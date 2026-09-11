@@ -205,9 +205,32 @@ export function buildPrecommit(
 // precommit_hash is only computable when the declared attribution is well-formed — a malformed A_i
 // means there is no valid predicate.attribution_hash to fold into the record, so the precommit
 // itself cannot be frozen. Fails closed (null), never silently hashed around the gap.
+//
+// FIXED 2026-09-11 (zexoverz, PR #14 review): jcs() sorts object keys but never array element
+// order, and `p.predicate.attribution` was hashed here in its RAW DECLARED form. For a
+// canon.set.v0 value (member order not semantic — attributionHash() already sorts it before
+// hashing), two declared orderings of the identical set produced identical attribution_hash but
+// DIFFERENT precommit_hash: a set with n members has n! valid precommit_hash values and nothing
+// in the record picks between them. That is the exact "coordinate selectable after the fact"
+// defect this record type exists to close — the frozen precommit is supposed to be one thing to
+// disagree about, not n! things that all read as the same declared attribution. Fix: hash a copy
+// of the record whose predicate.attribution.value is the CANONICAL value (the same one already
+// computed for attribution_hash), never the raw declared one — canon_id itself is untouched, it
+// stays part of the preimage exactly as before. The record's own `attribution` field still stores
+// what was DECLARED (transparency: a reader can see the order the caller actually supplied); only
+// the hash preimage canonicalizes it.
 export function precommitHash(p: Precommit): string | null {
   if (p.predicate.attribution_hash === null) return null;
-  return sha256hex(jcs(p as unknown as Json));
+  const c = canonicalize(p.predicate.attribution);
+  if (!c.ok) return null; // unreachable in practice (attribution_hash is already non-null iff this succeeds), kept fail-closed rather than assumed
+  const canonicalRecord: Precommit = {
+    ...p,
+    predicate: {
+      ...p.predicate,
+      attribution: { canon_id: p.predicate.attribution.canon_id, value: c.canonicalValue },
+    },
+  };
+  return sha256hex(jcs(canonicalRecord as unknown as Json));
 }
 
 export type Verdict = { state: "PASS" | "CONFORMANCE_FAILED" | "UNRESOLVED"; reason: string | null };

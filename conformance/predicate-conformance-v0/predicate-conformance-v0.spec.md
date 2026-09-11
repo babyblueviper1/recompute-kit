@@ -39,6 +39,18 @@ malformed — see canonicalization below), `precommit_hash` is also `null`: ther
 `predicate.attribution_hash` to fold into the record, so the precommit cannot be frozen at all.
 Fails closed, never hashed around the gap.
 
+FIXED 2026-09-11 (zexoverz, PR #14 review): `sha256(JCS(record))` above means the record with
+`predicate.attribution.value` in its **canonical** form (the same `canonicalize(canon_id, A_i)`
+result already folded into `attribution_hash`), not the raw declared value. For `canon.set.v0`,
+member order is not semantic — attribution_hash was already order-independent, but the whole-record
+hash was hashing the DECLARED order verbatim, so an n-member set had n! valid `precommit_hash`
+values and nothing in the record picked between them: the exact "coordinate selectable after the
+fact" defect this record type exists to close. `predicate.attribution` in the stored record still
+shows what was DECLARED (a reader can see the caller's actual input order); only the hash preimage
+canonicalizes it. See the paired vectors `set-valued-attribution-order-independence` /
+`precommit-hash-order-independent-of-declared-set-order` for the before/after pair (same set, two
+declared orders, one `precommit_hash`).
+
 **`predicate-conformance-run.v0`** — one per run:
 
 ```json

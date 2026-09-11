@@ -81,7 +81,7 @@
     },
     {
       "name": "set-valued-attribution-order-independence",
-      "note": "A_i is a declared canon.set.v0 (member order not semantic). The gate's observed set is the SAME members in a DIFFERENT order -- canonical(A_i) must still match, so this is PASS, proving the sort-then-JCS fix actually normalizes order (a naive per-array JCS would wrongly report CONFORMANCE_FAILED here).",
+      "note": "A_i is a declared canon.set.v0 (member order not semantic). The gate's observed set is the SAME members in a DIFFERENT order -- canonical(A_i) must still match, so this is PASS, proving the sort-then-JCS fix actually normalizes order (a naive per-array JCS would wrongly report CONFORMANCE_FAILED here). FIXED 2026-09-11 (zexoverz, PR #14 review): precommit_hash re-pinned -- it used to hash the RAW declared attribution order (n! valid hashes for an n-member set, the exact 'coordinate selectable after the fact' defect this record type exists to close), now hashes the canonical (sorted) form, same as attribution_hash already did. See the sibling vector 'precommit-hash-order-independent-of-declared-set-order' for the direct before/after pair.",
       "invariant_definition": {
         "rule": "flagged_invariant_violations",
         "version": 1
@@ -117,7 +117,54 @@
       "repair": null,
       "expected": {
         "disjointness_holds": true,
-        "precommit_hash": "0efdb54262cb00a26776f2b65a25a279d5e998ef92728876eb3d9224f8835846",
+        "precommit_hash": "8bc550827b38295ad8cadd6c99249c419274123ab6a59d192032263149d91ef1",
+        "conformance_verdict": {
+          "state": "PASS",
+          "reason": null
+        },
+        "repair_verdict": null,
+        "conformance_run_observed_hash": "404e6bfb44465c378c00139e6ad81630c6e59fc0aaf1dc670aeceb1298819bbc"
+      }
+    },
+    {
+      "name": "precommit-hash-order-independent-of-declared-set-order",
+      "note": "Direct regression vector for the zexoverz PR #14 finding: identical canon.set.v0 predicate attribution as 'set-valued-attribution-order-independence', declared here in a DIFFERENT (alphabetically-sorted) member order. precommit_hash below is pinned to the EXACT SAME value as that sibling vector's own (now-fixed) precommit_hash -- proving the frozen coordinate no longer depends on which of the n! valid orderings the predicate happened to declare. Before the fix, this vector's computed precommit_hash would have differed from the sibling's (0efdb542... vs 8bc55082...) despite both declaring the identical set.",
+      "invariant_definition": {
+        "rule": "flagged_invariant_violations",
+        "version": 1
+      },
+      "mutant": {
+        "id": "m3",
+        "content": {
+          "diff": "remove bounds check on withdraw()"
+        },
+        "author_commit": "3333333333333333333333333333333333333c",
+        "author_identity": "dave"
+      },
+      "predicate": {
+        "attribution": {
+          "canon_id": "canon.set.v0",
+          "value": [
+            "integer_overflow",
+            "reentrancy",
+            "unchecked_transfer"
+          ]
+        },
+        "oracle_author_commit": "4444444444444444444444444444444444444d",
+        "oracle_author_identity": "erin"
+      },
+      "observed_attribution": {
+        "canon_id": "canon.set.v0",
+        "value": [
+          "integer_overflow",
+          "reentrancy",
+          "unchecked_transfer"
+        ]
+      },
+      "repair": null,
+      "expected": {
+        "disjointness_holds": true,
+        "precommit_hash": "8bc550827b38295ad8cadd6c99249c419274123ab6a59d192032263149d91ef1",
         "conformance_verdict": {
           "state": "PASS",
           "reason": null
