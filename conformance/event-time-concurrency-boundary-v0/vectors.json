@@ -1,0 +1,1605 @@
+{
+  "profile": "event_time_concurrency_boundary.v0",
+  "cases": [
+    {
+      "case_id": "A1_CONTROL_EVENT_REEVALUATED",
+      "description": "Current predicate true; one admitted transition.",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "policy_version": 3,
+          "ceiling": 10
+        },
+        "discipline": "SINGLE_WRITER",
+        "idempotency": false,
+        "writers": {
+          "A": {
+            "canonical_capture_ref": "capture:a",
+            "amount": 5
+          }
+        },
+        "schedule": [
+          {
+            "op": "READ",
+            "writer": "A",
+            "expected_version": 7
+          },
+          {
+            "op": "CHECK",
+            "writer": "A",
+            "mode": "EVENT_REEVALUATED"
+          },
+          {
+            "op": "WRITE",
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "satisfied",
+        "concurrency_status": "satisfied",
+        "idempotency_status": "not_applicable",
+        "admission_result": "admit",
+        "reason_codes": [
+          "EVENT_TIME_ESTABLISHED",
+          "SAFE_UNDER_MODELED_SERIALIZATION_ASSUMPTION"
+        ],
+        "transition_count": 1,
+        "final_state_version": 8,
+        "observed_results": [
+          {
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "A2_PERIODIC_PASS_BECOMES_STALE",
+      "description": "Audit at policy 3 passes; policy 4 rejects amount 5; old PASS used.",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "policy_version": 3,
+          "ceiling": 10
+        },
+        "discipline": "SINGLE_WRITER",
+        "idempotency": false,
+        "writers": {
+          "A": {
+            "canonical_capture_ref": "capture:a",
+            "amount": 5
+          }
+        },
+        "schedule": [
+          {
+            "op": "AUDIT",
+            "writer": "A"
+          },
+          {
+            "op": "POLICY",
+            "policy_version": 4,
+            "ceiling": 0
+          },
+          {
+            "op": "READ",
+            "writer": "A",
+            "expected_version": 7
+          },
+          {
+            "op": "CHECK",
+            "writer": "A",
+            "mode": "PERIODIC_PASS_ONLY"
+          },
+          {
+            "op": "WRITE",
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "violated",
+        "concurrency_status": "satisfied",
+        "idempotency_status": "not_applicable",
+        "admission_result": "reject",
+        "reason_codes": [
+          "PERIODIC_PASS_NOT_AUTHORITY",
+          "SAFE_UNDER_MODELED_SERIALIZATION_ASSUMPTION"
+        ],
+        "transition_count": 1,
+        "final_state_version": 8,
+        "observed_results": [
+          {
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "A3_EVENT_REEVALUATION_CATCHES_TRANSITION",
+      "description": "Same policy history as A2; current evaluation rejects; safe rejection.",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "policy_version": 3,
+          "ceiling": 10
+        },
+        "discipline": "SINGLE_WRITER",
+        "idempotency": false,
+        "writers": {
+          "A": {
+            "canonical_capture_ref": "capture:a",
+            "amount": 5
+          }
+        },
+        "schedule": [
+          {
+            "op": "AUDIT",
+            "writer": "A"
+          },
+          {
+            "op": "POLICY",
+            "policy_version": 4,
+            "ceiling": 0
+          },
+          {
+            "op": "READ",
+            "writer": "A",
+            "expected_version": 7
+          },
+          {
+            "op": "CHECK",
+            "writer": "A",
+            "mode": "EVENT_REEVALUATED"
+          },
+          {
+            "op": "WRITE",
+            "writer": "A",
+            "outcome": "reject"
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "satisfied",
+        "concurrency_status": "satisfied",
+        "idempotency_status": "not_applicable",
+        "admission_result": "reject",
+        "reason_codes": [
+          "EVENT_TIME_ESTABLISHED",
+          "SAFE_UNDER_MODELED_SERIALIZATION_ASSUMPTION"
+        ],
+        "transition_count": 0,
+        "final_state_version": 7,
+        "observed_results": [
+          {
+            "writer": "A",
+            "outcome": "reject",
+            "index": null
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "A4_OLD_PASS_NOT_AUTHORITY",
+      "description": "Earlier audit is valid within its supplied model; even unchanged policy does not make it event authorization.",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "policy_version": 3,
+          "ceiling": 10
+        },
+        "discipline": "SINGLE_WRITER",
+        "idempotency": false,
+        "writers": {
+          "A": {
+            "canonical_capture_ref": "capture:a",
+            "amount": 5
+          }
+        },
+        "schedule": [
+          {
+            "op": "AUDIT",
+            "writer": "A"
+          },
+          {
+            "op": "READ",
+            "writer": "A",
+            "expected_version": 7
+          },
+          {
+            "op": "WRITE",
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "violated",
+        "concurrency_status": "satisfied",
+        "idempotency_status": "not_applicable",
+        "admission_result": "reject",
+        "reason_codes": [
+          "EVENT_CHECK_MISSING",
+          "SAFE_UNDER_MODELED_SERIALIZATION_ASSUMPTION"
+        ],
+        "transition_count": 1,
+        "final_state_version": 8,
+        "observed_results": [
+          {
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "B1_CONTROL_SINGLE_WRITER",
+      "description": "Safe only within the declared single-writer domain.",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "policy_version": 3,
+          "ceiling": 10
+        },
+        "discipline": "SINGLE_WRITER",
+        "idempotency": false,
+        "writers": {
+          "A": {
+            "canonical_capture_ref": "capture:a",
+            "amount": 5
+          }
+        },
+        "schedule": [
+          {
+            "op": "READ",
+            "writer": "A",
+            "expected_version": 7
+          },
+          {
+            "op": "CHECK",
+            "writer": "A",
+            "mode": "EVENT_REEVALUATED"
+          },
+          {
+            "op": "WRITE",
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "satisfied",
+        "concurrency_status": "satisfied",
+        "idempotency_status": "not_applicable",
+        "admission_result": "admit",
+        "reason_codes": [
+          "EVENT_TIME_ESTABLISHED",
+          "SAFE_UNDER_MODELED_SERIALIZATION_ASSUMPTION"
+        ],
+        "transition_count": 1,
+        "final_state_version": 8,
+        "observed_results": [
+          {
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "B2_TWO_WRITERS_NONATOMIC",
+      "description": "Both read version 7; two non-atomic protected transitions consume that expected version.",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "policy_version": 3,
+          "ceiling": 10
+        },
+        "discipline": "UNSPECIFIED",
+        "idempotency": false,
+        "writers": {
+          "A": {
+            "canonical_capture_ref": "capture:a",
+            "amount": 5
+          },
+          "B": {
+            "canonical_capture_ref": "capture:b",
+            "amount": 5
+          }
+        },
+        "schedule": [
+          {
+            "op": "READ",
+            "writer": "A",
+            "expected_version": 7
+          },
+          {
+            "op": "READ",
+            "writer": "B",
+            "expected_version": 7
+          },
+          {
+            "op": "CHECK",
+            "writer": "A",
+            "mode": "EVENT_REEVALUATED"
+          },
+          {
+            "op": "CHECK",
+            "writer": "B",
+            "mode": "EVENT_REEVALUATED"
+          },
+          {
+            "op": "WRITE",
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          },
+          {
+            "op": "WRITE",
+            "writer": "B",
+            "outcome": "commit",
+            "index": 1
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "satisfied",
+        "concurrency_status": "violated",
+        "idempotency_status": "not_applicable",
+        "admission_result": "reject",
+        "reason_codes": [
+          "EVENT_TIME_ESTABLISHED",
+          "NONATOMIC_CONCURRENT_WRITE"
+        ],
+        "transition_count": 2,
+        "final_state_version": 9,
+        "observed_results": [
+          {
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          },
+          {
+            "writer": "B",
+            "outcome": "commit",
+            "index": 1
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "B3_TWO_WRITERS_CAS",
+      "description": "A commits 7 to 8; B expects 7 and is rejected.",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "policy_version": 3,
+          "ceiling": 10
+        },
+        "discipline": "UNSPECIFIED",
+        "idempotency": false,
+        "writers": {
+          "A": {
+            "canonical_capture_ref": "capture:a",
+            "amount": 5
+          },
+          "B": {
+            "canonical_capture_ref": "capture:b",
+            "amount": 5
+          }
+        },
+        "schedule": [
+          {
+            "op": "READ",
+            "writer": "A",
+            "expected_version": 7
+          },
+          {
+            "op": "READ",
+            "writer": "B",
+            "expected_version": 7
+          },
+          {
+            "op": "CHECK",
+            "writer": "A",
+            "mode": "EVENT_REEVALUATED"
+          },
+          {
+            "op": "CHECK",
+            "writer": "B",
+            "mode": "EVENT_REEVALUATED"
+          },
+          {
+            "op": "CAS",
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          },
+          {
+            "op": "CAS",
+            "writer": "B",
+            "outcome": "reject"
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "satisfied",
+        "concurrency_status": "satisfied",
+        "idempotency_status": "not_applicable",
+        "admission_result": "admit",
+        "reason_codes": [
+          "CAS_SCHEDULE_CHECKED",
+          "EVENT_TIME_ESTABLISHED"
+        ],
+        "transition_count": 1,
+        "final_state_version": 8,
+        "observed_results": [
+          {
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          },
+          {
+            "writer": "B",
+            "outcome": "reject",
+            "index": null
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "B4_SERIALIZED_WRITERS",
+      "description": "B reads 8 only after A completes; two distinct, serial version transitions.",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "policy_version": 3,
+          "ceiling": 10
+        },
+        "discipline": "SERIALIZED",
+        "idempotency": false,
+        "writers": {
+          "A": {
+            "canonical_capture_ref": "capture:a",
+            "amount": 5
+          },
+          "B": {
+            "canonical_capture_ref": "capture:b",
+            "amount": 5
+          }
+        },
+        "schedule": [
+          {
+            "op": "READ",
+            "writer": "A",
+            "expected_version": 7
+          },
+          {
+            "op": "CHECK",
+            "writer": "A",
+            "mode": "EVENT_REEVALUATED"
+          },
+          {
+            "op": "WRITE",
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          },
+          {
+            "op": "READ",
+            "writer": "B",
+            "expected_version": 8
+          },
+          {
+            "op": "CHECK",
+            "writer": "B",
+            "mode": "EVENT_REEVALUATED"
+          },
+          {
+            "op": "WRITE",
+            "writer": "B",
+            "outcome": "commit",
+            "index": 1
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "satisfied",
+        "concurrency_status": "satisfied",
+        "idempotency_status": "not_applicable",
+        "admission_result": "admit",
+        "reason_codes": [
+          "EVENT_TIME_ESTABLISHED",
+          "SAFE_UNDER_MODELED_SERIALIZATION_ASSUMPTION"
+        ],
+        "transition_count": 2,
+        "final_state_version": 9,
+        "observed_results": [
+          {
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          },
+          {
+            "writer": "B",
+            "outcome": "commit",
+            "index": 1
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "B5_IDEMPOTENT_REPLAY",
+      "description": "Same derived identity returns index 0; no second protected transition.",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "policy_version": 3,
+          "ceiling": 10
+        },
+        "discipline": "SERIALIZED",
+        "idempotency": true,
+        "writers": {
+          "A": {
+            "canonical_capture_ref": "capture:a",
+            "amount": 5
+          },
+          "B": {
+            "canonical_capture_ref": "capture:a",
+            "amount": 5
+          }
+        },
+        "schedule": [
+          {
+            "op": "READ",
+            "writer": "A",
+            "expected_version": 7
+          },
+          {
+            "op": "CHECK",
+            "writer": "A",
+            "mode": "EVENT_REEVALUATED"
+          },
+          {
+            "op": "WRITE",
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          },
+          {
+            "op": "READ",
+            "writer": "B",
+            "expected_version": 8
+          },
+          {
+            "op": "WRITE",
+            "writer": "B",
+            "outcome": "replay",
+            "index": 0
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "satisfied",
+        "concurrency_status": "satisfied",
+        "idempotency_status": "satisfied",
+        "admission_result": "admit",
+        "reason_codes": [
+          "EVENT_TIME_ESTABLISHED",
+          "IDENTITY_RECEIPT_MAPPING_PRESERVED",
+          "SAFE_UNDER_MODELED_SERIALIZATION_ASSUMPTION"
+        ],
+        "transition_count": 1,
+        "final_state_version": 8,
+        "observed_results": [
+          {
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          },
+          {
+            "writer": "B",
+            "outcome": "replay",
+            "index": 0
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "B6_DISTINCT_REQUEST_RACE",
+      "description": "Lookup by distinct identities misses for both; immutable identity mappings coexist with a race.",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "policy_version": 3,
+          "ceiling": 10
+        },
+        "discipline": "UNSPECIFIED",
+        "idempotency": true,
+        "writers": {
+          "A": {
+            "canonical_capture_ref": "capture:a",
+            "amount": 5
+          },
+          "B": {
+            "canonical_capture_ref": "capture:b",
+            "amount": 5
+          }
+        },
+        "schedule": [
+          {
+            "op": "READ",
+            "writer": "A",
+            "expected_version": 7
+          },
+          {
+            "op": "READ",
+            "writer": "B",
+            "expected_version": 7
+          },
+          {
+            "op": "CHECK",
+            "writer": "A",
+            "mode": "EVENT_REEVALUATED"
+          },
+          {
+            "op": "CHECK",
+            "writer": "B",
+            "mode": "EVENT_REEVALUATED"
+          },
+          {
+            "op": "WRITE",
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          },
+          {
+            "op": "WRITE",
+            "writer": "B",
+            "outcome": "commit",
+            "index": 1
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "satisfied",
+        "concurrency_status": "violated",
+        "idempotency_status": "satisfied",
+        "admission_result": "reject",
+        "reason_codes": [
+          "EVENT_TIME_ESTABLISHED",
+          "IDENTITY_RECEIPT_MAPPING_PRESERVED",
+          "NONATOMIC_CONCURRENT_WRITE"
+        ],
+        "transition_count": 2,
+        "final_state_version": 9,
+        "observed_results": [
+          {
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          },
+          {
+            "writer": "B",
+            "outcome": "commit",
+            "index": 1
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "C1_EVENT_TIME_BUT_NONATOMIC",
+      "description": "Both evaluate current policy 3 while state version 7 remains valid; later non-atomic writes conflict.",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "policy_version": 3,
+          "ceiling": 10
+        },
+        "discipline": "UNSPECIFIED",
+        "idempotency": false,
+        "writers": {
+          "A": {
+            "canonical_capture_ref": "capture:a",
+            "amount": 5
+          },
+          "B": {
+            "canonical_capture_ref": "capture:b",
+            "amount": 5
+          }
+        },
+        "schedule": [
+          {
+            "op": "READ",
+            "writer": "A",
+            "expected_version": 7
+          },
+          {
+            "op": "READ",
+            "writer": "B",
+            "expected_version": 7
+          },
+          {
+            "op": "CHECK",
+            "writer": "A",
+            "mode": "EVENT_REEVALUATED"
+          },
+          {
+            "op": "CHECK",
+            "writer": "B",
+            "mode": "EVENT_REEVALUATED"
+          },
+          {
+            "op": "WRITE",
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          },
+          {
+            "op": "WRITE",
+            "writer": "B",
+            "outcome": "commit",
+            "index": 1
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "satisfied",
+        "concurrency_status": "violated",
+        "idempotency_status": "not_applicable",
+        "admission_result": "reject",
+        "reason_codes": [
+          "EVENT_TIME_ESTABLISHED",
+          "NONATOMIC_CONCURRENT_WRITE"
+        ],
+        "transition_count": 2,
+        "final_state_version": 9,
+        "observed_results": [
+          {
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          },
+          {
+            "writer": "B",
+            "outcome": "commit",
+            "index": 1
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "C2_ATOMIC_BUT_STALE_PREDICATE",
+      "description": "CAS compares the correct protected version but consumes only stale periodic authorization.",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "policy_version": 3,
+          "ceiling": 10
+        },
+        "discipline": "UNSPECIFIED",
+        "idempotency": false,
+        "writers": {
+          "A": {
+            "canonical_capture_ref": "capture:a",
+            "amount": 5
+          }
+        },
+        "schedule": [
+          {
+            "op": "AUDIT",
+            "writer": "A"
+          },
+          {
+            "op": "POLICY",
+            "policy_version": 4,
+            "ceiling": 0
+          },
+          {
+            "op": "READ",
+            "writer": "A",
+            "expected_version": 7
+          },
+          {
+            "op": "CHECK",
+            "writer": "A",
+            "mode": "PERIODIC_PASS_ONLY"
+          },
+          {
+            "op": "CAS",
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "violated",
+        "concurrency_status": "satisfied",
+        "idempotency_status": "not_applicable",
+        "admission_result": "reject",
+        "reason_codes": [
+          "CAS_SCHEDULE_CHECKED",
+          "PERIODIC_PASS_NOT_AUTHORITY"
+        ],
+        "transition_count": 1,
+        "final_state_version": 8,
+        "observed_results": [
+          {
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "C3_BOTH_CLOSED",
+      "description": "Event checks and CAS trace together admit exactly one transition from version 7.",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "policy_version": 3,
+          "ceiling": 10
+        },
+        "discipline": "UNSPECIFIED",
+        "idempotency": true,
+        "writers": {
+          "A": {
+            "canonical_capture_ref": "capture:a",
+            "amount": 5
+          },
+          "B": {
+            "canonical_capture_ref": "capture:b",
+            "amount": 5
+          }
+        },
+        "schedule": [
+          {
+            "op": "READ",
+            "writer": "A",
+            "expected_version": 7
+          },
+          {
+            "op": "READ",
+            "writer": "B",
+            "expected_version": 7
+          },
+          {
+            "op": "CHECK",
+            "writer": "A",
+            "mode": "EVENT_REEVALUATED"
+          },
+          {
+            "op": "CHECK",
+            "writer": "B",
+            "mode": "EVENT_REEVALUATED"
+          },
+          {
+            "op": "CAS",
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          },
+          {
+            "op": "CAS",
+            "writer": "B",
+            "outcome": "reject"
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "satisfied",
+        "concurrency_status": "satisfied",
+        "idempotency_status": "satisfied",
+        "admission_result": "admit",
+        "reason_codes": [
+          "CAS_SCHEDULE_CHECKED",
+          "EVENT_TIME_ESTABLISHED",
+          "IDENTITY_RECEIPT_MAPPING_PRESERVED"
+        ],
+        "transition_count": 1,
+        "final_state_version": 8,
+        "observed_results": [
+          {
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          },
+          {
+            "writer": "B",
+            "outcome": "reject",
+            "index": null
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "D1_EVENT_CHECK_REMOVED",
+      "description": "Old audit survives a policy change; event check is absent.",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "policy_version": 3,
+          "ceiling": 10
+        },
+        "discipline": "SINGLE_WRITER",
+        "idempotency": false,
+        "writers": {
+          "A": {
+            "canonical_capture_ref": "capture:a",
+            "amount": 5
+          }
+        },
+        "schedule": [
+          {
+            "op": "AUDIT",
+            "writer": "A"
+          },
+          {
+            "op": "POLICY",
+            "policy_version": 4,
+            "ceiling": 0
+          },
+          {
+            "op": "READ",
+            "writer": "A",
+            "expected_version": 7
+          },
+          {
+            "op": "WRITE",
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "violated",
+        "concurrency_status": "satisfied",
+        "idempotency_status": "not_applicable",
+        "admission_result": "reject",
+        "reason_codes": [
+          "EVENT_CHECK_MISSING",
+          "SAFE_UNDER_MODELED_SERIALIZATION_ASSUMPTION"
+        ],
+        "transition_count": 1,
+        "final_state_version": 8,
+        "observed_results": [
+          {
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "D2_STALE_CAS_COMMIT",
+      "description": "Faulty CAS observation allows B to commit after A advanced the version.",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "policy_version": 3,
+          "ceiling": 10
+        },
+        "discipline": "UNSPECIFIED",
+        "idempotency": false,
+        "writers": {
+          "A": {
+            "canonical_capture_ref": "capture:a",
+            "amount": 5
+          },
+          "B": {
+            "canonical_capture_ref": "capture:b",
+            "amount": 5
+          }
+        },
+        "schedule": [
+          {
+            "op": "READ",
+            "writer": "A",
+            "expected_version": 7
+          },
+          {
+            "op": "READ",
+            "writer": "B",
+            "expected_version": 7
+          },
+          {
+            "op": "CHECK",
+            "writer": "A",
+            "mode": "EVENT_REEVALUATED"
+          },
+          {
+            "op": "CHECK",
+            "writer": "B",
+            "mode": "EVENT_REEVALUATED"
+          },
+          {
+            "op": "CAS",
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          },
+          {
+            "op": "CAS",
+            "writer": "B",
+            "outcome": "commit",
+            "index": 1
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "satisfied",
+        "concurrency_status": "violated",
+        "idempotency_status": "not_applicable",
+        "admission_result": "reject",
+        "reason_codes": [
+          "CAS_VERSION_MISMATCH",
+          "EVENT_TIME_ESTABLISHED"
+        ],
+        "transition_count": 2,
+        "final_state_version": 9,
+        "observed_results": [
+          {
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          },
+          {
+            "writer": "B",
+            "outcome": "commit",
+            "index": 1
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "D3_SERIALIZATION_OVERLAP",
+      "description": "Declared serialized domain is contradicted by overlapping read-to-completion intervals, even if B rejects.",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "policy_version": 3,
+          "ceiling": 10
+        },
+        "discipline": "SERIALIZED",
+        "idempotency": false,
+        "writers": {
+          "A": {
+            "canonical_capture_ref": "capture:a",
+            "amount": 5
+          },
+          "B": {
+            "canonical_capture_ref": "capture:b",
+            "amount": 5
+          }
+        },
+        "schedule": [
+          {
+            "op": "READ",
+            "writer": "A",
+            "expected_version": 7
+          },
+          {
+            "op": "READ",
+            "writer": "B",
+            "expected_version": 7
+          },
+          {
+            "op": "CHECK",
+            "writer": "A",
+            "mode": "EVENT_REEVALUATED"
+          },
+          {
+            "op": "CHECK",
+            "writer": "B",
+            "mode": "EVENT_REEVALUATED"
+          },
+          {
+            "op": "WRITE",
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          },
+          {
+            "op": "WRITE",
+            "writer": "B",
+            "outcome": "reject"
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "satisfied",
+        "concurrency_status": "violated",
+        "idempotency_status": "not_applicable",
+        "admission_result": "reject",
+        "reason_codes": [
+          "EVENT_TIME_ESTABLISHED",
+          "SERIALIZATION_OVERLAP"
+        ],
+        "transition_count": 1,
+        "final_state_version": 8,
+        "observed_results": [
+          {
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          },
+          {
+            "writer": "B",
+            "outcome": "reject",
+            "index": null
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "D4_UNDECLARED_SINGLE_WRITER",
+      "description": "One observed writer is no proof of exclusion for the state domain.",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "policy_version": 3,
+          "ceiling": 10
+        },
+        "discipline": "UNSPECIFIED",
+        "idempotency": false,
+        "writers": {
+          "A": {
+            "canonical_capture_ref": "capture:a",
+            "amount": 5
+          }
+        },
+        "schedule": [
+          {
+            "op": "READ",
+            "writer": "A",
+            "expected_version": 7
+          },
+          {
+            "op": "CHECK",
+            "writer": "A",
+            "mode": "EVENT_REEVALUATED"
+          },
+          {
+            "op": "WRITE",
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "satisfied",
+        "concurrency_status": "cannot_establish",
+        "idempotency_status": "not_applicable",
+        "admission_result": "cannot_establish",
+        "reason_codes": [
+          "EVENT_TIME_ESTABLISHED",
+          "NO_ATOMIC_OR_SERIALIZATION_EVIDENCE"
+        ],
+        "transition_count": 1,
+        "final_state_version": 8,
+        "observed_results": [
+          {
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "D5_UNKNOWN_OPERATION",
+      "description": "Unknown operation cannot be silently interpreted as a safe write.",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "policy_version": 3,
+          "ceiling": 10
+        },
+        "discipline": "SINGLE_WRITER",
+        "idempotency": false,
+        "writers": {
+          "A": {
+            "canonical_capture_ref": "capture:a",
+            "amount": 5
+          }
+        },
+        "schedule": [
+          {
+            "op": "READ",
+            "writer": "A",
+            "expected_version": 7
+          },
+          {
+            "op": "TRANSACT",
+            "writer": "A"
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "cannot_establish",
+        "concurrency_status": "cannot_establish",
+        "idempotency_status": "cannot_establish",
+        "admission_result": "cannot_establish",
+        "reason_codes": [
+          "INVALID_TRACE"
+        ],
+        "transition_count": null,
+        "final_state_version": null,
+        "observed_results": []
+      }
+    },
+    {
+      "case_id": "D6_INCOMPLETE_SCHEDULE",
+      "description": "No completed event or protected transition evidence.",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "policy_version": 3,
+          "ceiling": 10
+        },
+        "discipline": "SINGLE_WRITER",
+        "idempotency": false,
+        "writers": {
+          "A": {
+            "canonical_capture_ref": "capture:a",
+            "amount": 5
+          }
+        },
+        "schedule": [
+          {
+            "op": "READ",
+            "writer": "A",
+            "expected_version": 7
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "cannot_establish",
+        "concurrency_status": "cannot_establish",
+        "idempotency_status": "not_applicable",
+        "admission_result": "cannot_establish",
+        "reason_codes": [
+          "INCOMPLETE_SCHEDULE"
+        ],
+        "transition_count": 0,
+        "final_state_version": 7,
+        "observed_results": []
+      }
+    },
+    {
+      "case_id": "D7_POLICY_CHANGES_AFTER_CHECK",
+      "description": "Even an event check loses authority if its policy coordinate changes before commit.",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "policy_version": 3,
+          "ceiling": 10
+        },
+        "discipline": "UNSPECIFIED",
+        "idempotency": false,
+        "writers": {
+          "A": {
+            "canonical_capture_ref": "capture:a",
+            "amount": 5
+          }
+        },
+        "schedule": [
+          {
+            "op": "READ",
+            "writer": "A",
+            "expected_version": 7
+          },
+          {
+            "op": "CHECK",
+            "writer": "A",
+            "mode": "EVENT_REEVALUATED"
+          },
+          {
+            "op": "POLICY",
+            "policy_version": 4,
+            "ceiling": 0
+          },
+          {
+            "op": "CAS",
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "violated",
+        "concurrency_status": "satisfied",
+        "idempotency_status": "not_applicable",
+        "admission_result": "reject",
+        "reason_codes": [
+          "CAS_SCHEDULE_CHECKED",
+          "EVENT_POLICY_VERSION_STALE"
+        ],
+        "transition_count": 1,
+        "final_state_version": 8,
+        "observed_results": [
+          {
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "D8_REPLAY_RECEIPT_CHANGED",
+      "description": "Replay must return the immutable receipt index.",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "policy_version": 3,
+          "ceiling": 10
+        },
+        "discipline": "SERIALIZED",
+        "idempotency": true,
+        "writers": {
+          "A": {
+            "canonical_capture_ref": "capture:a",
+            "amount": 5
+          },
+          "B": {
+            "canonical_capture_ref": "capture:a",
+            "amount": 5
+          }
+        },
+        "schedule": [
+          {
+            "op": "READ",
+            "writer": "A",
+            "expected_version": 7
+          },
+          {
+            "op": "CHECK",
+            "writer": "A",
+            "mode": "EVENT_REEVALUATED"
+          },
+          {
+            "op": "WRITE",
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          },
+          {
+            "op": "READ",
+            "writer": "B",
+            "expected_version": 8
+          },
+          {
+            "op": "WRITE",
+            "writer": "B",
+            "outcome": "replay",
+            "index": 1
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "satisfied",
+        "concurrency_status": "satisfied",
+        "idempotency_status": "violated",
+        "admission_result": "reject",
+        "reason_codes": [
+          "EVENT_TIME_ESTABLISHED",
+          "REPLAY_RECEIPT_CHANGED",
+          "SAFE_UNDER_MODELED_SERIALIZATION_ASSUMPTION"
+        ],
+        "transition_count": 1,
+        "final_state_version": 8,
+        "observed_results": [
+          {
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          },
+          {
+            "writer": "B",
+            "outcome": "replay",
+            "index": 1
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "D9_SECOND_TRANSITION_SAME_IDENTITY",
+      "description": "Even serial version transitions cannot mint a second admission for the same identity.",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "policy_version": 3,
+          "ceiling": 10
+        },
+        "discipline": "SERIALIZED",
+        "idempotency": true,
+        "writers": {
+          "A": {
+            "canonical_capture_ref": "capture:a",
+            "amount": 5
+          },
+          "B": {
+            "canonical_capture_ref": "capture:a",
+            "amount": 5
+          }
+        },
+        "schedule": [
+          {
+            "op": "READ",
+            "writer": "A",
+            "expected_version": 7
+          },
+          {
+            "op": "CHECK",
+            "writer": "A",
+            "mode": "EVENT_REEVALUATED"
+          },
+          {
+            "op": "WRITE",
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          },
+          {
+            "op": "READ",
+            "writer": "B",
+            "expected_version": 8
+          },
+          {
+            "op": "CHECK",
+            "writer": "B",
+            "mode": "EVENT_REEVALUATED"
+          },
+          {
+            "op": "WRITE",
+            "writer": "B",
+            "outcome": "commit",
+            "index": 1
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "satisfied",
+        "concurrency_status": "satisfied",
+        "idempotency_status": "violated",
+        "admission_result": "reject",
+        "reason_codes": [
+          "EVENT_TIME_ESTABLISHED",
+          "SAFE_UNDER_MODELED_SERIALIZATION_ASSUMPTION",
+          "SECOND_TRANSITION_SAME_IDENTITY"
+        ],
+        "transition_count": 2,
+        "final_state_version": 9,
+        "observed_results": [
+          {
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          },
+          {
+            "writer": "B",
+            "outcome": "commit",
+            "index": 1
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "D10_FALSE_PREDICATE_COMMITTED",
+      "description": "A current evaluation is insufficient when its predicate is false.",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "policy_version": 3,
+          "ceiling": 10
+        },
+        "discipline": "SINGLE_WRITER",
+        "idempotency": false,
+        "writers": {
+          "A": {
+            "canonical_capture_ref": "capture:a",
+            "amount": 5
+          }
+        },
+        "schedule": [
+          {
+            "op": "POLICY",
+            "policy_version": 4,
+            "ceiling": 0
+          },
+          {
+            "op": "READ",
+            "writer": "A",
+            "expected_version": 7
+          },
+          {
+            "op": "CHECK",
+            "writer": "A",
+            "mode": "EVENT_REEVALUATED"
+          },
+          {
+            "op": "WRITE",
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "violated",
+        "concurrency_status": "satisfied",
+        "idempotency_status": "not_applicable",
+        "admission_result": "reject",
+        "reason_codes": [
+          "PREDICATE_FALSE",
+          "SAFE_UNDER_MODELED_SERIALIZATION_ASSUMPTION"
+        ],
+        "transition_count": 1,
+        "final_state_version": 8,
+        "observed_results": [
+          {
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "D11_FALSE_READ_COORDINATE",
+      "description": "A READ cannot claim a version other than the modeled current version.",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "policy_version": 3,
+          "ceiling": 10
+        },
+        "discipline": "SINGLE_WRITER",
+        "idempotency": false,
+        "writers": {
+          "A": {
+            "canonical_capture_ref": "capture:a",
+            "amount": 5
+          }
+        },
+        "schedule": [
+          {
+            "op": "READ",
+            "writer": "A",
+            "expected_version": 6
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "cannot_establish",
+        "concurrency_status": "cannot_establish",
+        "idempotency_status": "cannot_establish",
+        "admission_result": "cannot_establish",
+        "reason_codes": [
+          "INVALID_TRACE"
+        ],
+        "transition_count": null,
+        "final_state_version": null,
+        "observed_results": []
+      }
+    }
+  ]
+}
