@@ -1600,6 +1600,111 @@
         "final_state_version": null,
         "observed_results": []
       }
+    },
+    {
+      "case_id": "D12_PRIOR_OVERLAP_DOES_NOT_TAINT_LATER_WRITER",
+      "description": "Prior A/B overlap is resolved by CAS before isolated C begins; historical overlap is not current attempt overlap.",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "policy_version": 3,
+          "ceiling": 10
+        },
+        "discipline": "UNSPECIFIED",
+        "idempotency": false,
+        "writers": {
+          "A": {
+            "canonical_capture_ref": "capture:a",
+            "amount": 5
+          },
+          "B": {
+            "canonical_capture_ref": "capture:b",
+            "amount": 5
+          },
+          "C": {
+            "canonical_capture_ref": "capture:c",
+            "amount": 5
+          }
+        },
+        "schedule": [
+          {
+            "op": "READ",
+            "writer": "A",
+            "expected_version": 7
+          },
+          {
+            "op": "READ",
+            "writer": "B",
+            "expected_version": 7
+          },
+          {
+            "op": "CHECK",
+            "writer": "A",
+            "mode": "EVENT_REEVALUATED"
+          },
+          {
+            "op": "CHECK",
+            "writer": "B",
+            "mode": "EVENT_REEVALUATED"
+          },
+          {
+            "op": "CAS",
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          },
+          {
+            "op": "CAS",
+            "writer": "B",
+            "outcome": "reject"
+          },
+          {
+            "op": "READ",
+            "writer": "C",
+            "expected_version": 8
+          },
+          {
+            "op": "CHECK",
+            "writer": "C",
+            "mode": "EVENT_REEVALUATED"
+          },
+          {
+            "op": "WRITE",
+            "writer": "C",
+            "outcome": "commit",
+            "index": 1
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "satisfied",
+        "concurrency_status": "cannot_establish",
+        "idempotency_status": "not_applicable",
+        "admission_result": "cannot_establish",
+        "reason_codes": [
+          "EVENT_TIME_ESTABLISHED",
+          "NO_ATOMIC_OR_SERIALIZATION_EVIDENCE"
+        ],
+        "transition_count": 2,
+        "final_state_version": 9,
+        "observed_results": [
+          {
+            "writer": "A",
+            "outcome": "commit",
+            "index": 0
+          },
+          {
+            "writer": "B",
+            "outcome": "reject",
+            "index": null
+          },
+          {
+            "writer": "C",
+            "outcome": "commit",
+            "index": 1
+          }
+        ]
+      }
     }
   ]
 }

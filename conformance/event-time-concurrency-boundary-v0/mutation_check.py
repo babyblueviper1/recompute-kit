@@ -23,6 +23,8 @@ MUTANTS = [
      'if expected != version:  # M3/M5:', 'if expected > version:  # M3/M5:'),
     ("M6_SERIALIZATION_ASSUMED", "D3_SERIALIZATION_OVERLAP", "concurrency_status",
      'if discipline != "UNSPECIFIED":  # M6:', 'if False:  # M6:'),
+    ("M7_NONOVERLAP_TREATED_AS_CONCURRENT", "D12_PRIOR_OVERLAP_DOES_NOT_TAINT_LATER_WRITER", "concurrency_status",
+     'if attempt["overlapped"]:  # M4/M7:', 'if True:  # M4/M7:'),
 ]
 
 
@@ -51,8 +53,11 @@ def main():
                 evaluate = namespace["evaluate"]
                 outputs = {c["case_id"]: evaluate(c) for c in cases}
                 control_ok = all(outputs[c["case_id"]] == c["expected"] for c in controls)
-                witnessed = (by_id[killer]["expected"][axis] == "violated"
-                             and outputs[killer][axis] == "satisfied"
+                expected_status, mutant_status = (("cannot_establish", "violated")
+                                                  if name == "M7_NONOVERLAP_TREATED_AS_CONCURRENT"
+                                                  else ("violated", "satisfied"))
+                witnessed = (by_id[killer]["expected"][axis] == expected_status
+                             and outputs[killer][axis] == mutant_status
                              and outputs[killer]["transition_count"] == by_id[killer]["expected"]["transition_count"])
                 record["controls_preserved"] = control_ok
                 record["witness_result"] = outputs[killer]

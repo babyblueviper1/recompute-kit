@@ -72,7 +72,6 @@ def _evaluate(data):
     event_unknown, concurrency_unknown = set(), set()
     results = []
     transitions = 0
-    overlap = False
     used_cas = False
     next_index = 0
     for step in schedule:
@@ -92,11 +91,13 @@ def _evaluate(data):
         elif op == "READ":
             require(writer not in active and writer not in finished)
             require(natural(step["expected_version"]) and step["expected_version"] == version)
+            overlapped = bool(active)
             if active:
-                overlap = True
+                for other in active.values():
+                    other["overlapped"] = True
                 if discipline != "UNSPECIFIED":  # M6: enforce declared exclusion
                     concurrency_bad.add("SERIALIZATION_OVERLAP")
-            active[writer] = {"expected": version, "check": None}
+            active[writer] = {"expected": version, "check": None, "overlapped": overlapped}
         elif op == "CHECK":
             require(writer in active and active[writer]["check"] is None)
             mode = step["mode"]
@@ -137,7 +138,7 @@ def _evaluate(data):
                     if expected != version:  # M3/M5: compare at the protected transition
                         concurrency_bad.add("CAS_VERSION_MISMATCH")
                 elif discipline == "UNSPECIFIED":
-                    if overlap:  # M4: distinct identities do not exclude each other
+                    if attempt["overlapped"]:  # M4/M7: this attempt's active interval
                         concurrency_bad.add("NONATOMIC_CONCURRENT_WRITE")
                     else:
                         concurrency_unknown.add("NO_ATOMIC_OR_SERIALIZATION_EVIDENCE")

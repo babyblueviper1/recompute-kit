@@ -84,7 +84,13 @@ Distinct identities can preserve every mapping while violating B (B6).
 `idempotency: false` gives `not_applicable`, never an inferred replay guarantee.
 
 `SINGLE_WRITER` and `SERIALIZED` both require nonoverlapping active intervals.
-Their success is labeled **SAFE UNDER THE MODELED SERIALIZATION ASSUMPTION**
+Concurrency overlap is scoped to each attempt's active READ -> completion interval.
+A new READ marks itself and every currently active attempt as overlapped; an attempt
+starting after all prior attempts finish starts nonoverlapped. Prior overlap elsewhere
+in the supplied history does not by itself prove that a later attempt was concurrent.
+An actually overlapping unprotected WRITE remains a violation; an isolated one under
+`UNSPECIFIED` remains `cannot_establish` without CAS or declared serialization evidence.
+Success under either declared discipline is labeled **SAFE UNDER THE MODELED SERIALIZATION ASSUMPTION**
 (`SAFE_UNDER_MODELED_SERIALIZATION_ASSUMPTION` in output). Single-writer admission
 may suffice under a declared single-writer model, but that assumption is part of
 the trusted operating model and MUST NOT be silently generalized to concurrent
@@ -142,12 +148,14 @@ invariant is violated; the CLI still succeeds when it reproduces that FAIL.
 | D1-D3 | Missing event check, stale committed CAS, falsely declared serialization. |
 | D4-D6 | Undeclared single writer, invalid operation, incomplete schedule. |
 | D7-D11 | Policy changes after CHECK, changed replay receipt, duplicate identity transition, committed false predicate, invalid READ coordinate. |
+| D12 | Earlier safe CAS overlap does not taint a later isolated unprotected WRITE: historical overlap != current attempt overlap; insufficient evidence != proven concurrent-write violation. |
 
 ## Mutation falsifiability
 
-`mutation_check.py` applies six one-site source mutations in isolated namespaces.
-Each has a required negative killer and must wrongly upgrade that killer's named
-axis from `violated` to `satisfied` while preserving the transition witness. All
+`mutation_check.py` applies seven one-site source mutations in isolated namespaces.
+M1-M6 have required negative killers and must wrongly upgrade the killer's named
+axis from `violated` to `satisfied`; M7 must wrongly classify D12's concurrency
+axis from `cannot_establish` to `violated`. Each must preserve the transition witness. All
 seven fully safe control vectors (including A3's correct rejection) must still
 match their complete expected results. A crash, unapplied patch, merely unknown
 result, broken positive control, or mismatch on some unrelated vector is not a kill.
@@ -161,6 +169,7 @@ Mutation failures return nonzero. The checker has no mutation-mode switch.
 | M4 | Idempotency substituted for atomicity | B6_DISTINCT_REQUEST_RACE |
 | M5 | Second writer allowed after version advanced | D2_STALE_CAS_COMMIT |
 | M6 | Serialization assumed despite overlapping writers | D3_SERIALIZATION_OVERLAP |
+| M7 | Nonoverlapping attempt treated as concurrent | D12_PRIOR_OVERLAP_DOES_NOT_TAINT_LATER_WRITER |
 
 M3 and M5 deliberately share the smallest stale-commit witness but change the
 checker differently (no comparison versus a comparison admitting older versions).
@@ -204,7 +213,7 @@ python3 tools/run_conformance.py
 git diff --check
 ```
 
-The first command checks all 24 complete expected results. `suite.json` registers
+The first command checks all 25 complete expected results. `suite.json` registers
 both conformance and mutation checks using the existing multi-check convention.
 Vector and spec hashes are mechanically SHA-256 pinned. Checker and mutation
 source pins are supplied too; the canonical runner validates vectors/spec pins,
