@@ -1,0 +1,1366 @@
+{
+  "profile": "consumption_time_state_binding.v0",
+  "cases": [
+    {
+      "case_id": "S1_CONTROL_UNCHANGED_STATE",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "used": 0,
+          "ceiling": 10
+        },
+        "history": [
+          {
+            "op": "CHECK",
+            "check_id": "check:B",
+            "amount": 6,
+            "predicate_result": true
+          },
+          {
+            "op": "CONSUME",
+            "mode": "VERSION_BOUND",
+            "amount": 6,
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 6,
+              "predicate_result": true
+            },
+            "observed_outcome": "admit"
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "satisfied",
+        "consumption_time_status": "satisfied",
+        "observed_consumption_outcome": "admit",
+        "required_consumption_outcome": "admit",
+        "checked_state_version": 7,
+        "current_state_version": 7,
+        "reason_codes": [
+          "CHECKED_VERSION_CURRENT",
+          "EVENT_TIME_EVALUATION_CORRECT"
+        ],
+        "observed_results": [
+          {
+            "op": "CHECK",
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 6,
+              "predicate_result": true
+            },
+            "reported_predicate_result": true
+          },
+          {
+            "op": "CONSUME",
+            "mode": "VERSION_BOUND",
+            "amount": 6,
+            "supplied_check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 6,
+              "predicate_result": true
+            },
+            "outcome": "admit"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "S2_STALE_PASS_AFTER_STATE_CHANGE_UNBOUND",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "used": 0,
+          "ceiling": 10
+        },
+        "history": [
+          {
+            "op": "CHECK",
+            "check_id": "check:B",
+            "amount": 6,
+            "predicate_result": true
+          },
+          {
+            "op": "STATE_TRANSITION",
+            "state": {
+              "state_version": 8,
+              "used": 6,
+              "ceiling": 10
+            }
+          },
+          {
+            "op": "CONSUME",
+            "mode": "UNBOUND",
+            "amount": 6,
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 6,
+              "predicate_result": true
+            },
+            "observed_outcome": "admit"
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "satisfied",
+        "consumption_time_status": "violated",
+        "observed_consumption_outcome": "admit",
+        "required_consumption_outcome": "reject",
+        "checked_state_version": 7,
+        "current_state_version": 8,
+        "reason_codes": [
+          "CONSUMPTION_OUTCOME_MISMATCH",
+          "EVENT_TIME_EVALUATION_CORRECT",
+          "STALE_UNBOUND_CONSUMPTION"
+        ],
+        "observed_results": [
+          {
+            "op": "CHECK",
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 6,
+              "predicate_result": true
+            },
+            "reported_predicate_result": true
+          },
+          {
+            "op": "STATE_TRANSITION",
+            "state": {
+              "state_version": 8,
+              "used": 6,
+              "ceiling": 10
+            }
+          },
+          {
+            "op": "CONSUME",
+            "mode": "UNBOUND",
+            "amount": 6,
+            "supplied_check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 6,
+              "predicate_result": true
+            },
+            "outcome": "admit"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "S3_VERSION_BOUND_REJECTS_STALE",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "used": 0,
+          "ceiling": 10
+        },
+        "history": [
+          {
+            "op": "CHECK",
+            "check_id": "check:B",
+            "amount": 6,
+            "predicate_result": true
+          },
+          {
+            "op": "STATE_TRANSITION",
+            "state": {
+              "state_version": 8,
+              "used": 6,
+              "ceiling": 10
+            }
+          },
+          {
+            "op": "CONSUME",
+            "mode": "VERSION_BOUND",
+            "amount": 6,
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 6,
+              "predicate_result": true
+            },
+            "observed_outcome": "reject"
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "satisfied",
+        "consumption_time_status": "satisfied",
+        "observed_consumption_outcome": "reject",
+        "required_consumption_outcome": "reject",
+        "checked_state_version": 7,
+        "current_state_version": 8,
+        "reason_codes": [
+          "CHECKED_VERSION_NOT_CURRENT",
+          "EVENT_TIME_EVALUATION_CORRECT"
+        ],
+        "observed_results": [
+          {
+            "op": "CHECK",
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 6,
+              "predicate_result": true
+            },
+            "reported_predicate_result": true
+          },
+          {
+            "op": "STATE_TRANSITION",
+            "state": {
+              "state_version": 8,
+              "used": 6,
+              "ceiling": 10
+            }
+          },
+          {
+            "op": "CONSUME",
+            "mode": "VERSION_BOUND",
+            "amount": 6,
+            "supplied_check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 6,
+              "predicate_result": true
+            },
+            "outcome": "reject"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "S4_REEVALUATE_REJECTS_STALE_FALSE",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "used": 0,
+          "ceiling": 10
+        },
+        "history": [
+          {
+            "op": "CHECK",
+            "check_id": "check:B",
+            "amount": 6,
+            "predicate_result": true
+          },
+          {
+            "op": "STATE_TRANSITION",
+            "state": {
+              "state_version": 8,
+              "used": 6,
+              "ceiling": 10
+            }
+          },
+          {
+            "op": "CONSUME",
+            "mode": "REEVALUATE",
+            "amount": 6,
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 6,
+              "predicate_result": true
+            },
+            "observed_outcome": "reject"
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "satisfied",
+        "consumption_time_status": "satisfied",
+        "observed_consumption_outcome": "reject",
+        "required_consumption_outcome": "reject",
+        "checked_state_version": 7,
+        "current_state_version": 8,
+        "reason_codes": [
+          "CURRENT_PREDICATE_FALSE",
+          "EVENT_TIME_EVALUATION_CORRECT"
+        ],
+        "observed_results": [
+          {
+            "op": "CHECK",
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 6,
+              "predicate_result": true
+            },
+            "reported_predicate_result": true
+          },
+          {
+            "op": "STATE_TRANSITION",
+            "state": {
+              "state_version": 8,
+              "used": 6,
+              "ceiling": 10
+            }
+          },
+          {
+            "op": "CONSUME",
+            "mode": "REEVALUATE",
+            "amount": 6,
+            "supplied_check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 6,
+              "predicate_result": true
+            },
+            "outcome": "reject"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "S5_STATE_CHANGED_BUT_PREDICATE_STILL_TRUE_REEVALUATE",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "used": 0,
+          "ceiling": 10
+        },
+        "history": [
+          {
+            "op": "CHECK",
+            "check_id": "check:B",
+            "amount": 2,
+            "predicate_result": true
+          },
+          {
+            "op": "STATE_TRANSITION",
+            "state": {
+              "state_version": 8,
+              "used": 3,
+              "ceiling": 10
+            }
+          },
+          {
+            "op": "CONSUME",
+            "mode": "REEVALUATE",
+            "amount": 2,
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 2,
+              "predicate_result": true
+            },
+            "observed_outcome": "admit"
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "satisfied",
+        "consumption_time_status": "satisfied",
+        "observed_consumption_outcome": "admit",
+        "required_consumption_outcome": "admit",
+        "checked_state_version": 7,
+        "current_state_version": 8,
+        "reason_codes": [
+          "CURRENT_PREDICATE_TRUE",
+          "EVENT_TIME_EVALUATION_CORRECT"
+        ],
+        "observed_results": [
+          {
+            "op": "CHECK",
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 2,
+              "predicate_result": true
+            },
+            "reported_predicate_result": true
+          },
+          {
+            "op": "STATE_TRANSITION",
+            "state": {
+              "state_version": 8,
+              "used": 3,
+              "ceiling": 10
+            }
+          },
+          {
+            "op": "CONSUME",
+            "mode": "REEVALUATE",
+            "amount": 2,
+            "supplied_check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 2,
+              "predicate_result": true
+            },
+            "outcome": "admit"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "S6_STATE_CHANGED_VERSION_BOUND_CONSERVATIVE_REJECT",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "used": 0,
+          "ceiling": 10
+        },
+        "history": [
+          {
+            "op": "CHECK",
+            "check_id": "check:B",
+            "amount": 2,
+            "predicate_result": true
+          },
+          {
+            "op": "STATE_TRANSITION",
+            "state": {
+              "state_version": 8,
+              "used": 3,
+              "ceiling": 10
+            }
+          },
+          {
+            "op": "CONSUME",
+            "mode": "VERSION_BOUND",
+            "amount": 2,
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 2,
+              "predicate_result": true
+            },
+            "observed_outcome": "reject"
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "satisfied",
+        "consumption_time_status": "satisfied",
+        "observed_consumption_outcome": "reject",
+        "required_consumption_outcome": "reject",
+        "checked_state_version": 7,
+        "current_state_version": 8,
+        "reason_codes": [
+          "CHECKED_VERSION_NOT_CURRENT",
+          "EVENT_TIME_EVALUATION_CORRECT"
+        ],
+        "observed_results": [
+          {
+            "op": "CHECK",
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 2,
+              "predicate_result": true
+            },
+            "reported_predicate_result": true
+          },
+          {
+            "op": "STATE_TRANSITION",
+            "state": {
+              "state_version": 8,
+              "used": 3,
+              "ceiling": 10
+            }
+          },
+          {
+            "op": "CONSUME",
+            "mode": "VERSION_BOUND",
+            "amount": 2,
+            "supplied_check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 2,
+              "predicate_result": true
+            },
+            "outcome": "reject"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "S7_EVENT_TIME_FALSE",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "used": 8,
+          "ceiling": 10
+        },
+        "history": [
+          {
+            "op": "CHECK",
+            "check_id": "check:B",
+            "amount": 4,
+            "predicate_result": false
+          },
+          {
+            "op": "STATE_TRANSITION",
+            "state": {
+              "state_version": 8,
+              "used": 0,
+              "ceiling": 10
+            }
+          },
+          {
+            "op": "CONSUME",
+            "mode": "REEVALUATE",
+            "amount": 4,
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 8,
+              "checked_ceiling": 10,
+              "amount": 4,
+              "predicate_result": false
+            },
+            "observed_outcome": "reject"
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "satisfied",
+        "consumption_time_status": "satisfied",
+        "observed_consumption_outcome": "reject",
+        "required_consumption_outcome": "reject",
+        "checked_state_version": 7,
+        "current_state_version": 8,
+        "reason_codes": [
+          "EVENT_PREDICATE_FALSE",
+          "EVENT_TIME_EVALUATION_CORRECT"
+        ],
+        "observed_results": [
+          {
+            "op": "CHECK",
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 8,
+              "checked_ceiling": 10,
+              "amount": 4,
+              "predicate_result": false
+            },
+            "reported_predicate_result": false
+          },
+          {
+            "op": "STATE_TRANSITION",
+            "state": {
+              "state_version": 8,
+              "used": 0,
+              "ceiling": 10
+            }
+          },
+          {
+            "op": "CONSUME",
+            "mode": "REEVALUATE",
+            "amount": 4,
+            "supplied_check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 8,
+              "checked_ceiling": 10,
+              "amount": 4,
+              "predicate_result": false
+            },
+            "outcome": "reject"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "S7_EVENT_TIME_FALSE_VERSION_BOUND",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "used": 8,
+          "ceiling": 10
+        },
+        "history": [
+          {
+            "op": "CHECK",
+            "check_id": "check:B",
+            "amount": 4,
+            "predicate_result": false
+          },
+          {
+            "op": "CONSUME",
+            "mode": "VERSION_BOUND",
+            "amount": 4,
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 8,
+              "checked_ceiling": 10,
+              "amount": 4,
+              "predicate_result": false
+            },
+            "observed_outcome": "reject"
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "satisfied",
+        "consumption_time_status": "satisfied",
+        "observed_consumption_outcome": "reject",
+        "required_consumption_outcome": "reject",
+        "checked_state_version": 7,
+        "current_state_version": 7,
+        "reason_codes": [
+          "EVENT_PREDICATE_FALSE",
+          "EVENT_TIME_EVALUATION_CORRECT"
+        ],
+        "observed_results": [
+          {
+            "op": "CHECK",
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 8,
+              "checked_ceiling": 10,
+              "amount": 4,
+              "predicate_result": false
+            },
+            "reported_predicate_result": false
+          },
+          {
+            "op": "CONSUME",
+            "mode": "VERSION_BOUND",
+            "amount": 4,
+            "supplied_check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 8,
+              "checked_ceiling": 10,
+              "amount": 4,
+              "predicate_result": false
+            },
+            "outcome": "reject"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "S7_EVENT_TIME_FALSE_UNBOUND",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "used": 8,
+          "ceiling": 10
+        },
+        "history": [
+          {
+            "op": "CHECK",
+            "check_id": "check:B",
+            "amount": 4,
+            "predicate_result": false
+          },
+          {
+            "op": "CONSUME",
+            "mode": "UNBOUND",
+            "amount": 4,
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 8,
+              "checked_ceiling": 10,
+              "amount": 4,
+              "predicate_result": false
+            },
+            "observed_outcome": "reject"
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "satisfied",
+        "consumption_time_status": "satisfied",
+        "observed_consumption_outcome": "reject",
+        "required_consumption_outcome": "reject",
+        "checked_state_version": 7,
+        "current_state_version": 7,
+        "reason_codes": [
+          "EVENT_PREDICATE_FALSE",
+          "EVENT_TIME_EVALUATION_CORRECT"
+        ],
+        "observed_results": [
+          {
+            "op": "CHECK",
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 8,
+              "checked_ceiling": 10,
+              "amount": 4,
+              "predicate_result": false
+            },
+            "reported_predicate_result": false
+          },
+          {
+            "op": "CONSUME",
+            "mode": "UNBOUND",
+            "amount": 4,
+            "supplied_check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 8,
+              "checked_ceiling": 10,
+              "amount": 4,
+              "predicate_result": false
+            },
+            "outcome": "reject"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "S8_MISSING_CHECK",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "used": 0,
+          "ceiling": 10
+        },
+        "history": [
+          {
+            "op": "CONSUME",
+            "mode": "VERSION_BOUND",
+            "amount": 6,
+            "check": null,
+            "observed_outcome": "reject"
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "cannot_establish",
+        "consumption_time_status": "cannot_establish",
+        "observed_consumption_outcome": "reject",
+        "required_consumption_outcome": "cannot_establish",
+        "checked_state_version": null,
+        "current_state_version": 7,
+        "reason_codes": [
+          "CHECK_MISSING"
+        ],
+        "observed_results": [
+          {
+            "op": "CONSUME",
+            "mode": "VERSION_BOUND",
+            "amount": 6,
+            "supplied_check": null,
+            "outcome": "reject"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "S9_CHECK_STATE_COORDINATE_TAMPER",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "used": 0,
+          "ceiling": 10
+        },
+        "history": [
+          {
+            "op": "CHECK",
+            "check_id": "check:B",
+            "amount": 6,
+            "predicate_result": true
+          },
+          {
+            "op": "CONSUME",
+            "mode": "VERSION_BOUND",
+            "amount": 6,
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 1,
+              "checked_ceiling": 10,
+              "amount": 6,
+              "predicate_result": true
+            },
+            "observed_outcome": "admit"
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "satisfied",
+        "consumption_time_status": "violated",
+        "observed_consumption_outcome": "admit",
+        "required_consumption_outcome": "reject",
+        "checked_state_version": 7,
+        "current_state_version": 7,
+        "reason_codes": [
+          "CHECK_STATE_IDENTITY_MISMATCH",
+          "CONSUMPTION_OUTCOME_MISMATCH",
+          "EVENT_TIME_EVALUATION_CORRECT"
+        ],
+        "observed_results": [
+          {
+            "op": "CHECK",
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 6,
+              "predicate_result": true
+            },
+            "reported_predicate_result": true
+          },
+          {
+            "op": "CONSUME",
+            "mode": "VERSION_BOUND",
+            "amount": 6,
+            "supplied_check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 1,
+              "checked_ceiling": 10,
+              "amount": 6,
+              "predicate_result": true
+            },
+            "outcome": "admit"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "S10_WRONG_REQUEST_REUSE",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "used": 0,
+          "ceiling": 10
+        },
+        "history": [
+          {
+            "op": "CHECK",
+            "check_id": "check:B",
+            "amount": 2,
+            "predicate_result": true
+          },
+          {
+            "op": "CONSUME",
+            "mode": "VERSION_BOUND",
+            "amount": 6,
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 2,
+              "predicate_result": true
+            },
+            "observed_outcome": "admit"
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "satisfied",
+        "consumption_time_status": "violated",
+        "observed_consumption_outcome": "admit",
+        "required_consumption_outcome": "reject",
+        "checked_state_version": 7,
+        "current_state_version": 7,
+        "reason_codes": [
+          "CONSUMPTION_OUTCOME_MISMATCH",
+          "EVENT_TIME_EVALUATION_CORRECT",
+          "REQUEST_SCOPE_MISMATCH"
+        ],
+        "observed_results": [
+          {
+            "op": "CHECK",
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 2,
+              "predicate_result": true
+            },
+            "reported_predicate_result": true
+          },
+          {
+            "op": "CONSUME",
+            "mode": "VERSION_BOUND",
+            "amount": 6,
+            "supplied_check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 2,
+              "predicate_result": true
+            },
+            "outcome": "admit"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "S11_ABA_VALUE_EQUALITY_NOT_STATE_IDENTITY",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "used": 0,
+          "ceiling": 10
+        },
+        "history": [
+          {
+            "op": "CHECK",
+            "check_id": "check:B",
+            "amount": 6,
+            "predicate_result": true
+          },
+          {
+            "op": "STATE_TRANSITION",
+            "state": {
+              "state_version": 8,
+              "used": 4,
+              "ceiling": 10
+            }
+          },
+          {
+            "op": "STATE_TRANSITION",
+            "state": {
+              "state_version": 9,
+              "used": 0,
+              "ceiling": 10
+            }
+          },
+          {
+            "op": "CONSUME",
+            "mode": "VERSION_BOUND",
+            "amount": 6,
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 6,
+              "predicate_result": true
+            },
+            "observed_outcome": "reject"
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "satisfied",
+        "consumption_time_status": "satisfied",
+        "observed_consumption_outcome": "reject",
+        "required_consumption_outcome": "reject",
+        "checked_state_version": 7,
+        "current_state_version": 9,
+        "reason_codes": [
+          "CHECKED_VERSION_NOT_CURRENT",
+          "EVENT_TIME_EVALUATION_CORRECT"
+        ],
+        "observed_results": [
+          {
+            "op": "CHECK",
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 6,
+              "predicate_result": true
+            },
+            "reported_predicate_result": true
+          },
+          {
+            "op": "STATE_TRANSITION",
+            "state": {
+              "state_version": 8,
+              "used": 4,
+              "ceiling": 10
+            }
+          },
+          {
+            "op": "STATE_TRANSITION",
+            "state": {
+              "state_version": 9,
+              "used": 0,
+              "ceiling": 10
+            }
+          },
+          {
+            "op": "CONSUME",
+            "mode": "VERSION_BOUND",
+            "amount": 6,
+            "supplied_check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 6,
+              "predicate_result": true
+            },
+            "outcome": "reject"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "S12_STATE_VERSION_NOT_ADVANCED",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "used": 0,
+          "ceiling": 10
+        },
+        "history": [
+          {
+            "op": "CHECK",
+            "check_id": "check:B",
+            "amount": 6,
+            "predicate_result": true
+          },
+          {
+            "op": "STATE_TRANSITION",
+            "state": {
+              "state_version": 7,
+              "used": 6,
+              "ceiling": 10
+            }
+          },
+          {
+            "op": "CONSUME",
+            "mode": "VERSION_BOUND",
+            "amount": 6,
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 6,
+              "predicate_result": true
+            },
+            "observed_outcome": "admit"
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "cannot_establish",
+        "consumption_time_status": "cannot_establish",
+        "observed_consumption_outcome": "none",
+        "required_consumption_outcome": "cannot_establish",
+        "checked_state_version": null,
+        "current_state_version": null,
+        "reason_codes": [
+          "INVALID_HISTORY"
+        ],
+        "observed_results": []
+      }
+    },
+    {
+      "case_id": "S13_FALSE_CHECK_CLAIMS_PASS",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "used": 8,
+          "ceiling": 10
+        },
+        "history": [
+          {
+            "op": "CHECK",
+            "check_id": "check:B",
+            "amount": 4,
+            "predicate_result": true
+          },
+          {
+            "op": "CONSUME",
+            "mode": "VERSION_BOUND",
+            "amount": 4,
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 8,
+              "checked_ceiling": 10,
+              "amount": 4,
+              "predicate_result": false
+            },
+            "observed_outcome": "reject"
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "violated",
+        "consumption_time_status": "satisfied",
+        "observed_consumption_outcome": "reject",
+        "required_consumption_outcome": "reject",
+        "checked_state_version": 7,
+        "current_state_version": 7,
+        "reason_codes": [
+          "CHECK_RESULT_MISREPORTED",
+          "EVENT_TIME_RESULT_MISMATCH"
+        ],
+        "observed_results": [
+          {
+            "op": "CHECK",
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 8,
+              "checked_ceiling": 10,
+              "amount": 4,
+              "predicate_result": false
+            },
+            "reported_predicate_result": true
+          },
+          {
+            "op": "CONSUME",
+            "mode": "VERSION_BOUND",
+            "amount": 4,
+            "supplied_check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 8,
+              "checked_ceiling": 10,
+              "amount": 4,
+              "predicate_result": false
+            },
+            "outcome": "reject"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "S14_NO_CONSUME",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "used": 0,
+          "ceiling": 10
+        },
+        "history": [
+          {
+            "op": "CHECK",
+            "check_id": "check:B",
+            "amount": 6,
+            "predicate_result": true
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "satisfied",
+        "consumption_time_status": "cannot_establish",
+        "observed_consumption_outcome": "none",
+        "required_consumption_outcome": "cannot_establish",
+        "checked_state_version": 7,
+        "current_state_version": 7,
+        "reason_codes": [
+          "CONSUME_MISSING"
+        ],
+        "observed_results": [
+          {
+            "op": "CHECK",
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 6,
+              "predicate_result": true
+            },
+            "reported_predicate_result": true
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "S15_UNBOUND_UNCHANGED_STATE",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "used": 0,
+          "ceiling": 10
+        },
+        "history": [
+          {
+            "op": "CHECK",
+            "check_id": "check:B",
+            "amount": 6,
+            "predicate_result": true
+          },
+          {
+            "op": "CONSUME",
+            "mode": "UNBOUND",
+            "amount": 6,
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 6,
+              "predicate_result": true
+            },
+            "observed_outcome": "admit"
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "satisfied",
+        "consumption_time_status": "satisfied",
+        "observed_consumption_outcome": "admit",
+        "required_consumption_outcome": "admit",
+        "checked_state_version": 7,
+        "current_state_version": 7,
+        "reason_codes": [
+          "EVENT_TIME_EVALUATION_CORRECT",
+          "UNCHANGED_STATE_PASS"
+        ],
+        "observed_results": [
+          {
+            "op": "CHECK",
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 6,
+              "predicate_result": true
+            },
+            "reported_predicate_result": true
+          },
+          {
+            "op": "CONSUME",
+            "mode": "UNBOUND",
+            "amount": 6,
+            "supplied_check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 6,
+              "predicate_result": true
+            },
+            "outcome": "admit"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "S16_UNBOUND_CHANGED_BUT_TRUE",
+      "inputs": {
+        "initial": {
+          "state_version": 7,
+          "used": 0,
+          "ceiling": 10
+        },
+        "history": [
+          {
+            "op": "CHECK",
+            "check_id": "check:B",
+            "amount": 2,
+            "predicate_result": true
+          },
+          {
+            "op": "STATE_TRANSITION",
+            "state": {
+              "state_version": 8,
+              "used": 3,
+              "ceiling": 10
+            }
+          },
+          {
+            "op": "CONSUME",
+            "mode": "UNBOUND",
+            "amount": 2,
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 2,
+              "predicate_result": true
+            },
+            "observed_outcome": "reject"
+          }
+        ]
+      },
+      "expected": {
+        "event_time_status": "satisfied",
+        "consumption_time_status": "cannot_establish",
+        "observed_consumption_outcome": "reject",
+        "required_consumption_outcome": "cannot_establish",
+        "checked_state_version": 7,
+        "current_state_version": 8,
+        "reason_codes": [
+          "EVENT_TIME_EVALUATION_CORRECT",
+          "UNBOUND_CHANGED_STATE"
+        ],
+        "observed_results": [
+          {
+            "op": "CHECK",
+            "check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 2,
+              "predicate_result": true
+            },
+            "reported_predicate_result": true
+          },
+          {
+            "op": "STATE_TRANSITION",
+            "state": {
+              "state_version": 8,
+              "used": 3,
+              "ceiling": 10
+            }
+          },
+          {
+            "op": "CONSUME",
+            "mode": "UNBOUND",
+            "amount": 2,
+            "supplied_check": {
+              "check_id": "check:B",
+              "checked_state_version": 7,
+              "checked_used": 0,
+              "checked_ceiling": 10,
+              "amount": 2,
+              "predicate_result": true
+            },
+            "outcome": "reject"
+          }
+        ]
+      }
+    }
+  ]
+}
