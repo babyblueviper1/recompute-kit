@@ -39,7 +39,7 @@ ends cryptographic **and mechanically chained**, not asserted across two fixture
 
 ## Vectors
 
-Five, in `profile-commitment-loop-v0.vectors.json` — one `closed`, four `open`, one per failure mode:
+Six, in `profile-commitment-loop-v0.vectors.json` — one `closed`, five `open`, one per failure mode:
 
 - `closed` — authorized A→B (both co-sign) + verdict commits exactly B + signed → loop closes
 - `open-bare-swap` — unauthorized swap: amendment fails closed to A, verdict commits B → seam mismatch → open
@@ -47,11 +47,23 @@ Five, in `profile-commitment-loop-v0.vectors.json` — one `closed`, four `open`
   mismatch → open (this is the case a shared-constant setup would miss; the computed chaining catches it)
 - `open-verdict-unsigned` — permitted A→B, right profile, but the resolver did not sign this verdict core → open
 - `open-verdict-profile-omitted` — permitted A→B, verdict carries no `effective_profile_commitment` → open
+- `open-amendment-unresolved-verdict-bound` — refused A→B (only one party co-signs) so A stays effective;
+  the verdict then *correctly* resolves under A and is signed → `resolution_status` = `bound`, but
+  `transition_status` = `unresolved` → loop `open`. The one vector where the resolution end is bound while
+  the amendment end is not permitted, so it makes the `transition_status == "permitted"` conjunct
+  load-bearing (raised by @Pavlentyy82, seconded by @babyblueviper1 on #42).
 
 Reproduced byte-for-byte by `loop_gate.py` and `profile-commitment-loop-v0.reference.mjs` (bun/node), each
 composing the shipped gates; each reds on a refuted vector, and a gate mutated to feed the verdict's own
 claimed profile (the shared-constant bug) flips exactly `open-verdict-wrong-profile` to a false `closed` —
 so the seam is demonstrably load-bearing.
+
+**Both conjuncts of `closed` are exercised.** `closed` is `transition_status == "permitted" AND
+resolution_status == "bound"`. A mutant dropping the *resolution* conjunct is caught by
+`open-verdict-wrong-profile` (as above). A mutant dropping the *transition* conjunct
+(`closed = resolution_status == "bound"` alone) is caught by exactly one vector,
+`open-amendment-unresolved-verdict-bound`, which flips to a false `closed`; the other five stay green
+under that mutation. Neither conjunct is merely present — each is proven to red a refuted vector.
 
 **Which vector isolates the seam.** That same mutation also drifts the resolution-side fields on
 `open-bare-swap`, but its `loop_status` does not move: its amendment side already refuses

@@ -5,7 +5,7 @@
       "name": "loop",
       "vectors": {
         "path": "profile-commitment-loop-v0.vectors.json",
-        "sha256": "2f921562cfff2799a67bb54c6fbffd3a799ac7ba216f172d12ca3060627623d4"
+        "sha256": "af73ee1a7e7a3c410cb7fe068556833053143998636090964c78438dc961842e"
       },
       "adapter": {
         "kind": "stdio",
@@ -16,7 +16,7 @@
       "name": "loop-reference-ts",
       "vectors": {
         "path": "profile-commitment-loop-v0.vectors.json",
-        "sha256": "2f921562cfff2799a67bb54c6fbffd3a799ac7ba216f172d12ca3060627623d4"
+        "sha256": "af73ee1a7e7a3c410cb7fe068556833053143998636090964c78438dc961842e"
       },
       "adapter": {
         "kind": "stdio",
@@ -27,6 +27,6 @@
   "laneHint": "recomputable",
   "spec": {
     "path": "profile-commitment-loop-v0.spec.md",
-    "sha256": "07ecb5da3c3ed28cd01a793c59b675eb3202a8c6de8c514143b20557f2b2be17"
+    "sha256": "ae3bfbeca7ec895e88c69cec3d3245346260c9834ce207516380620f6a7c98b5"
   }
 }

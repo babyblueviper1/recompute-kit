@@ -339,6 +339,72 @@
         "bound_profile_commitment": null,
         "loop_status": "open"
       }
+    },
+    {
+      "name": "open-amendment-unresolved-verdict-bound",
+      "note": "refused A->B (only buyer co-signs) so A stays effective; the verdict correctly resolves under A and is signed -> resolution BOUND, but transition UNRESOLVED -> loop open. The only vector where resolution_status==bound while transition_status!=permitted, so it makes the transition_status=='permitted' conjunct load-bearing (Pavlentyy82 + babyblueviper1, #42).",
+      "in_force_profile": {
+        "schema": "verification-profile.v0",
+        "version": 1,
+        "mechanically_checkable": [
+          "result_hash_matches"
+        ],
+        "admissible_evidence": [
+          "onchain_receipt"
+        ],
+        "jury_resolved": [
+          "reasoning_quality"
+        ]
+      },
+      "proposed_profile": {
+        "schema": "verification-profile.v0",
+        "version": 2,
+        "mechanically_checkable": [
+          "result_hash_matches",
+          "chain_id_matches"
+        ],
+        "admissible_evidence": [
+          "onchain_receipt"
+        ],
+        "jury_resolved": [
+          "reasoning_quality"
+        ]
+      },
+      "escrow_ref": "a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90#0",
+      "required_parties": [
+        "buyer",
+        "supplier"
+      ],
+      "amendment": {
+        "schema": "profile-amendment.v0",
+        "prior_profile_commitment": "cc458bd42359a4dcd873cd3bde38cc45e5562f51f674c214b4659030317c70ce",
+        "new_profile_commitment": "c5561c0ddd64f3b971563ef2ec08b812b2aaad3787ed8de3cc39d69d9fd35984",
+        "escrow_ref": "a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90#0"
+      },
+      "authorizations": {
+        "buyer": {
+          "party": "buyer",
+          "signed_digest": "6e1e3f6df4a77a9e38b0eaaf64f5d5eb3297acf4dbdc9e0c80e14c1ce93324e5",
+          "pubkey": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        }
+      },
+      "verdict_core": {
+        "schema": "verdict.v0",
+        "job_id": "job-7",
+        "outcome": "accepted",
+        "effective_profile_commitment": "cc458bd42359a4dcd873cd3bde38cc45e5562f51f674c214b4659030317c70ce"
+      },
+      "resolver_sig": {
+        "signed_digest": "7464a2611f474e7104ec7d501eeaec99de97b25ef9e5f202485bbef356c583b0",
+        "pubkey": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      },
+      "expect": {
+        "transition_status": "unresolved",
+        "resolution_status": "bound",
+        "effective_profile_commitment": "cc458bd42359a4dcd873cd3bde38cc45e5562f51f674c214b4659030317c70ce",
+        "bound_profile_commitment": "cc458bd42359a4dcd873cd3bde38cc45e5562f51f674c214b4659030317c70ce",
+        "loop_status": "open"
+      }
     }
   ]
 }
