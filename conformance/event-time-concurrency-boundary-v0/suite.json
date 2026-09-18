@@ -1,0 +1,40 @@
+{
+  "profile": "event_time_concurrency_boundary.v0",
+  "spec": {
+    "path": "README.md",
+    "sha256": "e67ab8c06e23eca1c24e627aec4304062861b01a4ed57c3501767fcefca3de0e"
+  },
+  "checker": {
+    "path": "boundary_check.py",
+    "sha256": "076144d44ba481aa6a2c159ae7269e75a286b65b033bc70e0d628e3927d7c7a8"
+  },
+  "mutation_checker": {
+    "path": "mutation_check.py",
+    "sha256": "121d1853e2cf9d9328838bb7cc7776910cebe43dc8f056ac06ab9c1e585cfd47"
+  },
+  "laneHint": "recomputable",
+  "checks": [
+    {
+      "name": "conformance",
+      "vectors": {
+        "path": "vectors.json",
+        "sha256": "9cfae3d121a865e3d9776a3a8d5805149be4d09e85ecccab00cf57ddd2d8709c"
+      },
+      "adapter": {
+        "kind": "stdio",
+        "cmd": "python3 boundary_check.py vectors.json"
+      }
+    },
+    {
+      "name": "mutation-coverage",
+      "vectors": {
+        "path": "vectors.json",
+        "sha256": "9cfae3d121a865e3d9776a3a8d5805149be4d09e85ecccab00cf57ddd2d8709c"
+      },
+      "adapter": {
+        "kind": "stdio",
+        "cmd": "python3 mutation_check.py"
+      }
+    }
+  ]
+}
