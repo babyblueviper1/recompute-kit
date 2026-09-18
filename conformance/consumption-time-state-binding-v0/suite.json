@@ -1,0 +1,40 @@
+{
+  "profile": "consumption_time_state_binding.v0",
+  "spec": {
+    "path": "README.md",
+    "sha256": "c2ac5109a141f6f586df55de5397001d00381629d5df187dacaec1a3ee4c4538"
+  },
+  "checker": {
+    "path": "binding_check.py",
+    "sha256": "8dee4a999278adc5140559369b57a5ac931cc3ac04b2e83665a4e537fb1593d9"
+  },
+  "mutation_checker": {
+    "path": "mutation_check.py",
+    "sha256": "0a8d644310d11893f3c4e251ea16ebec738e5a4f47382c7880831eb1e91a0514"
+  },
+  "laneHint": "recomputable",
+  "checks": [
+    {
+      "name": "conformance",
+      "vectors": {
+        "path": "vectors.json",
+        "sha256": "0788f31772d0d3ee646cbc1bcf77e003c524256162b27f77c80a2e234d9e9e08"
+      },
+      "adapter": {
+        "kind": "stdio",
+        "cmd": "python3 binding_check.py vectors.json"
+      }
+    },
+    {
+      "name": "mutation-coverage",
+      "vectors": {
+        "path": "vectors.json",
+        "sha256": "0788f31772d0d3ee646cbc1bcf77e003c524256162b27f77c80a2e234d9e9e08"
+      },
+      "adapter": {
+        "kind": "stdio",
+        "cmd": "python3 mutation_check.py"
+      }
+    }
+  ]
+}
