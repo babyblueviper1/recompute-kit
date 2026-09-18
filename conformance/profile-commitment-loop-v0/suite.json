@@ -1,0 +1,32 @@
+{
+  "profile": "profile-commitment-loop.v0",
+  "checks": [
+    {
+      "name": "loop",
+      "vectors": {
+        "path": "profile-commitment-loop-v0.vectors.json",
+        "sha256": "af73ee1a7e7a3c410cb7fe068556833053143998636090964c78438dc961842e"
+      },
+      "adapter": {
+        "kind": "stdio",
+        "cmd": "python3 loop_gate.py profile-commitment-loop-v0.vectors.json"
+      }
+    },
+    {
+      "name": "loop-reference-ts",
+      "vectors": {
+        "path": "profile-commitment-loop-v0.vectors.json",
+        "sha256": "af73ee1a7e7a3c410cb7fe068556833053143998636090964c78438dc961842e"
+      },
+      "adapter": {
+        "kind": "stdio",
+        "cmd": "bun profile-commitment-loop-v0.reference.mjs profile-commitment-loop-v0.vectors.json"
+      }
+    }
+  ],
+  "laneHint": "recomputable",
+  "spec": {
+    "path": "profile-commitment-loop-v0.spec.md",
+    "sha256": "ae3bfbeca7ec895e88c69cec3d3245346260c9834ce207516380620f6a7c98b5"
+  }
+}
