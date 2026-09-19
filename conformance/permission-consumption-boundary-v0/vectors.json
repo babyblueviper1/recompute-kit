@@ -1,0 +1,1410 @@
+{
+  "profile": "permission_consumption_boundary.v0",
+  "cases": [
+    {
+      "case_id": "P1_CONTROL_UNCHANGED_FINITE_GRANT",
+      "inputs": {
+        "grant_id": "G1",
+        "grant_epoch": 1,
+        "amount": 6,
+        "check_at": 5,
+        "grants": [
+          {
+            "grant_id": "G1",
+            "grant_epoch": 1,
+            "activated_at": 0,
+            "expiry": 10,
+            "capacity_domain": "C1"
+          }
+        ],
+        "lifecycle_transitions": [],
+        "capacities": [
+          {
+            "domain_id": "C1",
+            "initial": {
+              "state_version": 7,
+              "used": 0,
+              "ceiling": 10
+            },
+            "transitions": []
+          }
+        ],
+        "consume": {
+          "grant_id": "G1",
+          "grant_epoch": 1,
+          "capacity_domain": "C1",
+          "at": 7,
+          "evidence": {
+            "expiry": true,
+            "lifecycle": true,
+            "capacity": true
+          },
+          "observed_outcome": "admit"
+        }
+      },
+      "expected": {
+        "historical_check_status": "satisfied",
+        "current_authorization_status": "satisfied",
+        "observed_consumption_outcome": "admit",
+        "required_consumption_outcome": "admit",
+        "consumption_conformance_status": "satisfied",
+        "historical_components": {
+          "expiry": "satisfied",
+          "lifecycle": "satisfied",
+          "capacity": "satisfied"
+        },
+        "current_components": {
+          "expiry": "satisfied",
+          "lifecycle": "satisfied",
+          "capacity": "satisfied"
+        },
+        "reason_codes": [
+          "CURRENT_CAPACITY_SATISFIED",
+          "CURRENT_EXPIRY_SATISFIED",
+          "CURRENT_LIFECYCLE_SATISFIED",
+          "HISTORICAL_AUTHORIZATION_ESTABLISHED"
+        ]
+      }
+    },
+    {
+      "case_id": "P2_CONTROL_PERPETUAL_GRANT",
+      "inputs": {
+        "grant_id": "G1",
+        "grant_epoch": 1,
+        "amount": 6,
+        "check_at": 5,
+        "grants": [
+          {
+            "grant_id": "G1",
+            "grant_epoch": 1,
+            "activated_at": 0,
+            "expiry": 18446744073709551615,
+            "capacity_domain": "C1"
+          }
+        ],
+        "lifecycle_transitions": [],
+        "capacities": [
+          {
+            "domain_id": "C1",
+            "initial": {
+              "state_version": 7,
+              "used": 0,
+              "ceiling": 10
+            },
+            "transitions": []
+          }
+        ],
+        "consume": {
+          "grant_id": "G1",
+          "grant_epoch": 1,
+          "capacity_domain": "C1",
+          "at": 20,
+          "evidence": {
+            "expiry": true,
+            "lifecycle": true,
+            "capacity": true
+          },
+          "observed_outcome": "admit"
+        }
+      },
+      "expected": {
+        "historical_check_status": "satisfied",
+        "current_authorization_status": "satisfied",
+        "observed_consumption_outcome": "admit",
+        "required_consumption_outcome": "admit",
+        "consumption_conformance_status": "satisfied",
+        "historical_components": {
+          "expiry": "satisfied",
+          "lifecycle": "satisfied",
+          "capacity": "satisfied"
+        },
+        "current_components": {
+          "expiry": "satisfied",
+          "lifecycle": "satisfied",
+          "capacity": "satisfied"
+        },
+        "reason_codes": [
+          "CURRENT_CAPACITY_SATISFIED",
+          "CURRENT_EXPIRY_SATISFIED",
+          "CURRENT_LIFECYCLE_SATISFIED",
+          "HISTORICAL_AUTHORIZATION_ESTABLISHED"
+        ]
+      }
+    },
+    {
+      "case_id": "P3_EXPIRY_AFTER_CHECK_WITHOUT_VERSION_DRIFT",
+      "inputs": {
+        "grant_id": "G1",
+        "grant_epoch": 1,
+        "amount": 6,
+        "check_at": 5,
+        "grants": [
+          {
+            "grant_id": "G1",
+            "grant_epoch": 1,
+            "activated_at": 0,
+            "expiry": 10,
+            "capacity_domain": "C1"
+          }
+        ],
+        "lifecycle_transitions": [],
+        "capacities": [
+          {
+            "domain_id": "C1",
+            "initial": {
+              "state_version": 7,
+              "used": 0,
+              "ceiling": 10
+            },
+            "transitions": []
+          }
+        ],
+        "consume": {
+          "grant_id": "G1",
+          "grant_epoch": 1,
+          "capacity_domain": "C1",
+          "at": 15,
+          "evidence": {
+            "expiry": true,
+            "lifecycle": true,
+            "capacity": true
+          },
+          "observed_outcome": "admit"
+        }
+      },
+      "expected": {
+        "historical_check_status": "satisfied",
+        "current_authorization_status": "violated",
+        "observed_consumption_outcome": "admit",
+        "required_consumption_outcome": "reject",
+        "consumption_conformance_status": "violated",
+        "historical_components": {
+          "expiry": "satisfied",
+          "lifecycle": "satisfied",
+          "capacity": "satisfied"
+        },
+        "current_components": {
+          "expiry": "violated",
+          "lifecycle": "satisfied",
+          "capacity": "satisfied"
+        },
+        "reason_codes": [
+          "CURRENT_CAPACITY_SATISFIED",
+          "CURRENT_EXPIRY_VIOLATED",
+          "CURRENT_LIFECYCLE_SATISFIED",
+          "HISTORICAL_AUTHORIZATION_ESTABLISHED"
+        ]
+      }
+    },
+    {
+      "case_id": "P4_EXPIRY_BOUNDARY",
+      "inputs": {
+        "grant_id": "G1",
+        "grant_epoch": 1,
+        "amount": 6,
+        "check_at": 5,
+        "grants": [
+          {
+            "grant_id": "G1",
+            "grant_epoch": 1,
+            "activated_at": 0,
+            "expiry": 10,
+            "capacity_domain": "C1"
+          }
+        ],
+        "lifecycle_transitions": [],
+        "capacities": [
+          {
+            "domain_id": "C1",
+            "initial": {
+              "state_version": 7,
+              "used": 0,
+              "ceiling": 10
+            },
+            "transitions": []
+          }
+        ],
+        "consume": {
+          "grant_id": "G1",
+          "grant_epoch": 1,
+          "capacity_domain": "C1",
+          "at": 10,
+          "evidence": {
+            "expiry": true,
+            "lifecycle": true,
+            "capacity": true
+          },
+          "observed_outcome": "reject"
+        }
+      },
+      "expected": {
+        "historical_check_status": "satisfied",
+        "current_authorization_status": "violated",
+        "observed_consumption_outcome": "reject",
+        "required_consumption_outcome": "reject",
+        "consumption_conformance_status": "satisfied",
+        "historical_components": {
+          "expiry": "satisfied",
+          "lifecycle": "satisfied",
+          "capacity": "satisfied"
+        },
+        "current_components": {
+          "expiry": "violated",
+          "lifecycle": "satisfied",
+          "capacity": "satisfied"
+        },
+        "reason_codes": [
+          "CURRENT_CAPACITY_SATISFIED",
+          "CURRENT_EXPIRY_VIOLATED",
+          "CURRENT_LIFECYCLE_SATISFIED",
+          "HISTORICAL_AUTHORIZATION_ESTABLISHED"
+        ]
+      }
+    },
+    {
+      "case_id": "P5_REVOKED_SELECTED_EPOCH",
+      "inputs": {
+        "grant_id": "G1",
+        "grant_epoch": 1,
+        "amount": 6,
+        "check_at": 5,
+        "grants": [
+          {
+            "grant_id": "G1",
+            "grant_epoch": 1,
+            "activated_at": 0,
+            "expiry": 10,
+            "capacity_domain": "C1"
+          }
+        ],
+        "lifecycle_transitions": [
+          {
+            "grant_id": "G1",
+            "grant_epoch": 1,
+            "kind": "revoked",
+            "at": 6
+          }
+        ],
+        "capacities": [
+          {
+            "domain_id": "C1",
+            "initial": {
+              "state_version": 7,
+              "used": 0,
+              "ceiling": 10
+            },
+            "transitions": []
+          }
+        ],
+        "consume": {
+          "grant_id": "G1",
+          "grant_epoch": 1,
+          "capacity_domain": "C1",
+          "at": 7,
+          "evidence": {
+            "expiry": true,
+            "lifecycle": true,
+            "capacity": true
+          },
+          "observed_outcome": "admit"
+        }
+      },
+      "expected": {
+        "historical_check_status": "satisfied",
+        "current_authorization_status": "violated",
+        "observed_consumption_outcome": "admit",
+        "required_consumption_outcome": "reject",
+        "consumption_conformance_status": "violated",
+        "historical_components": {
+          "expiry": "satisfied",
+          "lifecycle": "satisfied",
+          "capacity": "satisfied"
+        },
+        "current_components": {
+          "expiry": "satisfied",
+          "lifecycle": "violated",
+          "capacity": "satisfied"
+        },
+        "reason_codes": [
+          "CURRENT_CAPACITY_SATISFIED",
+          "CURRENT_EXPIRY_SATISFIED",
+          "CURRENT_LIFECYCLE_VIOLATED",
+          "HISTORICAL_AUTHORIZATION_ESTABLISHED"
+        ]
+      }
+    },
+    {
+      "case_id": "P7_RENEWED_EPOCH_IS_NOT_THE_OLD_EPOCH",
+      "inputs": {
+        "grant_id": "G1",
+        "grant_epoch": 1,
+        "amount": 6,
+        "check_at": 5,
+        "grants": [
+          {
+            "grant_id": "G1",
+            "grant_epoch": 1,
+            "activated_at": 0,
+            "expiry": 10,
+            "capacity_domain": "C1"
+          },
+          {
+            "grant_id": "G1",
+            "grant_epoch": 2,
+            "activated_at": 11,
+            "expiry": 30,
+            "capacity_domain": "C1"
+          }
+        ],
+        "lifecycle_transitions": [],
+        "capacities": [
+          {
+            "domain_id": "C1",
+            "initial": {
+              "state_version": 7,
+              "used": 0,
+              "ceiling": 10
+            },
+            "transitions": []
+          }
+        ],
+        "consume": {
+          "grant_id": "G1",
+          "grant_epoch": 1,
+          "capacity_domain": "C1",
+          "at": 15,
+          "evidence": {
+            "expiry": true,
+            "lifecycle": true,
+            "capacity": true
+          },
+          "observed_outcome": "admit"
+        }
+      },
+      "expected": {
+        "historical_check_status": "satisfied",
+        "current_authorization_status": "violated",
+        "observed_consumption_outcome": "admit",
+        "required_consumption_outcome": "reject",
+        "consumption_conformance_status": "violated",
+        "historical_components": {
+          "expiry": "satisfied",
+          "lifecycle": "satisfied",
+          "capacity": "satisfied"
+        },
+        "current_components": {
+          "expiry": "violated",
+          "lifecycle": "satisfied",
+          "capacity": "satisfied"
+        },
+        "reason_codes": [
+          "CURRENT_CAPACITY_SATISFIED",
+          "CURRENT_EXPIRY_VIOLATED",
+          "CURRENT_LIFECYCLE_SATISFIED",
+          "HISTORICAL_AUTHORIZATION_ESTABLISHED"
+        ]
+      }
+    },
+    {
+      "case_id": "P8_UNRELATED_ACTIVE_GRANT_CANNOT_SUBSTITUTE",
+      "inputs": {
+        "grant_id": "G1",
+        "grant_epoch": 1,
+        "amount": 6,
+        "check_at": 5,
+        "grants": [
+          {
+            "grant_id": "G1",
+            "grant_epoch": 1,
+            "activated_at": 0,
+            "expiry": 10,
+            "capacity_domain": "C1"
+          },
+          {
+            "grant_id": "G2",
+            "grant_epoch": 1,
+            "activated_at": 0,
+            "expiry": 30,
+            "capacity_domain": "C1"
+          }
+        ],
+        "lifecycle_transitions": [],
+        "capacities": [
+          {
+            "domain_id": "C1",
+            "initial": {
+              "state_version": 7,
+              "used": 0,
+              "ceiling": 10
+            },
+            "transitions": []
+          }
+        ],
+        "consume": {
+          "grant_id": "G1",
+          "grant_epoch": 1,
+          "capacity_domain": "C1",
+          "at": 15,
+          "evidence": {
+            "expiry": true,
+            "lifecycle": true,
+            "capacity": true
+          },
+          "observed_outcome": "admit"
+        }
+      },
+      "expected": {
+        "historical_check_status": "satisfied",
+        "current_authorization_status": "violated",
+        "observed_consumption_outcome": "admit",
+        "required_consumption_outcome": "reject",
+        "consumption_conformance_status": "violated",
+        "historical_components": {
+          "expiry": "satisfied",
+          "lifecycle": "satisfied",
+          "capacity": "satisfied"
+        },
+        "current_components": {
+          "expiry": "violated",
+          "lifecycle": "satisfied",
+          "capacity": "satisfied"
+        },
+        "reason_codes": [
+          "CURRENT_CAPACITY_SATISFIED",
+          "CURRENT_EXPIRY_VIOLATED",
+          "CURRENT_LIFECYCLE_SATISFIED",
+          "HISTORICAL_AUTHORIZATION_ESTABLISHED"
+        ]
+      }
+    },
+    {
+      "case_id": "P9_CONSUMED_CAPACITY_REUSES_S2_SHAPE",
+      "inputs": {
+        "grant_id": "G1",
+        "grant_epoch": 1,
+        "amount": 6,
+        "check_at": 5,
+        "grants": [
+          {
+            "grant_id": "G1",
+            "grant_epoch": 1,
+            "activated_at": 0,
+            "expiry": 10,
+            "capacity_domain": "C1"
+          }
+        ],
+        "lifecycle_transitions": [],
+        "capacities": [
+          {
+            "domain_id": "C1",
+            "initial": {
+              "state_version": 7,
+              "used": 0,
+              "ceiling": 10
+            },
+            "transitions": [
+              {
+                "at": 6,
+                "state": {
+                  "state_version": 8,
+                  "used": 6,
+                  "ceiling": 10
+                }
+              }
+            ]
+          }
+        ],
+        "consume": {
+          "grant_id": "G1",
+          "grant_epoch": 1,
+          "capacity_domain": "C1",
+          "at": 7,
+          "evidence": {
+            "expiry": true,
+            "lifecycle": true,
+            "capacity": true
+          },
+          "observed_outcome": "admit"
+        }
+      },
+      "expected": {
+        "historical_check_status": "satisfied",
+        "current_authorization_status": "violated",
+        "observed_consumption_outcome": "admit",
+        "required_consumption_outcome": "reject",
+        "consumption_conformance_status": "violated",
+        "historical_components": {
+          "expiry": "satisfied",
+          "lifecycle": "satisfied",
+          "capacity": "satisfied"
+        },
+        "current_components": {
+          "expiry": "satisfied",
+          "lifecycle": "satisfied",
+          "capacity": "violated"
+        },
+        "reason_codes": [
+          "CURRENT_CAPACITY_VIOLATED",
+          "CURRENT_EXPIRY_SATISFIED",
+          "CURRENT_LIFECYCLE_SATISFIED",
+          "HISTORICAL_AUTHORIZATION_ESTABLISHED"
+        ]
+      }
+    },
+    {
+      "case_id": "P10_CURRENT_CAPACITY_STILL_SUFFICIENT",
+      "inputs": {
+        "grant_id": "G1",
+        "grant_epoch": 1,
+        "amount": 2,
+        "check_at": 5,
+        "grants": [
+          {
+            "grant_id": "G1",
+            "grant_epoch": 1,
+            "activated_at": 0,
+            "expiry": 10,
+            "capacity_domain": "C1"
+          }
+        ],
+        "lifecycle_transitions": [],
+        "capacities": [
+          {
+            "domain_id": "C1",
+            "initial": {
+              "state_version": 7,
+              "used": 0,
+              "ceiling": 10
+            },
+            "transitions": [
+              {
+                "at": 6,
+                "state": {
+                  "state_version": 8,
+                  "used": 3,
+                  "ceiling": 10
+                }
+              }
+            ]
+          }
+        ],
+        "consume": {
+          "grant_id": "G1",
+          "grant_epoch": 1,
+          "capacity_domain": "C1",
+          "at": 7,
+          "evidence": {
+            "expiry": true,
+            "lifecycle": true,
+            "capacity": true
+          },
+          "observed_outcome": "admit"
+        }
+      },
+      "expected": {
+        "historical_check_status": "satisfied",
+        "current_authorization_status": "satisfied",
+        "observed_consumption_outcome": "admit",
+        "required_consumption_outcome": "admit",
+        "consumption_conformance_status": "satisfied",
+        "historical_components": {
+          "expiry": "satisfied",
+          "lifecycle": "satisfied",
+          "capacity": "satisfied"
+        },
+        "current_components": {
+          "expiry": "satisfied",
+          "lifecycle": "satisfied",
+          "capacity": "satisfied"
+        },
+        "reason_codes": [
+          "CURRENT_CAPACITY_SATISFIED",
+          "CURRENT_EXPIRY_SATISFIED",
+          "CURRENT_LIFECYCLE_SATISFIED",
+          "HISTORICAL_AUTHORIZATION_ESTABLISHED"
+        ]
+      }
+    },
+    {
+      "case_id": "P11_WRONG_CAPACITY_DOMAIN_CANNOT_SUBSTITUTE",
+      "inputs": {
+        "grant_id": "G1",
+        "grant_epoch": 1,
+        "amount": 6,
+        "check_at": 5,
+        "grants": [
+          {
+            "grant_id": "G1",
+            "grant_epoch": 1,
+            "activated_at": 0,
+            "expiry": 10,
+            "capacity_domain": "C1"
+          }
+        ],
+        "lifecycle_transitions": [],
+        "capacities": [
+          {
+            "domain_id": "C1",
+            "initial": {
+              "state_version": 7,
+              "used": 0,
+              "ceiling": 10
+            },
+            "transitions": [
+              {
+                "at": 6,
+                "state": {
+                  "state_version": 8,
+                  "used": 6,
+                  "ceiling": 10
+                }
+              }
+            ]
+          },
+          {
+            "domain_id": "C2",
+            "initial": {
+              "state_version": 7,
+              "used": 0,
+              "ceiling": 10
+            },
+            "transitions": []
+          }
+        ],
+        "consume": {
+          "grant_id": "G1",
+          "grant_epoch": 1,
+          "capacity_domain": "C1",
+          "at": 7,
+          "evidence": {
+            "expiry": true,
+            "lifecycle": true,
+            "capacity": true
+          },
+          "observed_outcome": "admit"
+        }
+      },
+      "expected": {
+        "historical_check_status": "satisfied",
+        "current_authorization_status": "violated",
+        "observed_consumption_outcome": "admit",
+        "required_consumption_outcome": "reject",
+        "consumption_conformance_status": "violated",
+        "historical_components": {
+          "expiry": "satisfied",
+          "lifecycle": "satisfied",
+          "capacity": "satisfied"
+        },
+        "current_components": {
+          "expiry": "satisfied",
+          "lifecycle": "satisfied",
+          "capacity": "violated"
+        },
+        "reason_codes": [
+          "CURRENT_CAPACITY_VIOLATED",
+          "CURRENT_EXPIRY_SATISFIED",
+          "CURRENT_LIFECYCLE_SATISFIED",
+          "HISTORICAL_AUTHORIZATION_ESTABLISHED"
+        ]
+      }
+    },
+    {
+      "case_id": "P12_MISSING_CURRENT_EXPIRY_EVIDENCE",
+      "inputs": {
+        "grant_id": "G1",
+        "grant_epoch": 1,
+        "amount": 6,
+        "check_at": 5,
+        "grants": [
+          {
+            "grant_id": "G1",
+            "grant_epoch": 1,
+            "activated_at": 0,
+            "expiry": 10,
+            "capacity_domain": "C1"
+          }
+        ],
+        "lifecycle_transitions": [],
+        "capacities": [
+          {
+            "domain_id": "C1",
+            "initial": {
+              "state_version": 7,
+              "used": 0,
+              "ceiling": 10
+            },
+            "transitions": []
+          }
+        ],
+        "consume": {
+          "grant_id": "G1",
+          "grant_epoch": 1,
+          "capacity_domain": "C1",
+          "at": 7,
+          "evidence": {
+            "expiry": false,
+            "lifecycle": true,
+            "capacity": true
+          },
+          "observed_outcome": "reject"
+        }
+      },
+      "expected": {
+        "historical_check_status": "satisfied",
+        "current_authorization_status": "cannot_establish",
+        "observed_consumption_outcome": "reject",
+        "required_consumption_outcome": "reject",
+        "consumption_conformance_status": "satisfied",
+        "historical_components": {
+          "expiry": "satisfied",
+          "lifecycle": "satisfied",
+          "capacity": "satisfied"
+        },
+        "current_components": {
+          "expiry": "cannot_establish",
+          "lifecycle": "satisfied",
+          "capacity": "satisfied"
+        },
+        "reason_codes": [
+          "CURRENT_CAPACITY_SATISFIED",
+          "CURRENT_EXPIRY_CANNOT_ESTABLISH",
+          "CURRENT_LIFECYCLE_SATISFIED",
+          "HISTORICAL_AUTHORIZATION_ESTABLISHED"
+        ]
+      }
+    },
+    {
+      "case_id": "P13_MISSING_LIFECYCLE_EVIDENCE",
+      "inputs": {
+        "grant_id": "G1",
+        "grant_epoch": 1,
+        "amount": 6,
+        "check_at": 5,
+        "grants": [
+          {
+            "grant_id": "G1",
+            "grant_epoch": 1,
+            "activated_at": 0,
+            "expiry": 10,
+            "capacity_domain": "C1"
+          }
+        ],
+        "lifecycle_transitions": [],
+        "capacities": [
+          {
+            "domain_id": "C1",
+            "initial": {
+              "state_version": 7,
+              "used": 0,
+              "ceiling": 10
+            },
+            "transitions": []
+          }
+        ],
+        "consume": {
+          "grant_id": "G1",
+          "grant_epoch": 1,
+          "capacity_domain": "C1",
+          "at": 7,
+          "evidence": {
+            "expiry": true,
+            "lifecycle": false,
+            "capacity": true
+          },
+          "observed_outcome": "reject"
+        }
+      },
+      "expected": {
+        "historical_check_status": "satisfied",
+        "current_authorization_status": "cannot_establish",
+        "observed_consumption_outcome": "reject",
+        "required_consumption_outcome": "reject",
+        "consumption_conformance_status": "satisfied",
+        "historical_components": {
+          "expiry": "satisfied",
+          "lifecycle": "satisfied",
+          "capacity": "satisfied"
+        },
+        "current_components": {
+          "expiry": "satisfied",
+          "lifecycle": "cannot_establish",
+          "capacity": "satisfied"
+        },
+        "reason_codes": [
+          "CURRENT_CAPACITY_SATISFIED",
+          "CURRENT_EXPIRY_SATISFIED",
+          "CURRENT_LIFECYCLE_CANNOT_ESTABLISH",
+          "HISTORICAL_AUTHORIZATION_ESTABLISHED"
+        ]
+      }
+    },
+    {
+      "case_id": "P14_MISSING_CAPACITY_EVIDENCE",
+      "inputs": {
+        "grant_id": "G1",
+        "grant_epoch": 1,
+        "amount": 6,
+        "check_at": 5,
+        "grants": [
+          {
+            "grant_id": "G1",
+            "grant_epoch": 1,
+            "activated_at": 0,
+            "expiry": 10,
+            "capacity_domain": "C1"
+          }
+        ],
+        "lifecycle_transitions": [],
+        "capacities": [
+          {
+            "domain_id": "C1",
+            "initial": {
+              "state_version": 7,
+              "used": 0,
+              "ceiling": 10
+            },
+            "transitions": []
+          }
+        ],
+        "consume": {
+          "grant_id": "G1",
+          "grant_epoch": 1,
+          "capacity_domain": "C1",
+          "at": 7,
+          "evidence": {
+            "expiry": true,
+            "lifecycle": true,
+            "capacity": false
+          },
+          "observed_outcome": "reject"
+        }
+      },
+      "expected": {
+        "historical_check_status": "satisfied",
+        "current_authorization_status": "cannot_establish",
+        "observed_consumption_outcome": "reject",
+        "required_consumption_outcome": "reject",
+        "consumption_conformance_status": "satisfied",
+        "historical_components": {
+          "expiry": "satisfied",
+          "lifecycle": "satisfied",
+          "capacity": "satisfied"
+        },
+        "current_components": {
+          "expiry": "satisfied",
+          "lifecycle": "satisfied",
+          "capacity": "cannot_establish"
+        },
+        "reason_codes": [
+          "CURRENT_CAPACITY_CANNOT_ESTABLISH",
+          "CURRENT_EXPIRY_SATISFIED",
+          "CURRENT_LIFECYCLE_SATISFIED",
+          "HISTORICAL_AUTHORIZATION_ESTABLISHED"
+        ]
+      }
+    },
+    {
+      "case_id": "P15_HISTORICAL_CHECK_INVALID",
+      "inputs": {
+        "grant_id": "G1",
+        "grant_epoch": 1,
+        "amount": 6,
+        "check_at": 5,
+        "grants": [
+          {
+            "grant_id": "G1",
+            "grant_epoch": 1,
+            "activated_at": 0,
+            "expiry": 4,
+            "capacity_domain": "C1"
+          }
+        ],
+        "lifecycle_transitions": [],
+        "capacities": [
+          {
+            "domain_id": "C1",
+            "initial": {
+              "state_version": 7,
+              "used": 0,
+              "ceiling": 10
+            },
+            "transitions": []
+          }
+        ],
+        "consume": {
+          "grant_id": "G1",
+          "grant_epoch": 1,
+          "capacity_domain": "C1",
+          "at": 7,
+          "evidence": {
+            "expiry": true,
+            "lifecycle": true,
+            "capacity": true
+          },
+          "observed_outcome": "reject"
+        }
+      },
+      "expected": {
+        "historical_check_status": "violated",
+        "current_authorization_status": "cannot_establish",
+        "observed_consumption_outcome": "reject",
+        "required_consumption_outcome": "reject",
+        "consumption_conformance_status": "satisfied",
+        "historical_components": {
+          "expiry": "violated",
+          "lifecycle": "satisfied",
+          "capacity": "satisfied"
+        },
+        "current_components": {},
+        "reason_codes": [
+          "CURRENT_AUTHORIZATION_NOT_EVALUATED",
+          "HISTORICAL_AUTHORIZATION_NOT_ESTABLISHED"
+        ]
+      }
+    },
+    {
+      "case_id": "P16_MISSING_EVIDENCE_OBSERVED_ADMIT",
+      "inputs": {
+        "grant_id": "G1",
+        "grant_epoch": 1,
+        "amount": 6,
+        "check_at": 5,
+        "grants": [
+          {
+            "grant_id": "G1",
+            "grant_epoch": 1,
+            "activated_at": 0,
+            "expiry": 10,
+            "capacity_domain": "C1"
+          }
+        ],
+        "lifecycle_transitions": [],
+        "capacities": [
+          {
+            "domain_id": "C1",
+            "initial": {
+              "state_version": 7,
+              "used": 0,
+              "ceiling": 10
+            },
+            "transitions": []
+          }
+        ],
+        "consume": {
+          "grant_id": "G1",
+          "grant_epoch": 1,
+          "capacity_domain": "C1",
+          "at": 7,
+          "evidence": {
+            "expiry": false,
+            "lifecycle": true,
+            "capacity": true
+          },
+          "observed_outcome": "admit"
+        }
+      },
+      "expected": {
+        "historical_check_status": "satisfied",
+        "current_authorization_status": "cannot_establish",
+        "observed_consumption_outcome": "admit",
+        "required_consumption_outcome": "reject",
+        "consumption_conformance_status": "violated",
+        "historical_components": {
+          "expiry": "satisfied",
+          "lifecycle": "satisfied",
+          "capacity": "satisfied"
+        },
+        "current_components": {
+          "expiry": "cannot_establish",
+          "lifecycle": "satisfied",
+          "capacity": "satisfied"
+        },
+        "reason_codes": [
+          "CURRENT_CAPACITY_SATISFIED",
+          "CURRENT_EXPIRY_CANNOT_ESTABLISH",
+          "CURRENT_LIFECYCLE_SATISFIED",
+          "HISTORICAL_AUTHORIZATION_ESTABLISHED"
+        ]
+      }
+    },
+    {
+      "case_id": "P17_CONSUMED_GRANT_ID_MISMATCH",
+      "inputs": {
+        "grant_id": "G1",
+        "grant_epoch": 1,
+        "amount": 6,
+        "check_at": 5,
+        "grants": [
+          {
+            "grant_id": "G1",
+            "grant_epoch": 1,
+            "activated_at": 0,
+            "expiry": 10,
+            "capacity_domain": "C1"
+          }
+        ],
+        "lifecycle_transitions": [],
+        "capacities": [
+          {
+            "domain_id": "C1",
+            "initial": {
+              "state_version": 7,
+              "used": 0,
+              "ceiling": 10
+            },
+            "transitions": []
+          }
+        ],
+        "consume": {
+          "grant_id": "G2",
+          "grant_epoch": 1,
+          "capacity_domain": "C1",
+          "at": 7,
+          "evidence": {
+            "expiry": true,
+            "lifecycle": true,
+            "capacity": true
+          },
+          "observed_outcome": "admit"
+        }
+      },
+      "expected": {
+        "historical_check_status": "satisfied",
+        "current_authorization_status": "violated",
+        "observed_consumption_outcome": "admit",
+        "required_consumption_outcome": "reject",
+        "consumption_conformance_status": "violated",
+        "historical_components": {
+          "expiry": "satisfied",
+          "lifecycle": "satisfied",
+          "capacity": "satisfied"
+        },
+        "current_components": {},
+        "reason_codes": [
+          "GRANT_IDENTITY_MISMATCH"
+        ]
+      }
+    },
+    {
+      "case_id": "P18_CONSUMED_GRANT_EPOCH_MISMATCH",
+      "inputs": {
+        "grant_id": "G1",
+        "grant_epoch": 1,
+        "amount": 6,
+        "check_at": 5,
+        "grants": [
+          {
+            "grant_id": "G1",
+            "grant_epoch": 1,
+            "activated_at": 0,
+            "expiry": 10,
+            "capacity_domain": "C1"
+          }
+        ],
+        "lifecycle_transitions": [],
+        "capacities": [
+          {
+            "domain_id": "C1",
+            "initial": {
+              "state_version": 7,
+              "used": 0,
+              "ceiling": 10
+            },
+            "transitions": []
+          }
+        ],
+        "consume": {
+          "grant_id": "G1",
+          "grant_epoch": 2,
+          "capacity_domain": "C1",
+          "at": 7,
+          "evidence": {
+            "expiry": true,
+            "lifecycle": true,
+            "capacity": true
+          },
+          "observed_outcome": "admit"
+        }
+      },
+      "expected": {
+        "historical_check_status": "satisfied",
+        "current_authorization_status": "violated",
+        "observed_consumption_outcome": "admit",
+        "required_consumption_outcome": "reject",
+        "consumption_conformance_status": "violated",
+        "historical_components": {
+          "expiry": "satisfied",
+          "lifecycle": "satisfied",
+          "capacity": "satisfied"
+        },
+        "current_components": {},
+        "reason_codes": [
+          "GRANT_IDENTITY_MISMATCH"
+        ]
+      }
+    },
+    {
+      "case_id": "P19_CONSUMED_CAPACITY_DOMAIN_MISMATCH",
+      "inputs": {
+        "grant_id": "G1",
+        "grant_epoch": 1,
+        "amount": 6,
+        "check_at": 5,
+        "grants": [
+          {
+            "grant_id": "G1",
+            "grant_epoch": 1,
+            "activated_at": 0,
+            "expiry": 10,
+            "capacity_domain": "C1"
+          }
+        ],
+        "lifecycle_transitions": [],
+        "capacities": [
+          {
+            "domain_id": "C1",
+            "initial": {
+              "state_version": 7,
+              "used": 0,
+              "ceiling": 10
+            },
+            "transitions": []
+          }
+        ],
+        "consume": {
+          "grant_id": "G1",
+          "grant_epoch": 1,
+          "capacity_domain": "C2",
+          "at": 7,
+          "evidence": {
+            "expiry": true,
+            "lifecycle": true,
+            "capacity": true
+          },
+          "observed_outcome": "admit"
+        }
+      },
+      "expected": {
+        "historical_check_status": "satisfied",
+        "current_authorization_status": "violated",
+        "observed_consumption_outcome": "admit",
+        "required_consumption_outcome": "reject",
+        "consumption_conformance_status": "violated",
+        "historical_components": {
+          "expiry": "satisfied",
+          "lifecycle": "satisfied",
+          "capacity": "satisfied"
+        },
+        "current_components": {},
+        "reason_codes": [
+          "CAPACITY_DOMAIN_MISMATCH"
+        ]
+      }
+    },
+    {
+      "case_id": "P20_VIOLATION_OUTRANKS_UNKNOWN",
+      "inputs": {
+        "grant_id": "G1",
+        "grant_epoch": 1,
+        "amount": 6,
+        "check_at": 5,
+        "grants": [
+          {
+            "grant_id": "G1",
+            "grant_epoch": 1,
+            "activated_at": 0,
+            "expiry": 10,
+            "capacity_domain": "C1"
+          }
+        ],
+        "lifecycle_transitions": [
+          {
+            "grant_id": "G1",
+            "grant_epoch": 1,
+            "kind": "revoked",
+            "at": 6
+          }
+        ],
+        "capacities": [
+          {
+            "domain_id": "C1",
+            "initial": {
+              "state_version": 7,
+              "used": 0,
+              "ceiling": 10
+            },
+            "transitions": []
+          }
+        ],
+        "consume": {
+          "grant_id": "G1",
+          "grant_epoch": 1,
+          "capacity_domain": "C1",
+          "at": 7,
+          "evidence": {
+            "expiry": true,
+            "lifecycle": true,
+            "capacity": false
+          },
+          "observed_outcome": "reject"
+        }
+      },
+      "expected": {
+        "historical_check_status": "satisfied",
+        "current_authorization_status": "violated",
+        "observed_consumption_outcome": "reject",
+        "required_consumption_outcome": "reject",
+        "consumption_conformance_status": "satisfied",
+        "historical_components": {
+          "expiry": "satisfied",
+          "lifecycle": "satisfied",
+          "capacity": "satisfied"
+        },
+        "current_components": {
+          "expiry": "satisfied",
+          "lifecycle": "violated",
+          "capacity": "cannot_establish"
+        },
+        "reason_codes": [
+          "CURRENT_CAPACITY_CANNOT_ESTABLISH",
+          "CURRENT_EXPIRY_SATISFIED",
+          "CURRENT_LIFECYCLE_VIOLATED",
+          "HISTORICAL_AUTHORIZATION_ESTABLISHED"
+        ]
+      }
+    },
+    {
+      "case_id": "P21_CONFLICTING_LIFECYCLE_EVIDENCE",
+      "inputs": {
+        "grant_id": "G1",
+        "grant_epoch": 1,
+        "amount": 6,
+        "check_at": 5,
+        "grants": [
+          {
+            "grant_id": "G1",
+            "grant_epoch": 1,
+            "activated_at": 0,
+            "expiry": 10,
+            "capacity_domain": "C1"
+          }
+        ],
+        "lifecycle_transitions": [
+          {
+            "grant_id": "G1",
+            "grant_epoch": 1,
+            "kind": "revoked",
+            "at": 6
+          },
+          {
+            "grant_id": "G1",
+            "grant_epoch": 1,
+            "kind": "superseded",
+            "at": 7
+          }
+        ],
+        "capacities": [
+          {
+            "domain_id": "C1",
+            "initial": {
+              "state_version": 7,
+              "used": 0,
+              "ceiling": 10
+            },
+            "transitions": []
+          }
+        ],
+        "consume": {
+          "grant_id": "G1",
+          "grant_epoch": 1,
+          "capacity_domain": "C1",
+          "at": 7,
+          "evidence": {
+            "expiry": true,
+            "lifecycle": true,
+            "capacity": true
+          },
+          "observed_outcome": "reject"
+        }
+      },
+      "expected": {
+        "historical_check_status": "satisfied",
+        "current_authorization_status": "cannot_establish",
+        "observed_consumption_outcome": "reject",
+        "required_consumption_outcome": "reject",
+        "consumption_conformance_status": "satisfied",
+        "historical_components": {
+          "expiry": "satisfied",
+          "lifecycle": "satisfied",
+          "capacity": "satisfied"
+        },
+        "current_components": {
+          "expiry": "satisfied",
+          "lifecycle": "cannot_establish",
+          "capacity": "satisfied"
+        },
+        "reason_codes": [
+          "CURRENT_CAPACITY_SATISFIED",
+          "CURRENT_EXPIRY_SATISFIED",
+          "CURRENT_LIFECYCLE_CANNOT_ESTABLISH",
+          "HISTORICAL_AUTHORIZATION_ESTABLISHED"
+        ]
+      }
+    },
+    {
+      "case_id": "P22_CONTROL_NO_CAPACITY_REQUIREMENT",
+      "inputs": {
+        "grant_id": "G1",
+        "grant_epoch": 1,
+        "amount": 6,
+        "check_at": 5,
+        "grants": [
+          {
+            "grant_id": "G1",
+            "grant_epoch": 1,
+            "activated_at": 0,
+            "expiry": 10,
+            "capacity_domain": null
+          }
+        ],
+        "lifecycle_transitions": [],
+        "capacities": [],
+        "consume": {
+          "grant_id": "G1",
+          "grant_epoch": 1,
+          "capacity_domain": null,
+          "at": 7,
+          "evidence": {
+            "expiry": true,
+            "lifecycle": true,
+            "capacity": false
+          },
+          "observed_outcome": "admit"
+        }
+      },
+      "expected": {
+        "historical_check_status": "satisfied",
+        "current_authorization_status": "satisfied",
+        "observed_consumption_outcome": "admit",
+        "required_consumption_outcome": "admit",
+        "consumption_conformance_status": "satisfied",
+        "historical_components": {
+          "expiry": "satisfied",
+          "lifecycle": "satisfied",
+          "capacity": "satisfied"
+        },
+        "current_components": {
+          "expiry": "satisfied",
+          "lifecycle": "satisfied",
+          "capacity": "satisfied"
+        },
+        "reason_codes": [
+          "CURRENT_CAPACITY_SATISFIED",
+          "CURRENT_EXPIRY_SATISFIED",
+          "CURRENT_LIFECYCLE_SATISFIED",
+          "HISTORICAL_AUTHORIZATION_ESTABLISHED"
+        ]
+      }
+    }
+  ]
+}
