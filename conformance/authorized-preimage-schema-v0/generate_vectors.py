@@ -1,0 +1,150 @@
+#!/usr/bin/env python3
+"""Deterministically (re)generate vectors.json for authorized_preimage_schema.v0.
+
+    python3 generate_vectors.py --registry registry_extract.json   # first time: registry from the issuer
+    python3 generate_vectors.py                                    # later: reuse the pinned registry in vectors.json
+
+The signing key is a PUBLISHED TEST KEY derived from a fixed label. It authorizes nothing anywhere.
+Signatures are BIP-340 with all-zero auxiliary randomness, so regeneration is byte-identical.
+"""
+
+import hashlib
+import json
+from pathlib import Path
+import sys
+
+import schema_check as sc
+
+HERE = Path(__file__).resolve().parent
+KEY_LABEL = b"recompute-kit/authorized-preimage-schema-v0/test-key/not-a-real-key"
+SECKEY = int.from_bytes(hashlib.sha256(KEY_LABEL).digest(), "big") % sc.ORDER
+CREATED_AT = 1789900000
+NULL_FIELDS = {"related_decision_ref", "registry_as_of", "registry_snapshot_sha256", "epistemic_basis",
+               "external_evidence_hash", "vantage_limitation", "intended_audience", "intended_verifier"}
+
+
+def schnorr_sign(message, seckey):
+    point = sc.point_mul(sc.BASE, seckey)
+    d = seckey if point[1] % 2 == 0 else sc.ORDER - seckey
+    t = (d ^ int.from_bytes(sc.tagged_hash("BIP0340/aux", bytes(32)), "big")).to_bytes(32, "big")
+    x = point[0].to_bytes(32, "big")
+    k0 = int.from_bytes(sc.tagged_hash("BIP0340/nonce", t + x + message), "big") % sc.ORDER
+    r_point = sc.point_mul(sc.BASE, k0)
+    k = k0 if r_point[1] % 2 == 0 else sc.ORDER - k0
+    r = r_point[0].to_bytes(32, "big")
+    e = int.from_bytes(sc.tagged_hash("BIP0340/challenge", r + x + message), "big") % sc.ORDER
+    return r + ((k + e * d) % sc.ORDER).to_bytes(32, "big")
+
+
+PUBKEY = sc.point_mul(sc.BASE, SECKEY)[0].to_bytes(32, "big").hex()
+
+
+def field_value(name, version):
+    if name == "policy_version":
+        return version
+    if name == "verdict":
+        return "approve"
+    if name == "artifact_type":
+        return "code_diff"
+    if name == "canonicalization_version":
+        return "rfc8785.v1"
+    if name in NULL_FIELDS:
+        return None
+    return "example:" + name
+
+
+def make_event(case_id, index, version, declared, hashed_names, universe, overrides=None, tamper=None):
+    """A signed NIP-01 event whose content carries every field in `universe`, the declared list as given,
+    and a decision_ref computed over `hashed_names` (what an honest producer of THAT declaration hashed)."""
+    content = {name: field_value(name, version) for name in universe}
+    content.update(overrides or {})
+    content["policy_version"] = version
+    content["decision_ref_preimage_fields"] = declared
+    if hashed_names is not None:
+        preimage = {name: content.get(name) for name in hashed_names}
+        content["decision_ref"] = "sha256:" + hashlib.sha256(sc.canonical(preimage)).hexdigest()
+    if tamper == "decision_ref":
+        content["decision_ref"] = "sha256:" + hashlib.sha256(b"a different preimage").hexdigest()
+    if tamper == "unhashable":
+        content["decision_ref"] = "sha256:" + "00" * 32
+    body = json.dumps(content, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    tags = [["d", "authorized-preimage-schema-v0/" + case_id]]
+    created = CREATED_AT + index
+    serialized = json.dumps([0, PUBKEY, created, 30078, tags, body], separators=(",", ":"), ensure_ascii=False)
+    digest = hashlib.sha256(serialized.encode("utf-8")).digest()
+    signature = schnorr_sign(digest, SECKEY).hex()
+    if tamper == "signature":
+        signature = signature[:-1] + ("0" if signature[-1] != "0" else "1")
+    return {"id": digest.hex(), "pubkey": PUBKEY, "created_at": created, "kind": 30078, "tags": tags,
+            "content": body, "sig": signature}
+
+
+def main():
+    path = HERE / "vectors.json"
+    if "--registry" in sys.argv:
+        extract = json.loads(Path(sys.argv[sys.argv.index("--registry") + 1]).read_text(encoding="utf-8"))
+        registry, current = extract["registry"], extract["current"]
+    else:
+        old = json.loads(path.read_text(encoding="utf-8"))
+        registry, current = old["registry"], old["current_policy_version"]
+    current_set = sorted(registry["states"][current][0])
+    v18_a, v18_b = registry["states"]["invinoveritas.review.v18"]
+    universe = sorted(set(current_set) | set(v18_a) | set(v18_b) | {"x_unregistered_field"})
+    reduced = [n for n in current_set if n != "action_binding_args_hash"]
+    ids = iter(range(1000))
+
+    def case(case_id, purpose, version, declared, hashed, observed, overrides=None, tamper=None):
+        event = make_event(case_id, next(ids), version, declared, hashed, universe, overrides, tamper)
+        entry = {"case_id": case_id, "purpose": purpose,
+                 "inputs": {"event": event, "observed_verification_outcome": observed}}
+        entry["expected"] = sc.evaluate(entry, registry, PUBKEY)
+        return entry
+
+    cases = [
+        case("A1_CONTROL_CURRENT_AUTHORIZED", "Current version, full registered set, valid signature: accept.",
+             current, current_set, current_set, "accept"),
+        case("A2_REORDERED_DECLARED_LIST_SAME_SET", "Reordering a registered set preserves authorization.",
+             current, list(reversed(current_set)), current_set, "accept"),
+        case("A3_V18_REGISTERED_STATE_1", "Historical control: one policy version, first of two registered states.",
+             "invinoveritas.review.v18", sorted(v18_a), v18_a, "accept"),
+        case("A4_V18_REGISTERED_STATE_2", "Historical control: the second registered state of the same version; "
+             "accepted only because the registry authorizes it (no one-version-one-schema assumption).",
+             "invinoveritas.review.v18", sorted(v18_b), v18_b, "accept"),
+        case("A5_CORE_NEGATIVE_CORRECTLY_REJECTED", "The core negative, judged by a verifier that rejects it: satisfied.",
+             current, reduced, reduced, "reject"),
+        case("N1_SELF_CONSISTENT_REDUCED_PREIMAGE", "Valid signature + self-consistent reduced preimage + "
+             "recomputable decision_ref != authorized preimage schema. Observed accept is a fail-open.",
+             current, reduced, reduced, "accept"),
+        case("N2_SUPERSET_WITH_UNREGISTERED_FIELD", "Authorized set plus one unregistered name is not a registered set.",
+             current, current_set + ["x_unregistered_field"], current_set + ["x_unregistered_field"], "accept"),
+        case("N3_UNREGISTERED_POLICY_VERSION", "No registry entry for the version: preimage_schema_status is "
+             "cannot_establish (epistemic) while the required outcome is reject (operational).",
+             "vendor.review.v999", current_set, current_set, "accept"),
+        case("N4_DUPLICATE_NAME_MALFORMED", "A repeated name is malformed, not silently deduped.",
+             current, current_set + [current_set[0]], current_set, "accept"),
+        case("N5_NON_STRING_ENTRY_MALFORMED", "A non-string entry is malformed, not coerced or dropped.",
+             current, current_set + [7], current_set, "accept"),
+        case("N6_NON_LIST_DECLARATION_MALFORMED", "A declaration that is not a list is malformed.",
+             current, {"verdict": True}, current_set, "accept"),
+        case("N7_RECOMPUTE_FAILURE_MUST_NOT_BYPASS_AUTHORIZATION", "Recompute cannot be established (unsupported "
+             "preimage value) on an unauthorized set: authorization must still gate the outcome.",
+             current, reduced, None, "accept", overrides={"artifact_type": 0.5}, tamper="unhashable"),
+        case("N8_DECISION_REF_TAMPERED", "Authorized set, valid signature, decision_ref does not recompute.",
+             current, current_set, current_set, "accept", tamper="decision_ref"),
+        case("N9_SIGNATURE_INVALID_ISOLATED", "Everything else authorized and recomputable; only the signature "
+             "is invalid. Shows the dimensions are independent.",
+             current, current_set, current_set, "accept", tamper="signature"),
+        case("N10_CURRENT_SET_UNDER_OLD_VERSION", "The current field set declared under v1: authority is per the "
+             "proof's OWN policy_version, not any version.",
+             "invinoveritas.review.v1", current_set, current_set, "accept"),
+    ]
+    document = {"profile": sc.PROFILE, "trusted_pubkey": PUBKEY, "test_key_label": KEY_LABEL.decode(),
+                "current_policy_version": current, "registry": registry,
+                "registry_sha256": sc.registry_digest(registry), "cases": cases}
+    path.write_text(json.dumps(document, sort_keys=True, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    print(json.dumps({"cases": len(cases), "registry_sha256": document["registry_sha256"], "pubkey": PUBKEY}))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

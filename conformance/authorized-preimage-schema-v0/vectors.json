@@ -1,0 +1,864 @@
+{
+  "cases": [
+    {
+      "case_id": "A1_CONTROL_CURRENT_AUTHORIZED",
+      "expected": {
+        "decision_ref_recompute_status": "satisfied",
+        "observed_verification_outcome": "accept",
+        "preimage_schema_status": "satisfied",
+        "reason_codes": [
+          "DECISION_REF_RECOMPUTED",
+          "DECLARED_SET_REGISTERED",
+          "SIGNATURE_VALID"
+        ],
+        "required_verification_outcome": "accept",
+        "signature_status": "satisfied",
+        "verification_status": "satisfied"
+      },
+      "inputs": {
+        "event": {
+          "content": "{\"action_binding_agent_id\":\"example:action_binding_agent_id\",\"action_binding_args_hash\":\"example:action_binding_args_hash\",\"action_binding_nonce\":\"example:action_binding_nonce\",\"action_binding_tool_hash\":\"example:action_binding_tool_hash\",\"artifact_hash\":\"example:artifact_hash\",\"artifact_type\":\"code_diff\",\"canonicalization_version\":\"rfc8785.v1\",\"confidentiality_tier\":\"example:confidentiality_tier\",\"decision_ref\":\"sha256:c86ce45746ab85446712958cb5b0540d03b0929c0c2b1a8eae7cb8225cd7f275\",\"decision_ref_preimage_fields\":[\"action_binding_agent_id\",\"action_binding_args_hash\",\"action_binding_nonce\",\"action_binding_tool_hash\",\"artifact_hash\",\"artifact_type\",\"canonicalization_version\",\"confidentiality_tier\",\"disclosed_summary\",\"epistemic_basis\",\"external_evidence_hash\",\"freshness_beacon_hash\",\"intended_audience\",\"intended_verifier\",\"policy_commitment\",\"policy_version\",\"registry_as_of\",\"registry_snapshot_sha256\",\"related_decision_ref\",\"source_class\",\"vantage_limitation\",\"verdict\",\"verified_at\"],\"disclosed_summary\":\"example:disclosed_summary\",\"epistemic_basis\":null,\"external_evidence_hash\":null,\"freshness_beacon_hash\":\"example:freshness_beacon_hash\",\"intended_audience\":null,\"intended_verifier\":null,\"policy_commitment\":\"example:policy_commitment\",\"policy_version\":\"invinoveritas.review.v19\",\"registry_as_of\":null,\"registry_snapshot_sha256\":null,\"related_decision_ref\":null,\"source_class\":\"example:source_class\",\"vantage_limitation\":null,\"verdict\":\"approve\",\"verified_at\":\"example:verified_at\",\"x_unregistered_field\":\"example:x_unregistered_field\"}",
+          "created_at": 1789900000,
+          "id": "88e73f92f3c15420ac477f91c697df189398261f28b23bede5e090e0969cef62",
+          "kind": 30078,
+          "pubkey": "a04b2492ce64234bdcfa5f191492c58dee16469f6675faaba6f2381b296a5ad8",
+          "sig": "931201f2a3d5b6863010f3359fe07e681732000c497ac4ecb59343a74842c73332b73b972c34151d564a3d0a8f5c2800ce46255cc2884b21aa649ef309800f3f",
+          "tags": [
+            [
+              "d",
+              "authorized-preimage-schema-v0/A1_CONTROL_CURRENT_AUTHORIZED"
+            ]
+          ]
+        },
+        "observed_verification_outcome": "accept"
+      },
+      "purpose": "Current version, full registered set, valid signature: accept."
+    },
+    {
+      "case_id": "A2_REORDERED_DECLARED_LIST_SAME_SET",
+      "expected": {
+        "decision_ref_recompute_status": "satisfied",
+        "observed_verification_outcome": "accept",
+        "preimage_schema_status": "satisfied",
+        "reason_codes": [
+          "DECISION_REF_RECOMPUTED",
+          "DECLARED_SET_REGISTERED",
+          "SIGNATURE_VALID"
+        ],
+        "required_verification_outcome": "accept",
+        "signature_status": "satisfied",
+        "verification_status": "satisfied"
+      },
+      "inputs": {
+        "event": {
+          "content": "{\"action_binding_agent_id\":\"example:action_binding_agent_id\",\"action_binding_args_hash\":\"example:action_binding_args_hash\",\"action_binding_nonce\":\"example:action_binding_nonce\",\"action_binding_tool_hash\":\"example:action_binding_tool_hash\",\"artifact_hash\":\"example:artifact_hash\",\"artifact_type\":\"code_diff\",\"canonicalization_version\":\"rfc8785.v1\",\"confidentiality_tier\":\"example:confidentiality_tier\",\"decision_ref\":\"sha256:c86ce45746ab85446712958cb5b0540d03b0929c0c2b1a8eae7cb8225cd7f275\",\"decision_ref_preimage_fields\":[\"verified_at\",\"verdict\",\"vantage_limitation\",\"source_class\",\"related_decision_ref\",\"registry_snapshot_sha256\",\"registry_as_of\",\"policy_version\",\"policy_commitment\",\"intended_verifier\",\"intended_audience\",\"freshness_beacon_hash\",\"external_evidence_hash\",\"epistemic_basis\",\"disclosed_summary\",\"confidentiality_tier\",\"canonicalization_version\",\"artifact_type\",\"artifact_hash\",\"action_binding_tool_hash\",\"action_binding_nonce\",\"action_binding_args_hash\",\"action_binding_agent_id\"],\"disclosed_summary\":\"example:disclosed_summary\",\"epistemic_basis\":null,\"external_evidence_hash\":null,\"freshness_beacon_hash\":\"example:freshness_beacon_hash\",\"intended_audience\":null,\"intended_verifier\":null,\"policy_commitment\":\"example:policy_commitment\",\"policy_version\":\"invinoveritas.review.v19\",\"registry_as_of\":null,\"registry_snapshot_sha256\":null,\"related_decision_ref\":null,\"source_class\":\"example:source_class\",\"vantage_limitation\":null,\"verdict\":\"approve\",\"verified_at\":\"example:verified_at\",\"x_unregistered_field\":\"example:x_unregistered_field\"}",
+          "created_at": 1789900001,
+          "id": "57b7caf746018224da0f360e689e4c7abc9b80f2884132277947af1f46d2e5d1",
+          "kind": 30078,
+          "pubkey": "a04b2492ce64234bdcfa5f191492c58dee16469f6675faaba6f2381b296a5ad8",
+          "sig": "7b26662ba9b290536dac7243c089853a6784b71ff7050dac97180f112e85112c848b044bd693a75eac7eb58a002d26b9a0b3963202ecb69679040953d66aa723",
+          "tags": [
+            [
+              "d",
+              "authorized-preimage-schema-v0/A2_REORDERED_DECLARED_LIST_SAME_SET"
+            ]
+          ]
+        },
+        "observed_verification_outcome": "accept"
+      },
+      "purpose": "Reordering a registered set preserves authorization."
+    },
+    {
+      "case_id": "A3_V18_REGISTERED_STATE_1",
+      "expected": {
+        "decision_ref_recompute_status": "satisfied",
+        "observed_verification_outcome": "accept",
+        "preimage_schema_status": "satisfied",
+        "reason_codes": [
+          "DECISION_REF_RECOMPUTED",
+          "DECLARED_SET_REGISTERED",
+          "SIGNATURE_VALID"
+        ],
+        "required_verification_outcome": "accept",
+        "signature_status": "satisfied",
+        "verification_status": "satisfied"
+      },
+      "inputs": {
+        "event": {
+          "content": "{\"action_binding_agent_id\":\"example:action_binding_agent_id\",\"action_binding_args_hash\":\"example:action_binding_args_hash\",\"action_binding_nonce\":\"example:action_binding_nonce\",\"action_binding_tool_hash\":\"example:action_binding_tool_hash\",\"artifact_hash\":\"example:artifact_hash\",\"artifact_type\":\"code_diff\",\"canonicalization_version\":\"rfc8785.v1\",\"confidentiality_tier\":\"example:confidentiality_tier\",\"decision_ref\":\"sha256:83ccbdb8814fe01284f6f2da9084d30349a62eece9514da02f50d609a2cbfb54\",\"decision_ref_preimage_fields\":[\"action_binding_agent_id\",\"action_binding_args_hash\",\"action_binding_nonce\",\"action_binding_tool_hash\",\"artifact_hash\",\"artifact_type\",\"confidentiality_tier\",\"disclosed_summary\",\"epistemic_basis\",\"external_evidence_hash\",\"freshness_beacon_hash\",\"intended_audience\",\"intended_verifier\",\"policy_commitment\",\"policy_version\",\"registry_as_of\",\"registry_snapshot_sha256\",\"related_decision_ref\",\"source_class\",\"vantage_limitation\",\"verdict\",\"verified_at\"],\"disclosed_summary\":\"example:disclosed_summary\",\"epistemic_basis\":null,\"external_evidence_hash\":null,\"freshness_beacon_hash\":\"example:freshness_beacon_hash\",\"intended_audience\":null,\"intended_verifier\":null,\"policy_commitment\":\"example:policy_commitment\",\"policy_version\":\"invinoveritas.review.v18\",\"registry_as_of\":null,\"registry_snapshot_sha256\":null,\"related_decision_ref\":null,\"source_class\":\"example:source_class\",\"vantage_limitation\":null,\"verdict\":\"approve\",\"verified_at\":\"example:verified_at\",\"x_unregistered_field\":\"example:x_unregistered_field\"}",
+          "created_at": 1789900002,
+          "id": "351e7bf84541924a10101a4f8bb415e439ea2578bfd0132c01a0ac57e0875fd8",
+          "kind": 30078,
+          "pubkey": "a04b2492ce64234bdcfa5f191492c58dee16469f6675faaba6f2381b296a5ad8",
+          "sig": "6e6536a9336b29f34c6f1149258062022257c5a25b88e280fe0e28b86766a9f0f100d73c2be42bc9b638dbf9f859714bcc999f38859626f9699164238047ea30",
+          "tags": [
+            [
+              "d",
+              "authorized-preimage-schema-v0/A3_V18_REGISTERED_STATE_1"
+            ]
+          ]
+        },
+        "observed_verification_outcome": "accept"
+      },
+      "purpose": "Historical control: one policy version, first of two registered states."
+    },
+    {
+      "case_id": "A4_V18_REGISTERED_STATE_2",
+      "expected": {
+        "decision_ref_recompute_status": "satisfied",
+        "observed_verification_outcome": "accept",
+        "preimage_schema_status": "satisfied",
+        "reason_codes": [
+          "DECISION_REF_RECOMPUTED",
+          "DECLARED_SET_REGISTERED",
+          "SIGNATURE_VALID"
+        ],
+        "required_verification_outcome": "accept",
+        "signature_status": "satisfied",
+        "verification_status": "satisfied"
+      },
+      "inputs": {
+        "event": {
+          "content": "{\"action_binding_agent_id\":\"example:action_binding_agent_id\",\"action_binding_args_hash\":\"example:action_binding_args_hash\",\"action_binding_nonce\":\"example:action_binding_nonce\",\"action_binding_tool_hash\":\"example:action_binding_tool_hash\",\"artifact_hash\":\"example:artifact_hash\",\"artifact_type\":\"code_diff\",\"canonicalization_version\":\"rfc8785.v1\",\"confidentiality_tier\":\"example:confidentiality_tier\",\"decision_ref\":\"sha256:42baf2f15bcd7230b63c03d0add9068ad94667a1e043b95cea30e4c37f8aa671\",\"decision_ref_preimage_fields\":[\"action_binding_agent_id\",\"action_binding_args_hash\",\"action_binding_nonce\",\"action_binding_tool_hash\",\"artifact_hash\",\"artifact_type\",\"confidentiality_tier\",\"disclosed_summary\",\"epistemic_basis\",\"freshness_beacon_hash\",\"intended_audience\",\"intended_verifier\",\"policy_commitment\",\"policy_version\",\"registry_as_of\",\"registry_snapshot_sha256\",\"related_decision_ref\",\"source_class\",\"vantage_limitation\",\"verdict\",\"verified_at\"],\"disclosed_summary\":\"example:disclosed_summary\",\"epistemic_basis\":null,\"external_evidence_hash\":null,\"freshness_beacon_hash\":\"example:freshness_beacon_hash\",\"intended_audience\":null,\"intended_verifier\":null,\"policy_commitment\":\"example:policy_commitment\",\"policy_version\":\"invinoveritas.review.v18\",\"registry_as_of\":null,\"registry_snapshot_sha256\":null,\"related_decision_ref\":null,\"source_class\":\"example:source_class\",\"vantage_limitation\":null,\"verdict\":\"approve\",\"verified_at\":\"example:verified_at\",\"x_unregistered_field\":\"example:x_unregistered_field\"}",
+          "created_at": 1789900003,
+          "id": "81ffd59ee64d802b95c834670bec3aa372738807457f754980a961c533c47a27",
+          "kind": 30078,
+          "pubkey": "a04b2492ce64234bdcfa5f191492c58dee16469f6675faaba6f2381b296a5ad8",
+          "sig": "866400f0fa9a70a89d63ced1cb48434d969090f0368710c027d1bb9712f5f26d34bdef4a79bf07944cc342f0b2fe5621cbe07092306e095c8e684407a8c4b079",
+          "tags": [
+            [
+              "d",
+              "authorized-preimage-schema-v0/A4_V18_REGISTERED_STATE_2"
+            ]
+          ]
+        },
+        "observed_verification_outcome": "accept"
+      },
+      "purpose": "Historical control: the second registered state of the same version; accepted only because the registry authorizes it (no one-version-one-schema assumption)."
+    },
+    {
+      "case_id": "A5_CORE_NEGATIVE_CORRECTLY_REJECTED",
+      "expected": {
+        "decision_ref_recompute_status": "satisfied",
+        "observed_verification_outcome": "reject",
+        "preimage_schema_status": "violated",
+        "reason_codes": [
+          "DECISION_REF_RECOMPUTED",
+          "DECLARED_SET_NOT_REGISTERED_FOR_VERSION",
+          "SIGNATURE_VALID"
+        ],
+        "required_verification_outcome": "reject",
+        "signature_status": "satisfied",
+        "verification_status": "satisfied"
+      },
+      "inputs": {
+        "event": {
+          "content": "{\"action_binding_agent_id\":\"example:action_binding_agent_id\",\"action_binding_args_hash\":\"example:action_binding_args_hash\",\"action_binding_nonce\":\"example:action_binding_nonce\",\"action_binding_tool_hash\":\"example:action_binding_tool_hash\",\"artifact_hash\":\"example:artifact_hash\",\"artifact_type\":\"code_diff\",\"canonicalization_version\":\"rfc8785.v1\",\"confidentiality_tier\":\"example:confidentiality_tier\",\"decision_ref\":\"sha256:6cd11feb64aa2885bfaf1391f42a0623fb0922f699b16097600e22167f1da41a\",\"decision_ref_preimage_fields\":[\"action_binding_agent_id\",\"action_binding_nonce\",\"action_binding_tool_hash\",\"artifact_hash\",\"artifact_type\",\"canonicalization_version\",\"confidentiality_tier\",\"disclosed_summary\",\"epistemic_basis\",\"external_evidence_hash\",\"freshness_beacon_hash\",\"intended_audience\",\"intended_verifier\",\"policy_commitment\",\"policy_version\",\"registry_as_of\",\"registry_snapshot_sha256\",\"related_decision_ref\",\"source_class\",\"vantage_limitation\",\"verdict\",\"verified_at\"],\"disclosed_summary\":\"example:disclosed_summary\",\"epistemic_basis\":null,\"external_evidence_hash\":null,\"freshness_beacon_hash\":\"example:freshness_beacon_hash\",\"intended_audience\":null,\"intended_verifier\":null,\"policy_commitment\":\"example:policy_commitment\",\"policy_version\":\"invinoveritas.review.v19\",\"registry_as_of\":null,\"registry_snapshot_sha256\":null,\"related_decision_ref\":null,\"source_class\":\"example:source_class\",\"vantage_limitation\":null,\"verdict\":\"approve\",\"verified_at\":\"example:verified_at\",\"x_unregistered_field\":\"example:x_unregistered_field\"}",
+          "created_at": 1789900004,
+          "id": "e4c9fc7d5bb3086d4cb51791b90538d41c99810eeb7f06b3358e1658ed81a529",
+          "kind": 30078,
+          "pubkey": "a04b2492ce64234bdcfa5f191492c58dee16469f6675faaba6f2381b296a5ad8",
+          "sig": "fc431793a31335c20453f03351ddb54c11af6fd72237d62b783235b20dea02b4a598bb70de7a7c3d0d4fa8f9f7a64366ab1665fc5dbeddbcf78d72a2392777c4",
+          "tags": [
+            [
+              "d",
+              "authorized-preimage-schema-v0/A5_CORE_NEGATIVE_CORRECTLY_REJECTED"
+            ]
+          ]
+        },
+        "observed_verification_outcome": "reject"
+      },
+      "purpose": "The core negative, judged by a verifier that rejects it: satisfied."
+    },
+    {
+      "case_id": "N1_SELF_CONSISTENT_REDUCED_PREIMAGE",
+      "expected": {
+        "decision_ref_recompute_status": "satisfied",
+        "observed_verification_outcome": "accept",
+        "preimage_schema_status": "violated",
+        "reason_codes": [
+          "DECISION_REF_RECOMPUTED",
+          "DECLARED_SET_NOT_REGISTERED_FOR_VERSION",
+          "SIGNATURE_VALID"
+        ],
+        "required_verification_outcome": "reject",
+        "signature_status": "satisfied",
+        "verification_status": "violated"
+      },
+      "inputs": {
+        "event": {
+          "content": "{\"action_binding_agent_id\":\"example:action_binding_agent_id\",\"action_binding_args_hash\":\"example:action_binding_args_hash\",\"action_binding_nonce\":\"example:action_binding_nonce\",\"action_binding_tool_hash\":\"example:action_binding_tool_hash\",\"artifact_hash\":\"example:artifact_hash\",\"artifact_type\":\"code_diff\",\"canonicalization_version\":\"rfc8785.v1\",\"confidentiality_tier\":\"example:confidentiality_tier\",\"decision_ref\":\"sha256:6cd11feb64aa2885bfaf1391f42a0623fb0922f699b16097600e22167f1da41a\",\"decision_ref_preimage_fields\":[\"action_binding_agent_id\",\"action_binding_nonce\",\"action_binding_tool_hash\",\"artifact_hash\",\"artifact_type\",\"canonicalization_version\",\"confidentiality_tier\",\"disclosed_summary\",\"epistemic_basis\",\"external_evidence_hash\",\"freshness_beacon_hash\",\"intended_audience\",\"intended_verifier\",\"policy_commitment\",\"policy_version\",\"registry_as_of\",\"registry_snapshot_sha256\",\"related_decision_ref\",\"source_class\",\"vantage_limitation\",\"verdict\",\"verified_at\"],\"disclosed_summary\":\"example:disclosed_summary\",\"epistemic_basis\":null,\"external_evidence_hash\":null,\"freshness_beacon_hash\":\"example:freshness_beacon_hash\",\"intended_audience\":null,\"intended_verifier\":null,\"policy_commitment\":\"example:policy_commitment\",\"policy_version\":\"invinoveritas.review.v19\",\"registry_as_of\":null,\"registry_snapshot_sha256\":null,\"related_decision_ref\":null,\"source_class\":\"example:source_class\",\"vantage_limitation\":null,\"verdict\":\"approve\",\"verified_at\":\"example:verified_at\",\"x_unregistered_field\":\"example:x_unregistered_field\"}",
+          "created_at": 1789900005,
+          "id": "4eb30144c01562d8e53433ec6acdf9d9937046f81c413348ec82f863855861c4",
+          "kind": 30078,
+          "pubkey": "a04b2492ce64234bdcfa5f191492c58dee16469f6675faaba6f2381b296a5ad8",
+          "sig": "51def920628609109148a6b599b23f6b9a6c5c26e86b99c8210f0f92bb089424104626c9f63ee3d1a1601459a8453899a7b55bfae0df8183f3e04eba54244136",
+          "tags": [
+            [
+              "d",
+              "authorized-preimage-schema-v0/N1_SELF_CONSISTENT_REDUCED_PREIMAGE"
+            ]
+          ]
+        },
+        "observed_verification_outcome": "accept"
+      },
+      "purpose": "Valid signature + self-consistent reduced preimage + recomputable decision_ref != authorized preimage schema. Observed accept is a fail-open."
+    },
+    {
+      "case_id": "N2_SUPERSET_WITH_UNREGISTERED_FIELD",
+      "expected": {
+        "decision_ref_recompute_status": "satisfied",
+        "observed_verification_outcome": "accept",
+        "preimage_schema_status": "violated",
+        "reason_codes": [
+          "DECISION_REF_RECOMPUTED",
+          "DECLARED_SET_NOT_REGISTERED_FOR_VERSION",
+          "SIGNATURE_VALID"
+        ],
+        "required_verification_outcome": "reject",
+        "signature_status": "satisfied",
+        "verification_status": "violated"
+      },
+      "inputs": {
+        "event": {
+          "content": "{\"action_binding_agent_id\":\"example:action_binding_agent_id\",\"action_binding_args_hash\":\"example:action_binding_args_hash\",\"action_binding_nonce\":\"example:action_binding_nonce\",\"action_binding_tool_hash\":\"example:action_binding_tool_hash\",\"artifact_hash\":\"example:artifact_hash\",\"artifact_type\":\"code_diff\",\"canonicalization_version\":\"rfc8785.v1\",\"confidentiality_tier\":\"example:confidentiality_tier\",\"decision_ref\":\"sha256:58f2c837de58e1c792421b195942afb4cd91f520910c4c25ab168e0264fc85c9\",\"decision_ref_preimage_fields\":[\"action_binding_agent_id\",\"action_binding_args_hash\",\"action_binding_nonce\",\"action_binding_tool_hash\",\"artifact_hash\",\"artifact_type\",\"canonicalization_version\",\"confidentiality_tier\",\"disclosed_summary\",\"epistemic_basis\",\"external_evidence_hash\",\"freshness_beacon_hash\",\"intended_audience\",\"intended_verifier\",\"policy_commitment\",\"policy_version\",\"registry_as_of\",\"registry_snapshot_sha256\",\"related_decision_ref\",\"source_class\",\"vantage_limitation\",\"verdict\",\"verified_at\",\"x_unregistered_field\"],\"disclosed_summary\":\"example:disclosed_summary\",\"epistemic_basis\":null,\"external_evidence_hash\":null,\"freshness_beacon_hash\":\"example:freshness_beacon_hash\",\"intended_audience\":null,\"intended_verifier\":null,\"policy_commitment\":\"example:policy_commitment\",\"policy_version\":\"invinoveritas.review.v19\",\"registry_as_of\":null,\"registry_snapshot_sha256\":null,\"related_decision_ref\":null,\"source_class\":\"example:source_class\",\"vantage_limitation\":null,\"verdict\":\"approve\",\"verified_at\":\"example:verified_at\",\"x_unregistered_field\":\"example:x_unregistered_field\"}",
+          "created_at": 1789900006,
+          "id": "05b408115ca8bf5d06b25bf4f0cd3fc92305f57f00221efe1dec0a3138b951f1",
+          "kind": 30078,
+          "pubkey": "a04b2492ce64234bdcfa5f191492c58dee16469f6675faaba6f2381b296a5ad8",
+          "sig": "a5b96bca28832230c4f858171d780409350ca2726fe67af3cd816eda73717b3f895f784863774f4ca5a5fc546bf0e8b94eca6ca050eabccc06bbf98fb3095d79",
+          "tags": [
+            [
+              "d",
+              "authorized-preimage-schema-v0/N2_SUPERSET_WITH_UNREGISTERED_FIELD"
+            ]
+          ]
+        },
+        "observed_verification_outcome": "accept"
+      },
+      "purpose": "Authorized set plus one unregistered name is not a registered set."
+    },
+    {
+      "case_id": "N3_UNREGISTERED_POLICY_VERSION",
+      "expected": {
+        "decision_ref_recompute_status": "satisfied",
+        "observed_verification_outcome": "accept",
+        "preimage_schema_status": "cannot_establish",
+        "reason_codes": [
+          "DECISION_REF_RECOMPUTED",
+          "POLICY_VERSION_NOT_REGISTERED",
+          "SIGNATURE_VALID"
+        ],
+        "required_verification_outcome": "reject",
+        "signature_status": "satisfied",
+        "verification_status": "violated"
+      },
+      "inputs": {
+        "event": {
+          "content": "{\"action_binding_agent_id\":\"example:action_binding_agent_id\",\"action_binding_args_hash\":\"example:action_binding_args_hash\",\"action_binding_nonce\":\"example:action_binding_nonce\",\"action_binding_tool_hash\":\"example:action_binding_tool_hash\",\"artifact_hash\":\"example:artifact_hash\",\"artifact_type\":\"code_diff\",\"canonicalization_version\":\"rfc8785.v1\",\"confidentiality_tier\":\"example:confidentiality_tier\",\"decision_ref\":\"sha256:45b86b3a7ad4ffca3d2873f764a5f8adf14d25cf174fa385e7f01079b7025bed\",\"decision_ref_preimage_fields\":[\"action_binding_agent_id\",\"action_binding_args_hash\",\"action_binding_nonce\",\"action_binding_tool_hash\",\"artifact_hash\",\"artifact_type\",\"canonicalization_version\",\"confidentiality_tier\",\"disclosed_summary\",\"epistemic_basis\",\"external_evidence_hash\",\"freshness_beacon_hash\",\"intended_audience\",\"intended_verifier\",\"policy_commitment\",\"policy_version\",\"registry_as_of\",\"registry_snapshot_sha256\",\"related_decision_ref\",\"source_class\",\"vantage_limitation\",\"verdict\",\"verified_at\"],\"disclosed_summary\":\"example:disclosed_summary\",\"epistemic_basis\":null,\"external_evidence_hash\":null,\"freshness_beacon_hash\":\"example:freshness_beacon_hash\",\"intended_audience\":null,\"intended_verifier\":null,\"policy_commitment\":\"example:policy_commitment\",\"policy_version\":\"vendor.review.v999\",\"registry_as_of\":null,\"registry_snapshot_sha256\":null,\"related_decision_ref\":null,\"source_class\":\"example:source_class\",\"vantage_limitation\":null,\"verdict\":\"approve\",\"verified_at\":\"example:verified_at\",\"x_unregistered_field\":\"example:x_unregistered_field\"}",
+          "created_at": 1789900007,
+          "id": "d09b661f58cc047abfb4f389ac5ca211cd9d09e925bc692066d3e1d9235eecfd",
+          "kind": 30078,
+          "pubkey": "a04b2492ce64234bdcfa5f191492c58dee16469f6675faaba6f2381b296a5ad8",
+          "sig": "1bc4f1b09fea57ed4cdd24cb89185e88ab5ddfd556c84aef0e9dafa35852a5a8456ce7a6d1633db7381c39217c51b1f8a761f4ef25fc9142b25ccb99a364bcd5",
+          "tags": [
+            [
+              "d",
+              "authorized-preimage-schema-v0/N3_UNREGISTERED_POLICY_VERSION"
+            ]
+          ]
+        },
+        "observed_verification_outcome": "accept"
+      },
+      "purpose": "No registry entry for the version: preimage_schema_status is cannot_establish (epistemic) while the required outcome is reject (operational)."
+    },
+    {
+      "case_id": "N4_DUPLICATE_NAME_MALFORMED",
+      "expected": {
+        "decision_ref_recompute_status": "cannot_establish",
+        "observed_verification_outcome": "accept",
+        "preimage_schema_status": "violated",
+        "reason_codes": [
+          "MALFORMED_DECLARED_LIST",
+          "RECOMPUTE_NOT_ATTEMPTED_MALFORMED_LIST",
+          "SIGNATURE_VALID"
+        ],
+        "required_verification_outcome": "reject",
+        "signature_status": "satisfied",
+        "verification_status": "violated"
+      },
+      "inputs": {
+        "event": {
+          "content": "{\"action_binding_agent_id\":\"example:action_binding_agent_id\",\"action_binding_args_hash\":\"example:action_binding_args_hash\",\"action_binding_nonce\":\"example:action_binding_nonce\",\"action_binding_tool_hash\":\"example:action_binding_tool_hash\",\"artifact_hash\":\"example:artifact_hash\",\"artifact_type\":\"code_diff\",\"canonicalization_version\":\"rfc8785.v1\",\"confidentiality_tier\":\"example:confidentiality_tier\",\"decision_ref\":\"sha256:c86ce45746ab85446712958cb5b0540d03b0929c0c2b1a8eae7cb8225cd7f275\",\"decision_ref_preimage_fields\":[\"action_binding_agent_id\",\"action_binding_args_hash\",\"action_binding_nonce\",\"action_binding_tool_hash\",\"artifact_hash\",\"artifact_type\",\"canonicalization_version\",\"confidentiality_tier\",\"disclosed_summary\",\"epistemic_basis\",\"external_evidence_hash\",\"freshness_beacon_hash\",\"intended_audience\",\"intended_verifier\",\"policy_commitment\",\"policy_version\",\"registry_as_of\",\"registry_snapshot_sha256\",\"related_decision_ref\",\"source_class\",\"vantage_limitation\",\"verdict\",\"verified_at\",\"action_binding_agent_id\"],\"disclosed_summary\":\"example:disclosed_summary\",\"epistemic_basis\":null,\"external_evidence_hash\":null,\"freshness_beacon_hash\":\"example:freshness_beacon_hash\",\"intended_audience\":null,\"intended_verifier\":null,\"policy_commitment\":\"example:policy_commitment\",\"policy_version\":\"invinoveritas.review.v19\",\"registry_as_of\":null,\"registry_snapshot_sha256\":null,\"related_decision_ref\":null,\"source_class\":\"example:source_class\",\"vantage_limitation\":null,\"verdict\":\"approve\",\"verified_at\":\"example:verified_at\",\"x_unregistered_field\":\"example:x_unregistered_field\"}",
+          "created_at": 1789900008,
+          "id": "cd55dac8cdc6720ecb6af3fe5943ad86cb0cd2ad86845700981acd9afd4e83a1",
+          "kind": 30078,
+          "pubkey": "a04b2492ce64234bdcfa5f191492c58dee16469f6675faaba6f2381b296a5ad8",
+          "sig": "da909ea511ebc62dfa81f2c34bf4c9243cecb742cedd82d0e8699c03d3ef365810711a2b6077b269261dd3a31f3db8e425c7e3f17e181d7679cd91b45f1be63a",
+          "tags": [
+            [
+              "d",
+              "authorized-preimage-schema-v0/N4_DUPLICATE_NAME_MALFORMED"
+            ]
+          ]
+        },
+        "observed_verification_outcome": "accept"
+      },
+      "purpose": "A repeated name is malformed, not silently deduped."
+    },
+    {
+      "case_id": "N5_NON_STRING_ENTRY_MALFORMED",
+      "expected": {
+        "decision_ref_recompute_status": "cannot_establish",
+        "observed_verification_outcome": "accept",
+        "preimage_schema_status": "violated",
+        "reason_codes": [
+          "MALFORMED_DECLARED_LIST",
+          "RECOMPUTE_NOT_ATTEMPTED_MALFORMED_LIST",
+          "SIGNATURE_VALID"
+        ],
+        "required_verification_outcome": "reject",
+        "signature_status": "satisfied",
+        "verification_status": "violated"
+      },
+      "inputs": {
+        "event": {
+          "content": "{\"action_binding_agent_id\":\"example:action_binding_agent_id\",\"action_binding_args_hash\":\"example:action_binding_args_hash\",\"action_binding_nonce\":\"example:action_binding_nonce\",\"action_binding_tool_hash\":\"example:action_binding_tool_hash\",\"artifact_hash\":\"example:artifact_hash\",\"artifact_type\":\"code_diff\",\"canonicalization_version\":\"rfc8785.v1\",\"confidentiality_tier\":\"example:confidentiality_tier\",\"decision_ref\":\"sha256:c86ce45746ab85446712958cb5b0540d03b0929c0c2b1a8eae7cb8225cd7f275\",\"decision_ref_preimage_fields\":[\"action_binding_agent_id\",\"action_binding_args_hash\",\"action_binding_nonce\",\"action_binding_tool_hash\",\"artifact_hash\",\"artifact_type\",\"canonicalization_version\",\"confidentiality_tier\",\"disclosed_summary\",\"epistemic_basis\",\"external_evidence_hash\",\"freshness_beacon_hash\",\"intended_audience\",\"intended_verifier\",\"policy_commitment\",\"policy_version\",\"registry_as_of\",\"registry_snapshot_sha256\",\"related_decision_ref\",\"source_class\",\"vantage_limitation\",\"verdict\",\"verified_at\",7],\"disclosed_summary\":\"example:disclosed_summary\",\"epistemic_basis\":null,\"external_evidence_hash\":null,\"freshness_beacon_hash\":\"example:freshness_beacon_hash\",\"intended_audience\":null,\"intended_verifier\":null,\"policy_commitment\":\"example:policy_commitment\",\"policy_version\":\"invinoveritas.review.v19\",\"registry_as_of\":null,\"registry_snapshot_sha256\":null,\"related_decision_ref\":null,\"source_class\":\"example:source_class\",\"vantage_limitation\":null,\"verdict\":\"approve\",\"verified_at\":\"example:verified_at\",\"x_unregistered_field\":\"example:x_unregistered_field\"}",
+          "created_at": 1789900009,
+          "id": "a1471088797f735295849f227b772cff0f27b2111d45b623b5c6f34692641a4d",
+          "kind": 30078,
+          "pubkey": "a04b2492ce64234bdcfa5f191492c58dee16469f6675faaba6f2381b296a5ad8",
+          "sig": "9417c26df83a432c53454e61544b43ecf086470d28424783b93a1162d47255a272f6891e88f3a119de5504f550a0e21b7881dd5a8df995f29ffd7379ea132ef3",
+          "tags": [
+            [
+              "d",
+              "authorized-preimage-schema-v0/N5_NON_STRING_ENTRY_MALFORMED"
+            ]
+          ]
+        },
+        "observed_verification_outcome": "accept"
+      },
+      "purpose": "A non-string entry is malformed, not coerced or dropped."
+    },
+    {
+      "case_id": "N6_NON_LIST_DECLARATION_MALFORMED",
+      "expected": {
+        "decision_ref_recompute_status": "cannot_establish",
+        "observed_verification_outcome": "accept",
+        "preimage_schema_status": "violated",
+        "reason_codes": [
+          "MALFORMED_DECLARED_LIST",
+          "RECOMPUTE_NOT_ATTEMPTED_MALFORMED_LIST",
+          "SIGNATURE_VALID"
+        ],
+        "required_verification_outcome": "reject",
+        "signature_status": "satisfied",
+        "verification_status": "violated"
+      },
+      "inputs": {
+        "event": {
+          "content": "{\"action_binding_agent_id\":\"example:action_binding_agent_id\",\"action_binding_args_hash\":\"example:action_binding_args_hash\",\"action_binding_nonce\":\"example:action_binding_nonce\",\"action_binding_tool_hash\":\"example:action_binding_tool_hash\",\"artifact_hash\":\"example:artifact_hash\",\"artifact_type\":\"code_diff\",\"canonicalization_version\":\"rfc8785.v1\",\"confidentiality_tier\":\"example:confidentiality_tier\",\"decision_ref\":\"sha256:c86ce45746ab85446712958cb5b0540d03b0929c0c2b1a8eae7cb8225cd7f275\",\"decision_ref_preimage_fields\":{\"verdict\":true},\"disclosed_summary\":\"example:disclosed_summary\",\"epistemic_basis\":null,\"external_evidence_hash\":null,\"freshness_beacon_hash\":\"example:freshness_beacon_hash\",\"intended_audience\":null,\"intended_verifier\":null,\"policy_commitment\":\"example:policy_commitment\",\"policy_version\":\"invinoveritas.review.v19\",\"registry_as_of\":null,\"registry_snapshot_sha256\":null,\"related_decision_ref\":null,\"source_class\":\"example:source_class\",\"vantage_limitation\":null,\"verdict\":\"approve\",\"verified_at\":\"example:verified_at\",\"x_unregistered_field\":\"example:x_unregistered_field\"}",
+          "created_at": 1789900010,
+          "id": "3a6bba796a09ea58d6c5deaf33c1c145ca3399c29b421095127461aef6976d2f",
+          "kind": 30078,
+          "pubkey": "a04b2492ce64234bdcfa5f191492c58dee16469f6675faaba6f2381b296a5ad8",
+          "sig": "f09bfa33164cf1d7de52c9654a0227ee191bcfbd3624f661e708bf74d56ba32d1e9a5be90541803717d158e770ad9cf47ac2ad930c9936ab50e7d9649fc4e382",
+          "tags": [
+            [
+              "d",
+              "authorized-preimage-schema-v0/N6_NON_LIST_DECLARATION_MALFORMED"
+            ]
+          ]
+        },
+        "observed_verification_outcome": "accept"
+      },
+      "purpose": "A declaration that is not a list is malformed."
+    },
+    {
+      "case_id": "N7_RECOMPUTE_FAILURE_MUST_NOT_BYPASS_AUTHORIZATION",
+      "expected": {
+        "decision_ref_recompute_status": "cannot_establish",
+        "observed_verification_outcome": "accept",
+        "preimage_schema_status": "violated",
+        "reason_codes": [
+          "DECLARED_SET_NOT_REGISTERED_FOR_VERSION",
+          "SIGNATURE_VALID",
+          "UNSUPPORTED_PREIMAGE_VALUE"
+        ],
+        "required_verification_outcome": "reject",
+        "signature_status": "satisfied",
+        "verification_status": "violated"
+      },
+      "inputs": {
+        "event": {
+          "content": "{\"action_binding_agent_id\":\"example:action_binding_agent_id\",\"action_binding_args_hash\":\"example:action_binding_args_hash\",\"action_binding_nonce\":\"example:action_binding_nonce\",\"action_binding_tool_hash\":\"example:action_binding_tool_hash\",\"artifact_hash\":\"example:artifact_hash\",\"artifact_type\":0.5,\"canonicalization_version\":\"rfc8785.v1\",\"confidentiality_tier\":\"example:confidentiality_tier\",\"decision_ref\":\"sha256:0000000000000000000000000000000000000000000000000000000000000000\",\"decision_ref_preimage_fields\":[\"action_binding_agent_id\",\"action_binding_nonce\",\"action_binding_tool_hash\",\"artifact_hash\",\"artifact_type\",\"canonicalization_version\",\"confidentiality_tier\",\"disclosed_summary\",\"epistemic_basis\",\"external_evidence_hash\",\"freshness_beacon_hash\",\"intended_audience\",\"intended_verifier\",\"policy_commitment\",\"policy_version\",\"registry_as_of\",\"registry_snapshot_sha256\",\"related_decision_ref\",\"source_class\",\"vantage_limitation\",\"verdict\",\"verified_at\"],\"disclosed_summary\":\"example:disclosed_summary\",\"epistemic_basis\":null,\"external_evidence_hash\":null,\"freshness_beacon_hash\":\"example:freshness_beacon_hash\",\"intended_audience\":null,\"intended_verifier\":null,\"policy_commitment\":\"example:policy_commitment\",\"policy_version\":\"invinoveritas.review.v19\",\"registry_as_of\":null,\"registry_snapshot_sha256\":null,\"related_decision_ref\":null,\"source_class\":\"example:source_class\",\"vantage_limitation\":null,\"verdict\":\"approve\",\"verified_at\":\"example:verified_at\",\"x_unregistered_field\":\"example:x_unregistered_field\"}",
+          "created_at": 1789900011,
+          "id": "5e37d4b1b7ad8e43185c9dfe6f4b7c184256662ac3fb3f70d2678145a28d97e7",
+          "kind": 30078,
+          "pubkey": "a04b2492ce64234bdcfa5f191492c58dee16469f6675faaba6f2381b296a5ad8",
+          "sig": "acee9ef69a34f2535d2a546f235debe51b906d32f197070d845815d61169da5492fe74b89c832171e5fc6357c0352d739ebc17b874640c4257da4dec5b3957fd",
+          "tags": [
+            [
+              "d",
+              "authorized-preimage-schema-v0/N7_RECOMPUTE_FAILURE_MUST_NOT_BYPASS_AUTHORIZATION"
+            ]
+          ]
+        },
+        "observed_verification_outcome": "accept"
+      },
+      "purpose": "Recompute cannot be established (unsupported preimage value) on an unauthorized set: authorization must still gate the outcome."
+    },
+    {
+      "case_id": "N8_DECISION_REF_TAMPERED",
+      "expected": {
+        "decision_ref_recompute_status": "violated",
+        "observed_verification_outcome": "accept",
+        "preimage_schema_status": "satisfied",
+        "reason_codes": [
+          "DECISION_REF_MISMATCH",
+          "DECLARED_SET_REGISTERED",
+          "SIGNATURE_VALID"
+        ],
+        "required_verification_outcome": "reject",
+        "signature_status": "satisfied",
+        "verification_status": "violated"
+      },
+      "inputs": {
+        "event": {
+          "content": "{\"action_binding_agent_id\":\"example:action_binding_agent_id\",\"action_binding_args_hash\":\"example:action_binding_args_hash\",\"action_binding_nonce\":\"example:action_binding_nonce\",\"action_binding_tool_hash\":\"example:action_binding_tool_hash\",\"artifact_hash\":\"example:artifact_hash\",\"artifact_type\":\"code_diff\",\"canonicalization_version\":\"rfc8785.v1\",\"confidentiality_tier\":\"example:confidentiality_tier\",\"decision_ref\":\"sha256:2a1349b03e321bc27863aa700517dfd4f77ba1003e491df1958df452b11061c8\",\"decision_ref_preimage_fields\":[\"action_binding_agent_id\",\"action_binding_args_hash\",\"action_binding_nonce\",\"action_binding_tool_hash\",\"artifact_hash\",\"artifact_type\",\"canonicalization_version\",\"confidentiality_tier\",\"disclosed_summary\",\"epistemic_basis\",\"external_evidence_hash\",\"freshness_beacon_hash\",\"intended_audience\",\"intended_verifier\",\"policy_commitment\",\"policy_version\",\"registry_as_of\",\"registry_snapshot_sha256\",\"related_decision_ref\",\"source_class\",\"vantage_limitation\",\"verdict\",\"verified_at\"],\"disclosed_summary\":\"example:disclosed_summary\",\"epistemic_basis\":null,\"external_evidence_hash\":null,\"freshness_beacon_hash\":\"example:freshness_beacon_hash\",\"intended_audience\":null,\"intended_verifier\":null,\"policy_commitment\":\"example:policy_commitment\",\"policy_version\":\"invinoveritas.review.v19\",\"registry_as_of\":null,\"registry_snapshot_sha256\":null,\"related_decision_ref\":null,\"source_class\":\"example:source_class\",\"vantage_limitation\":null,\"verdict\":\"approve\",\"verified_at\":\"example:verified_at\",\"x_unregistered_field\":\"example:x_unregistered_field\"}",
+          "created_at": 1789900012,
+          "id": "4cdf5bc8d3dcf09cf3e2525abcf98303b77347a542db9c66154bb2d54f82be54",
+          "kind": 30078,
+          "pubkey": "a04b2492ce64234bdcfa5f191492c58dee16469f6675faaba6f2381b296a5ad8",
+          "sig": "5fad4032ad8b579308584507c5b5e01fcaddd8754a651a7cfed6d19eabc25595e00d4795dec7a3761673a66090be2d44f0a045a4952b9b6e8256f671bd329a73",
+          "tags": [
+            [
+              "d",
+              "authorized-preimage-schema-v0/N8_DECISION_REF_TAMPERED"
+            ]
+          ]
+        },
+        "observed_verification_outcome": "accept"
+      },
+      "purpose": "Authorized set, valid signature, decision_ref does not recompute."
+    },
+    {
+      "case_id": "N9_SIGNATURE_INVALID_ISOLATED",
+      "expected": {
+        "decision_ref_recompute_status": "satisfied",
+        "observed_verification_outcome": "accept",
+        "preimage_schema_status": "satisfied",
+        "reason_codes": [
+          "DECISION_REF_RECOMPUTED",
+          "DECLARED_SET_REGISTERED",
+          "SIGNATURE_INVALID"
+        ],
+        "required_verification_outcome": "reject",
+        "signature_status": "violated",
+        "verification_status": "violated"
+      },
+      "inputs": {
+        "event": {
+          "content": "{\"action_binding_agent_id\":\"example:action_binding_agent_id\",\"action_binding_args_hash\":\"example:action_binding_args_hash\",\"action_binding_nonce\":\"example:action_binding_nonce\",\"action_binding_tool_hash\":\"example:action_binding_tool_hash\",\"artifact_hash\":\"example:artifact_hash\",\"artifact_type\":\"code_diff\",\"canonicalization_version\":\"rfc8785.v1\",\"confidentiality_tier\":\"example:confidentiality_tier\",\"decision_ref\":\"sha256:c86ce45746ab85446712958cb5b0540d03b0929c0c2b1a8eae7cb8225cd7f275\",\"decision_ref_preimage_fields\":[\"action_binding_agent_id\",\"action_binding_args_hash\",\"action_binding_nonce\",\"action_binding_tool_hash\",\"artifact_hash\",\"artifact_type\",\"canonicalization_version\",\"confidentiality_tier\",\"disclosed_summary\",\"epistemic_basis\",\"external_evidence_hash\",\"freshness_beacon_hash\",\"intended_audience\",\"intended_verifier\",\"policy_commitment\",\"policy_version\",\"registry_as_of\",\"registry_snapshot_sha256\",\"related_decision_ref\",\"source_class\",\"vantage_limitation\",\"verdict\",\"verified_at\"],\"disclosed_summary\":\"example:disclosed_summary\",\"epistemic_basis\":null,\"external_evidence_hash\":null,\"freshness_beacon_hash\":\"example:freshness_beacon_hash\",\"intended_audience\":null,\"intended_verifier\":null,\"policy_commitment\":\"example:policy_commitment\",\"policy_version\":\"invinoveritas.review.v19\",\"registry_as_of\":null,\"registry_snapshot_sha256\":null,\"related_decision_ref\":null,\"source_class\":\"example:source_class\",\"vantage_limitation\":null,\"verdict\":\"approve\",\"verified_at\":\"example:verified_at\",\"x_unregistered_field\":\"example:x_unregistered_field\"}",
+          "created_at": 1789900013,
+          "id": "06263ea0b168734474c9a75ed3bd2973b8912d9cbcd427eeb0ca61e0cf2fd6ae",
+          "kind": 30078,
+          "pubkey": "a04b2492ce64234bdcfa5f191492c58dee16469f6675faaba6f2381b296a5ad8",
+          "sig": "4e5648c1e677e6533280a727e576707dce9c8713cca6246dbf9e90a1ae62f5b39f673e6ca63afc20c38c5f0b97d77408453c0040ae3204ed10ae825fae705450",
+          "tags": [
+            [
+              "d",
+              "authorized-preimage-schema-v0/N9_SIGNATURE_INVALID_ISOLATED"
+            ]
+          ]
+        },
+        "observed_verification_outcome": "accept"
+      },
+      "purpose": "Everything else authorized and recomputable; only the signature is invalid. Shows the dimensions are independent."
+    },
+    {
+      "case_id": "N10_CURRENT_SET_UNDER_OLD_VERSION",
+      "expected": {
+        "decision_ref_recompute_status": "satisfied",
+        "observed_verification_outcome": "accept",
+        "preimage_schema_status": "violated",
+        "reason_codes": [
+          "DECISION_REF_RECOMPUTED",
+          "DECLARED_SET_NOT_REGISTERED_FOR_VERSION",
+          "SIGNATURE_VALID"
+        ],
+        "required_verification_outcome": "reject",
+        "signature_status": "satisfied",
+        "verification_status": "violated"
+      },
+      "inputs": {
+        "event": {
+          "content": "{\"action_binding_agent_id\":\"example:action_binding_agent_id\",\"action_binding_args_hash\":\"example:action_binding_args_hash\",\"action_binding_nonce\":\"example:action_binding_nonce\",\"action_binding_tool_hash\":\"example:action_binding_tool_hash\",\"artifact_hash\":\"example:artifact_hash\",\"artifact_type\":\"code_diff\",\"canonicalization_version\":\"rfc8785.v1\",\"confidentiality_tier\":\"example:confidentiality_tier\",\"decision_ref\":\"sha256:88f22b0b2a6e836a38c9311dd486cbbcca47a1f892c1f4d70493b9ce46fca4d1\",\"decision_ref_preimage_fields\":[\"action_binding_agent_id\",\"action_binding_args_hash\",\"action_binding_nonce\",\"action_binding_tool_hash\",\"artifact_hash\",\"artifact_type\",\"canonicalization_version\",\"confidentiality_tier\",\"disclosed_summary\",\"epistemic_basis\",\"external_evidence_hash\",\"freshness_beacon_hash\",\"intended_audience\",\"intended_verifier\",\"policy_commitment\",\"policy_version\",\"registry_as_of\",\"registry_snapshot_sha256\",\"related_decision_ref\",\"source_class\",\"vantage_limitation\",\"verdict\",\"verified_at\"],\"disclosed_summary\":\"example:disclosed_summary\",\"epistemic_basis\":null,\"external_evidence_hash\":null,\"freshness_beacon_hash\":\"example:freshness_beacon_hash\",\"intended_audience\":null,\"intended_verifier\":null,\"policy_commitment\":\"example:policy_commitment\",\"policy_version\":\"invinoveritas.review.v1\",\"registry_as_of\":null,\"registry_snapshot_sha256\":null,\"related_decision_ref\":null,\"source_class\":\"example:source_class\",\"vantage_limitation\":null,\"verdict\":\"approve\",\"verified_at\":\"example:verified_at\",\"x_unregistered_field\":\"example:x_unregistered_field\"}",
+          "created_at": 1789900014,
+          "id": "03eeebb7f3c1315472ebad239a06ba8002f1c580e7b647402c2332ee2dbbc3a7",
+          "kind": 30078,
+          "pubkey": "a04b2492ce64234bdcfa5f191492c58dee16469f6675faaba6f2381b296a5ad8",
+          "sig": "5976969ab48b15d37059f7b4892d1b7d2f3060fc072df253bdf527d72be2a12a0cc57e11a4750a0deecfdffa04fb2e8888e0d233b7d0d5145fee5e96182c0c37",
+          "tags": [
+            [
+              "d",
+              "authorized-preimage-schema-v0/N10_CURRENT_SET_UNDER_OLD_VERSION"
+            ]
+          ]
+        },
+        "observed_verification_outcome": "accept"
+      },
+      "purpose": "The current field set declared under v1: authority is per the proof's OWN policy_version, not any version."
+    }
+  ],
+  "current_policy_version": "invinoveritas.review.v19",
+  "profile": "authorized_preimage_schema.v0",
+  "registry": {
+    "states": {
+      "invinoveritas.review.v1": [
+        [
+          "artifact_hash",
+          "artifact_type",
+          "policy_version",
+          "verdict"
+        ]
+      ],
+      "invinoveritas.review.v10": [
+        [
+          "artifact_hash",
+          "artifact_type",
+          "confidentiality_tier",
+          "disclosed_summary",
+          "intended_audience",
+          "intended_verifier",
+          "policy_commitment",
+          "policy_version",
+          "related_decision_ref",
+          "source_class",
+          "vantage_limitation",
+          "verdict"
+        ]
+      ],
+      "invinoveritas.review.v11": [
+        [
+          "artifact_hash",
+          "artifact_type",
+          "confidentiality_tier",
+          "disclosed_summary",
+          "intended_audience",
+          "intended_verifier",
+          "policy_commitment",
+          "policy_version",
+          "registry_as_of",
+          "registry_snapshot_sha256",
+          "related_decision_ref",
+          "source_class",
+          "vantage_limitation",
+          "verdict",
+          "verified_at"
+        ]
+      ],
+      "invinoveritas.review.v12": [
+        [
+          "artifact_hash",
+          "artifact_type",
+          "confidentiality_tier",
+          "disclosed_summary",
+          "intended_audience",
+          "intended_verifier",
+          "policy_commitment",
+          "policy_version",
+          "registry_as_of",
+          "registry_snapshot_sha256",
+          "related_decision_ref",
+          "source_class",
+          "vantage_limitation",
+          "verdict",
+          "verified_at"
+        ]
+      ],
+      "invinoveritas.review.v13": [
+        [
+          "action_binding_hash",
+          "artifact_hash",
+          "artifact_type",
+          "confidentiality_tier",
+          "disclosed_summary",
+          "intended_audience",
+          "intended_verifier",
+          "policy_commitment",
+          "policy_version",
+          "registry_as_of",
+          "registry_snapshot_sha256",
+          "related_decision_ref",
+          "source_class",
+          "vantage_limitation",
+          "verdict",
+          "verified_at"
+        ]
+      ],
+      "invinoveritas.review.v14": [
+        [
+          "action_binding_agent_id",
+          "action_binding_args_hash",
+          "action_binding_tool_hash",
+          "artifact_hash",
+          "artifact_type",
+          "confidentiality_tier",
+          "disclosed_summary",
+          "intended_audience",
+          "intended_verifier",
+          "policy_commitment",
+          "policy_version",
+          "registry_as_of",
+          "registry_snapshot_sha256",
+          "related_decision_ref",
+          "source_class",
+          "vantage_limitation",
+          "verdict",
+          "verified_at"
+        ]
+      ],
+      "invinoveritas.review.v15": [
+        [
+          "action_binding_agent_id",
+          "action_binding_args_hash",
+          "action_binding_nonce",
+          "action_binding_tool_hash",
+          "artifact_hash",
+          "artifact_type",
+          "confidentiality_tier",
+          "disclosed_summary",
+          "intended_audience",
+          "intended_verifier",
+          "policy_commitment",
+          "policy_version",
+          "registry_as_of",
+          "registry_snapshot_sha256",
+          "related_decision_ref",
+          "source_class",
+          "vantage_limitation",
+          "verdict",
+          "verified_at"
+        ]
+      ],
+      "invinoveritas.review.v16": [
+        [
+          "action_binding_agent_id",
+          "action_binding_args_hash",
+          "action_binding_nonce",
+          "action_binding_tool_hash",
+          "artifact_hash",
+          "artifact_type",
+          "confidentiality_tier",
+          "disclosed_summary",
+          "freshness_beacon_hash",
+          "intended_audience",
+          "intended_verifier",
+          "policy_commitment",
+          "policy_version",
+          "registry_as_of",
+          "registry_snapshot_sha256",
+          "related_decision_ref",
+          "source_class",
+          "vantage_limitation",
+          "verdict",
+          "verified_at"
+        ]
+      ],
+      "invinoveritas.review.v17": [
+        [
+          "action_binding_agent_id",
+          "action_binding_args_hash",
+          "action_binding_nonce",
+          "action_binding_tool_hash",
+          "artifact_hash",
+          "artifact_type",
+          "confidentiality_tier",
+          "disclosed_summary",
+          "freshness_beacon_hash",
+          "intended_audience",
+          "intended_verifier",
+          "policy_commitment",
+          "policy_version",
+          "registry_as_of",
+          "registry_snapshot_sha256",
+          "related_decision_ref",
+          "source_class",
+          "vantage_limitation",
+          "verdict",
+          "verified_at"
+        ]
+      ],
+      "invinoveritas.review.v18": [
+        [
+          "action_binding_agent_id",
+          "action_binding_args_hash",
+          "action_binding_nonce",
+          "action_binding_tool_hash",
+          "artifact_hash",
+          "artifact_type",
+          "confidentiality_tier",
+          "disclosed_summary",
+          "epistemic_basis",
+          "external_evidence_hash",
+          "freshness_beacon_hash",
+          "intended_audience",
+          "intended_verifier",
+          "policy_commitment",
+          "policy_version",
+          "registry_as_of",
+          "registry_snapshot_sha256",
+          "related_decision_ref",
+          "source_class",
+          "vantage_limitation",
+          "verdict",
+          "verified_at"
+        ],
+        [
+          "action_binding_agent_id",
+          "action_binding_args_hash",
+          "action_binding_nonce",
+          "action_binding_tool_hash",
+          "artifact_hash",
+          "artifact_type",
+          "confidentiality_tier",
+          "disclosed_summary",
+          "epistemic_basis",
+          "freshness_beacon_hash",
+          "intended_audience",
+          "intended_verifier",
+          "policy_commitment",
+          "policy_version",
+          "registry_as_of",
+          "registry_snapshot_sha256",
+          "related_decision_ref",
+          "source_class",
+          "vantage_limitation",
+          "verdict",
+          "verified_at"
+        ]
+      ],
+      "invinoveritas.review.v19": [
+        [
+          "action_binding_agent_id",
+          "action_binding_args_hash",
+          "action_binding_nonce",
+          "action_binding_tool_hash",
+          "artifact_hash",
+          "artifact_type",
+          "canonicalization_version",
+          "confidentiality_tier",
+          "disclosed_summary",
+          "epistemic_basis",
+          "external_evidence_hash",
+          "freshness_beacon_hash",
+          "intended_audience",
+          "intended_verifier",
+          "policy_commitment",
+          "policy_version",
+          "registry_as_of",
+          "registry_snapshot_sha256",
+          "related_decision_ref",
+          "source_class",
+          "vantage_limitation",
+          "verdict",
+          "verified_at"
+        ]
+      ],
+      "invinoveritas.review.v2": [
+        [
+          "artifact_hash",
+          "artifact_type",
+          "policy_version",
+          "source_class",
+          "verdict"
+        ]
+      ],
+      "invinoveritas.review.v3": [
+        [
+          "artifact_hash",
+          "artifact_type",
+          "policy_version",
+          "source_class",
+          "verdict"
+        ]
+      ],
+      "invinoveritas.review.v4": [
+        [
+          "artifact_hash",
+          "artifact_type",
+          "policy_version",
+          "source_class",
+          "vantage_limitation",
+          "verdict"
+        ]
+      ],
+      "invinoveritas.review.v5": [
+        [
+          "artifact_hash",
+          "artifact_type",
+          "policy_version",
+          "source_class",
+          "vantage_limitation",
+          "verdict"
+        ]
+      ],
+      "invinoveritas.review.v6": [
+        [
+          "artifact_hash",
+          "artifact_type",
+          "policy_version",
+          "related_decision_ref",
+          "source_class",
+          "vantage_limitation",
+          "verdict"
+        ]
+      ],
+      "invinoveritas.review.v7": [
+        [
+          "artifact_hash",
+          "artifact_type",
+          "intended_audience",
+          "policy_version",
+          "related_decision_ref",
+          "source_class",
+          "vantage_limitation",
+          "verdict"
+        ]
+      ],
+      "invinoveritas.review.v8": [
+        [
+          "artifact_hash",
+          "artifact_type",
+          "confidentiality_tier",
+          "disclosed_summary",
+          "intended_audience",
+          "policy_version",
+          "related_decision_ref",
+          "source_class",
+          "vantage_limitation",
+          "verdict"
+        ]
+      ],
+      "invinoveritas.review.v9": [
+        [
+          "artifact_hash",
+          "artifact_type",
+          "confidentiality_tier",
+          "disclosed_summary",
+          "intended_audience",
+          "intended_verifier",
+          "policy_version",
+          "related_decision_ref",
+          "source_class",
+          "vantage_limitation",
+          "verdict"
+        ]
+      ]
+    }
+  },
+  "registry_sha256": "2c0bddcf27375e866b39fd063dbad3fe3b99e6d767e1f13751b9fc63ec2ec731",
+  "test_key_label": "recompute-kit/authorized-preimage-schema-v0/test-key/not-a-real-key",
+  "trusted_pubkey": "a04b2492ce64234bdcfa5f191492c58dee16469f6675faaba6f2381b296a5ad8"
+}

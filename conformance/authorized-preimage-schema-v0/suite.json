@@ -1,0 +1,40 @@
+{
+  "profile": "authorized_preimage_schema.v0",
+  "spec": {
+    "path": "README.md",
+    "sha256": "5109aad9ec0b9a6c180ddfb150323720bbac26569496d3b404ff1edcf395dc93"
+  },
+  "checker": {
+    "path": "schema_check.py",
+    "sha256": "af403e58596c264b303fcb2b20a205e4e421c16c3f0453e328bdaead6b6a0442"
+  },
+  "mutation_checker": {
+    "path": "mutation_check.py",
+    "sha256": "e18b7dca71472e91d6b53fb10318f269a5c63e2b6311930688c294da23186514"
+  },
+  "laneHint": "recomputable",
+  "checks": [
+    {
+      "name": "conformance",
+      "vectors": {
+        "path": "vectors.json",
+        "sha256": "9c5709cfb4c7b060069a16150cd939bd9b6b998df88bb0552a4daca17719f3ae"
+      },
+      "adapter": {
+        "kind": "stdio",
+        "cmd": "python3 schema_check.py vectors.json"
+      }
+    },
+    {
+      "name": "mutation-coverage",
+      "vectors": {
+        "path": "vectors.json",
+        "sha256": "9c5709cfb4c7b060069a16150cd939bd9b6b998df88bb0552a4daca17719f3ae"
+      },
+      "adapter": {
+        "kind": "stdio",
+        "cmd": "python3 mutation_check.py"
+      }
+    }
+  ]
+}
