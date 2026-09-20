@@ -103,7 +103,7 @@ def signature_status(event, trusted_pubkey):
         digest = hashlib.sha256(serialized.encode("utf-8")).digest()
         if digest.hex() != event["id"]:
             return "violated", "EVENT_ID_MISMATCH"
-        if not schnorr_verify(digest, bytes.fromhex(event["pubkey"]), bytes.fromhex(event["sig"])):  # M8
+        if not schnorr_verify(digest, bytes.fromhex(event["pubkey"]), bytes.fromhex(event["sig"])):
             return "violated", "SIGNATURE_INVALID"
         return "satisfied", "SIGNATURE_VALID"
     except (KeyError, TypeError, ValueError):
@@ -112,7 +112,10 @@ def signature_status(event, trusted_pubkey):
 
 def declared_names(declared):
     """The declared field list as a tuple of names, or None when it is not a well-formed declaration of a
-    field SET: a list of plain strings with no repeated name. Reordering is fine; repetition is malformed."""
+    field SET: a list of plain strings with no repeated name. Reordering is fine; repetition is malformed.
+    None maps to "violated" on schema_status but "cannot_establish" on recompute_status ON PURPOSE: a malformed
+    declaration is the producer's fault (a violation of the profile), while the verifier genuinely cannot recompute
+    over a list that is not a set of names. Same input condition, different dimension, different honest answer."""
     if not (isinstance(declared, list) and all(type(f) is str for f in declared)):  # M4
         return None
     if len(set(declared)) != len(declared):  # M3
@@ -152,12 +155,23 @@ def required_outcome(signature, schema, recompute):
     return "reject"
 
 
+# Completeness of the REGISTRY's authorized set for every semantic dependency of the decision is not something this
+# profile can establish: it can show the declared set is registered for the proof's own policy_version and that
+# decision_ref recomputes over exactly that set, not that the registered set itself is semantically complete.
+# So it is reported as its own dimension, always "cannot_establish", and is deliberately NON-GATING: an "accept"
+# means only "this proof conforms to the registered preimage schema", never "the registered schema is complete".
+COMPLETENESS_STATUS = "cannot_establish"
+COMPLETENESS_REASON = "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE"
+
+
 def result(signature, schema, recompute, required, observed, reasons):
     return {"signature_status": signature, "preimage_schema_status": schema,
-            "decision_ref_recompute_status": recompute, "required_verification_outcome": required,
+            "decision_ref_recompute_status": recompute,
+            "registered_set_completeness_status": COMPLETENESS_STATUS,
+            "required_verification_outcome": required,
             "observed_verification_outcome": observed,
             "verification_status": "satisfied" if observed == required else "violated",
-            "reason_codes": sorted(reasons)}
+            "reason_codes": sorted(list(reasons) + [COMPLETENESS_REASON])}
 
 
 def evaluate(case, registry, trusted_pubkey):
@@ -209,7 +223,8 @@ def main():
         results.append({"case_id": case["case_id"], "result": actual, "reproduced": actual == case["expected"]})
     counts = {axis: {s: sum(r["result"][axis] == s for r in results)
                      for s in ("satisfied", "violated", "cannot_establish")}
-              for axis in ("signature_status", "preimage_schema_status", "decision_ref_recompute_status")}
+              for axis in ("signature_status", "preimage_schema_status", "decision_ref_recompute_status",
+                   "registered_set_completeness_status")}
     print(json.dumps({"results": results, "counts": counts, "total": len(results),
                       "reproduced": sum(r["reproduced"] for r in results)}, sort_keys=True, indent=2))
     return 0 if all(r["reproduced"] for r in results) else 1

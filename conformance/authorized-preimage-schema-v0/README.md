@@ -12,7 +12,9 @@ proof is self-consistent, and the promoted claim ("this decision is bound to its
 
 This profile pins the missing relation. A verifier must establish that the **declared field set is
 registered for the proof's own policy version** before it treats a clean recompute as evidence, and it
-must report the three dimensions separately instead of one scalar "verified".
+must report the dimensions separately instead of one scalar "verified". A fourth dimension,
+`registered_set_completeness_status`, is reported so the profile states its own epistemic boundary
+instead of leaving it in prose.
 
 Status: `authorized_preimage_schema.v0`, vectors + checker + mutation evidence. Shaped like
 `consumption-time-state-binding-v0` (#46).
@@ -26,7 +28,13 @@ recompute against it and can report who holds the authority, but it cannot estab
 complete or correct, and nothing inside the producer's boundary can.
 
 - **Completeness and correctness of the registry are not established.** The snapshot is a producer-side
-  claim. `registry_sha256` pins its content, not its truthfulness.
+  claim. `registry_sha256` pins its content, not its truthfulness. This is now exposed mechanically as
+  `registered_set_completeness_status`, which is `cannot_establish` on every vector and is **non-gating**:
+  an `accept` means "this proof conforms to the registered preimage schema", never "the registered
+  schema is semantically complete" (`AUTHORIZED PREIMAGE SCHEMA != COMPLETE SEMANTIC COMMITMENT SCHEMA`).
+  Because a constant is emitted correctly by an implementation that computes nothing, the mutation suite
+  has a mutant that claims it (`M13`) and one that promotes the non-claim to a failure (`M14`); both must
+  be killed.
 - **Registry authority is relayed, not recomputed.** A verifier that returns `authorized` has recomputed
   the hash and checked the signature; it has *relayed* that the set is registered. Reports should keep
   those two apart (the reference implementation does, see below).
@@ -40,14 +48,24 @@ complete or correct, and nothing inside the producer's boundary can.
 - **Canonicalization scope.** Preimage values are strings, `null`, or safe integers, where RFC 8785
   output equals compact sorted-key JSON. Any other value type makes the recompute `cannot_establish`
   (`N7`), deliberately, rather than guessing a serialization.
-- **Coverage is finite.** 15 cases and 11 one-site mutations show these bugs are caught, not that no
+- **Coverage is finite.** 15 cases and 14 one-site mutations show these bugs are caught, not that no
   other bug exists.
+- **"15/15 reproduced" is not "15/15 agreed by an independent code path".** The expected results in
+  `vectors.json` are authored by hand in `generate_vectors.py` (`EXPECTED`) from each case's stated
+  purpose, and the generator fails if the checker disagrees. They are no longer produced by the checker
+  under test (an earlier revision did that, so the count only showed the checker was deterministic). The
+  authored table is still one author's reading of the rules; independence is what the cross-check below
+  and a third implementation provide.
+- **`registry_sha256` pins the serialization, not set membership.** The digest covers the canonical JSON
+  including the order of registered states within a version, so two snapshots that differ only in that
+  order have different digests while being semantically identical. Harmless today; it matters if the
+  extraction order ever changes.
 
 ## Recompute it (no dependencies beyond Python 3)
 
 ```sh
 python3 schema_check.py vectors.json   # 15/15 reproduced; exit 0
-python3 mutation_check.py              # 11/11 KILLED, controls preserved; exit 0
+python3 mutation_check.py              # 14/14 KILLED on the intended dimension, controls preserved; exit 0
 ```
 
 ## What a case supplies
@@ -70,8 +88,10 @@ own answer and is never rewritten into `violated`.
 | `signature_status` | Does the BIP-340 signature verify over the NIP-01 event id, under the trusted key? | `SIGNATURE_VALID`, `SIGNATURE_INVALID`, `EVENT_ID_MISMATCH`, `UNTRUSTED_PUBKEY`, `MALFORMED_EVENT` |
 | `preimage_schema_status` | Is the declared field **set** registered for the proof's own `policy_version`? | `DECLARED_SET_REGISTERED`, `DECLARED_SET_NOT_REGISTERED_FOR_VERSION`, `POLICY_VERSION_NOT_REGISTERED`, `MALFORMED_DECLARED_LIST` |
 | `decision_ref_recompute_status` | Does `decision_ref` equal `sha256(JCS({name: content[name]}))` over **exactly the declared names** (absent -> `null`)? | `DECISION_REF_RECOMPUTED`, `DECISION_REF_MISMATCH`, `UNSUPPORTED_PREIMAGE_VALUE`, `RECOMPUTE_NOT_ATTEMPTED_MALFORMED_LIST` |
+| `registered_set_completeness_status` | Is the registered set itself complete for every semantic dependency of the decision? | `REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE` (constant; **non-gating**) |
 
-`required_verification_outcome` is `accept` only when all three are `satisfied`; otherwise `reject`.
+`required_verification_outcome` is `accept` only when the first three are `satisfied`; otherwise `reject`.
+`registered_set_completeness_status` never gates it (it is `cannot_establish` on all 15 vectors).
 `verification_status` is `satisfied` when the observed outcome equals the required one and `violated`
 otherwise (an observed `accept` of a required `reject` is a fail-open).
 
@@ -81,6 +101,13 @@ An unregistered `policy_version` gives `preimage_schema_status = cannot_establis
 `required_verification_outcome = reject`. "We have no authorized schema for this version" must not be
 rewritten into the stronger factual claim "this schema is known to be unauthorized". Both cases reject;
 they are not the same statement, and a relying party may treat them differently.
+
+### One condition, two dimensions, two honest answers
+
+A malformed declared list (`N4`-`N6`) is `violated` on `preimage_schema_status` but `cannot_establish` on
+`decision_ref_recompute_status`, on purpose: the malformed declaration is the producer's fault (a violation
+of the profile), while the verifier genuinely cannot recompute over something that is not a set of names.
+A second implementer who maps both to the same status has made a silent mistake.
 
 ### A declaration is a field SET
 
@@ -124,9 +151,16 @@ exception that proves the signature dimension is independent of the other two.
 
 ## Mutation evidence
 
-`mutation_check.py` applies one-site edits to `schema_check.py`. Each named verifier bug must flip
-`required_verification_outcome` on its witness case while the positive control (`A1`) and a negative
-control (`N8`) stay exactly as expected. 11 of 11 are killed.
+`mutation_check.py` applies one-site edits to `schema_check.py`. A mutant is **killed** only when the
+dimension it targets changes on its witness case, judged against the full expected result, while the
+controls (`A1` and `N8` by default) stay exactly as expected on every other dimension. All dimensions that
+changed are recorded (`changed_dimensions`, `also_changed`), so a mutant that dies for a different reason
+than intended is visible. 14 of 14 are killed.
+
+This replaces an earlier criterion that judged every mutant on the scalar `required_verification_outcome`
+alone. That collapsed the three dimensions back into one verdict, the thing this profile exists to prevent:
+a mutant that corrupted *which dimension reported what* survived whenever accept/reject happened to be
+preserved (`M12` below, reported by an independent reviewer on #48).
 
 | mutant | the bug | witness |
 |---|---|---|
@@ -141,6 +175,9 @@ control (`N8`) stay exactly as expected. 11 of 11 are killed.
 | `M9_LIST_ORDER_TREATED_AS_IDENTITY` | reordering breaks authorization | `A2` |
 | `M10_ANY_VERSIONS_REGISTRY_ACCEPTED` | set authorized against any version's states | `N10` |
 | `M11_ONE_VERSION_ONE_SCHEMA_ASSUMED` | only the first registered state per version accepted | `A4` |
+| `M12_RECOMPUTE_OVER_REGISTERED_SET_NOT_DECLARED` | `decision_ref` recomputed over the registered set instead of the declared one; every authorized case unchanged and every unauthorized case rejected either way, so it **survived the scalar-outcome criterion**; it flips `decision_ref_recompute_status` on `N1`, `N2`, `N10`, `A5` | `N1` (dimension: recompute) |
+| `M13_COMPLETENESS_CLAIMED_SATISFIED` | the constant completeness dimension reports `satisfied` | `A1` (dimension: completeness) |
+| `M14_COMPLETENESS_NON_CLAIM_PROMOTED_TO_FAILURE` | `cannot_establish` completeness gates the outcome, rejecting authorized proofs | `A4` (dimension: outcome; controls are the two reject controls `N8`, `N9`, since the positive controls break by design) |
 
 **On `M2` (proposed observable definition).** "Authorize after recompute instead of before" is not
 visible in an outcome when a verifier computes both and combines them. What is observable, and what this
@@ -159,11 +196,22 @@ same split in `trust_basis`:
 |---|---|
 | `decision_ref_recompute_status` | `recomputed_by_verifier.decision_ref_hash_matches_declared_fields` (`null` = not established) |
 | `preimage_schema_status` `satisfied` / `violated` / `cannot_establish` | `relayed_from_verifier_registry.preimage_schema_status` = `authorized` / `not_authorized_for_version` or `malformed_declared_list` / `cannot_establish` |
+| `registered_set_completeness_status` | `relayed_from_verifier_registry.registered_set_completeness_status` (constant `cannot_establish`, non-gating) |
+| `signature_status` | `checks.id_integrity` and `checks.signature_valid` |
 | `required_verification_outcome` | `relayed_from_verifier_registry.required_verification_outcome` |
 
 The two implementations share no code (this checker is standard-library only; the production verifier
-uses the `rfc8785` library and its own signature path), but they share an author (see the limits above). Running the production verifier over all 15
-events gave the same schema status and the same accept/reject outcome on 15 of 15.
+uses the `rfc8785` library and its own signature path), but they share an author (see the limits above).
+
+Compared **dimension by dimension**, not only on accept/reject (an outcome-only comparison hid the one
+disagreement below): over all 15 events the production verifier and this checker agree on schema status,
+signature status, recompute status, the completeness constant and the outcome, with **one named divergence**.
+On `N7` the recompute dimension differs: production reports `violated` and this profile reports
+`cannot_establish`. `N7` puts a float in the preimage. The profile refuses floats on purpose (its
+standard-library canonicalizer cannot promise RFC 8785 identity for them); production canonicalizes them
+through the `rfc8785` library, computes a real hash, and finds the (tampered) `decision_ref` does not
+match. Both reject by the schema dimension, so the outcome agrees. The test pins this exact pair so any
+change on either side fails it.
 
 ## Test key and regeneration
 

@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
-"""One-site oracle mutations: each named verifier bug must flip the required outcome on its named
-witness case while the positive control (and a negative control) stay exactly as expected."""
+"""One-site oracle mutations: each named verifier bug must change ITS INTENDED DIMENSION on its named
+witness case while the controls stay exactly as expected on every dimension.
+
+Kill criterion (revised after review on #48): a mutant is killed only when the dimension it targets changes on the
+witness case, judged against the FULL expected result. An earlier revision judged every mutant on the single scalar
+required_verification_outcome, which is exactly the collapse this profile exists to replace: a mutant that corrupts
+which dimension reported what survived whenever accept/reject happened to be preserved. All dimensions that changed
+are recorded, so a mutant that kills for a different reason than intended is visible, not silently counted."""
 
 import json
 from pathlib import Path
@@ -12,34 +18,62 @@ HERE = Path(__file__).resolve().parent
 CONTROLS = ["A1_CONTROL_CURRENT_AUTHORIZED", "N8_DECISION_REF_TAMPERED"]
 ANY_STATE = "any(set(names) == set(state) for state in states)"
 MUTANTS = [
-    ("M1_DECLARED_SET_TRUSTED_DIRECTLY", "N1_SELF_CONSISTENT_REDUCED_PREIMAGE", ANY_STATE, "True"),
+    ("M1_DECLARED_SET_TRUSTED_DIRECTLY", "N1_SELF_CONSISTENT_REDUCED_PREIMAGE", ANY_STATE, "True", "preimage_schema_status"),
     ("M2_RECOMPUTE_FAILURE_BYPASSES_AUTHORIZATION", "N7_RECOMPUTE_FAILURE_MUST_NOT_BYPASS_AUTHORIZATION",
      'if signature == "satisfied" and schema == "satisfied" and recompute == "satisfied":  # M2/M8',
      'if recompute == "cannot_establish" and signature == "satisfied" or (signature == "satisfied" and '
-     'schema == "satisfied" and recompute == "satisfied"):  # M2/M8'),
+     'schema == "satisfied" and recompute == "satisfied"):  # M2/M8', "required_verification_outcome"),
     ("M3_DUPLICATE_NAMES_SILENTLY_DEDUPED", "N4_DUPLICATE_NAME_MALFORMED",
-     "if len(set(declared)) != len(declared):  # M3", "if False:  # M3"),
+     "if len(set(declared)) != len(declared):  # M3", "if False:  # M3", "preimage_schema_status"),
     ("M4_NON_STRING_ENTRIES_COERCED_AWAY", "N5_NON_STRING_ENTRY_MALFORMED",
      "if not (isinstance(declared, list) and all(type(f) is str for f in declared)):  # M4",
      "if isinstance(declared, list):\n        declared = [f for f in declared if type(f) is str]\n"
-     "    if not isinstance(declared, list):  # M4"),
+     "    if not isinstance(declared, list):  # M4", "preimage_schema_status"),
     ("M5_UNKNOWN_POLICY_VERSION_ACCEPTED", "N3_UNREGISTERED_POLICY_VERSION",
      "if states is None:  # M5",
-     'if states is None:\n        return "satisfied", "DECLARED_SET_REGISTERED"\n    if False:  # M5'),
+     'if states is None:\n        return "satisfied", "DECLARED_SET_REGISTERED"\n    if False:  # M5', "preimage_schema_status"),
     ("M6_PROPER_SUBSET_ACCEPTED", "N1_SELF_CONSISTENT_REDUCED_PREIMAGE",
-     ANY_STATE, "any(set(names) <= set(state) for state in states)"),
+     ANY_STATE, "any(set(names) <= set(state) for state in states)", "preimage_schema_status"),
     ("M7_SUPERSET_ACCEPTED", "N2_SUPERSET_WITH_UNREGISTERED_FIELD",
-     ANY_STATE, "any(set(names) >= set(state) for state in states)"),
+     ANY_STATE, "any(set(names) >= set(state) for state in states)", "preimage_schema_status"),
     ("M8_SIGNATURE_NOT_CHECKED", "N9_SIGNATURE_INVALID_ISOLATED",
      'if signature == "satisfied" and schema == "satisfied" and recompute == "satisfied":  # M2/M8',
-     'if schema == "satisfied" and recompute == "satisfied":  # M2/M8'),
+     'if schema == "satisfied" and recompute == "satisfied":  # M2/M8', "required_verification_outcome"),
     ("M9_LIST_ORDER_TREATED_AS_IDENTITY", "A2_REORDERED_DECLARED_LIST_SAME_SET",
-     ANY_STATE, "any(list(names) == list(state) for state in states)"),
+     ANY_STATE, "any(list(names) == list(state) for state in states)", "preimage_schema_status"),
     ("M10_ANY_VERSIONS_REGISTRY_ACCEPTED", "N10_CURRENT_SET_UNDER_OLD_VERSION",
-     ANY_STATE, 'any(set(names) == set(state) for group in registry["states"].values() for state in group)'),
+     ANY_STATE, 'any(set(names) == set(state) for group in registry["states"].values() for state in group)', "preimage_schema_status"),
     ("M11_ONE_VERSION_ONE_SCHEMA_ASSUMED", "A4_V18_REGISTERED_STATE_2",
-     ANY_STATE, "set(names) == set(states[0])"),
+     ANY_STATE, "set(names) == set(states[0])", "preimage_schema_status"),
+    # Reported on #48 (independent reviewer): recompute over the REGISTERED set instead of the DECLARED one. Every
+    # authorized case is unchanged and every unauthorized case is rejected either way, so on the scalar outcome axis
+    # this survived; it destroys exactly the "clean recompute over an unauthorized set" distinction N1 exists to draw.
+    ("M12_RECOMPUTE_OVER_REGISTERED_SET_NOT_DECLARED", "N1_SELF_CONSISTENT_REDUCED_PREIMAGE",
+     "    preimage = {name: content.get(name) for name in names}\n",
+     "    _states = _REGISTRY[\"states\"].get(content.get(\"policy_version\")) or [names]\n"
+     "    _pick = next((s for s in _states if set(s) == set(names)), _states[0])\n"
+     "    preimage = {name: content.get(name) for name in sorted(_pick)}\n",
+     "decision_ref_recompute_status"),
+    # Completeness is a constant dimension. A constant is emitted correctly by an implementation that computes
+    # nothing, so it needs a mutant that claims it (must be killed) and the converse: promoting the non-claim
+    # into a failure (must also be killed). Controls exclude the intended dimension by design.
+    ("M13_COMPLETENESS_CLAIMED_SATISFIED", "A1_CONTROL_CURRENT_AUTHORIZED",
+     'COMPLETENESS_STATUS = "cannot_establish"', 'COMPLETENESS_STATUS = "satisfied"',
+     "registered_set_completeness_status"),
+    ("M14_COMPLETENESS_NON_CLAIM_PROMOTED_TO_FAILURE", "A4_V18_REGISTERED_STATE_2",
+     'if signature == "satisfied" and schema == "satisfied" and recompute == "satisfied":  # M2/M8',
+     'if signature == "satisfied" and schema == "satisfied" and recompute == "satisfied" and '
+     'COMPLETENESS_STATUS == "satisfied":  # M2/M8',
+     "required_verification_outcome", ["N8_DECISION_REF_TAMPERED", "N9_SIGNATURE_INVALID_ISOLATED"]),
 ]
+
+
+DIMENSIONS = ("signature_status", "preimage_schema_status", "decision_ref_recompute_status",
+              "registered_set_completeness_status", "required_verification_outcome")
+
+
+def changed_dimensions(actual, expected):
+    return [d for d in DIMENSIONS if actual[d] != expected[d]]
 
 
 def main():
@@ -56,24 +90,28 @@ def main():
         return 1
     source = (HERE / "schema_check.py").read_text(encoding="utf-8")
     records = []
-    for name, killer, before, after in MUTANTS:
-        entry = {"mutant": name, "required_killer": killer, "axis": "required_verification_outcome"}
-        if by_id.get(killer) is None:
+    for mutant in MUTANTS:
+        name, killer, before, after, intended = mutant[:5]
+        controls = mutant[5] if len(mutant) > 5 else CONTROLS
+        entry = {"mutant": name, "required_killer": killer, "intended_dimension": intended, "controls": controls}
+        if by_id.get(killer) is None or any(cid not in by_id for cid in controls):
             entry["status"] = "UNKNOWN_KILLER"
         elif source.count(before) != 1:
             entry["status"] = "NOT_APPLIED"
         else:
             try:
-                ns = {"__name__": "schema_mutant"}
+                ns = {"__name__": "schema_mutant", "_REGISTRY": registry}
                 exec(compile(source.replace(before, after, 1), name, "exec"), ns)
-                controls_ok = all(ns["evaluate"](by_id[cid], registry, pubkey) == by_id[cid]["expected"]
-                                  for cid in CONTROLS)
-                expected = by_id[killer]["expected"]
+                # Controls must be preserved on EVERY dimension except the one this mutant intentionally targets.
+                controls_ok = all(
+                    [d for d in changed_dimensions(ns["evaluate"](by_id[cid], registry, pubkey), by_id[cid]["expected"])
+                     if d != intended] == []
+                    for cid in controls)
                 actual = ns["evaluate"](by_id[killer], registry, pubkey)
-                killed = actual["required_verification_outcome"] != expected["required_verification_outcome"]
-                entry.update(controls_preserved=controls_ok,
-                             expected_required=expected["required_verification_outcome"],
-                             mutant_required=actual["required_verification_outcome"],
+                changed = changed_dimensions(actual, by_id[killer]["expected"])
+                killed = intended in changed
+                entry.update(controls_preserved=controls_ok, changed_dimensions=changed,
+                             also_changed=[d for d in changed if d != intended],
                              status="CONTROL_BROKEN" if not controls_ok else "KILLED" if killed else "SURVIVED")
             except Exception as error:
                 entry.update(status="CRASH", error=type(error).__name__)

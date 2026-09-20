@@ -79,6 +79,50 @@ def make_event(case_id, index, version, declared, hashed_names, universe, overri
             "content": body, "sig": signature}
 
 
+# Expected results are AUTHORED HERE, from each case's stated purpose and the profile's prose rules, and are NOT
+# produced by running the checker under test. (An earlier revision set entry["expected"] = sc.evaluate(...), which
+# made "N/N reproduced" mean only "the checker is deterministic", not "the expected values are right"; a reviewer
+# rightly flagged that.) The generator now fails loudly if schema_check.py disagrees with this table. It is still
+# the same author's reading of the rules, so this establishes reproduction of an authored expectation, not
+# independence -- see the README's Evidence section for what the cross-check against /verify-proof adds.
+SIG_OK = ("satisfied", "SIGNATURE_VALID")
+SCHEMA_OK = ("satisfied", "DECLARED_SET_REGISTERED")
+SCHEMA_NOT_REG = ("violated", "DECLARED_SET_NOT_REGISTERED_FOR_VERSION")
+SCHEMA_MALFORMED = ("violated", "MALFORMED_DECLARED_LIST")
+REC_OK = ("satisfied", "DECISION_REF_RECOMPUTED")
+REC_NOT_ATTEMPTED = ("cannot_establish", "RECOMPUTE_NOT_ATTEMPTED_MALFORMED_LIST")
+
+
+def authored(sig, schema, rec, required, observed):
+    return {"signature_status": sig[0], "preimage_schema_status": schema[0],
+            "decision_ref_recompute_status": rec[0],
+            "registered_set_completeness_status": "cannot_establish",
+            "required_verification_outcome": required, "observed_verification_outcome": observed,
+            "verification_status": "satisfied" if observed == required else "violated",
+            "reason_codes": sorted([sig[1], schema[1], rec[1], "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE"])}
+
+
+EXPECTED = {
+    "A1_CONTROL_CURRENT_AUTHORIZED": authored(SIG_OK, SCHEMA_OK, REC_OK, "accept", "accept"),
+    "A2_REORDERED_DECLARED_LIST_SAME_SET": authored(SIG_OK, SCHEMA_OK, REC_OK, "accept", "accept"),
+    "A3_V18_REGISTERED_STATE_1": authored(SIG_OK, SCHEMA_OK, REC_OK, "accept", "accept"),
+    "A4_V18_REGISTERED_STATE_2": authored(SIG_OK, SCHEMA_OK, REC_OK, "accept", "accept"),
+    "A5_CORE_NEGATIVE_CORRECTLY_REJECTED": authored(SIG_OK, SCHEMA_NOT_REG, REC_OK, "reject", "reject"),
+    "N1_SELF_CONSISTENT_REDUCED_PREIMAGE": authored(SIG_OK, SCHEMA_NOT_REG, REC_OK, "reject", "accept"),
+    "N2_SUPERSET_WITH_UNREGISTERED_FIELD": authored(SIG_OK, SCHEMA_NOT_REG, REC_OK, "reject", "accept"),
+    "N3_UNREGISTERED_POLICY_VERSION": authored(
+        SIG_OK, ("cannot_establish", "POLICY_VERSION_NOT_REGISTERED"), REC_OK, "reject", "accept"),
+    "N4_DUPLICATE_NAME_MALFORMED": authored(SIG_OK, SCHEMA_MALFORMED, REC_NOT_ATTEMPTED, "reject", "accept"),
+    "N5_NON_STRING_ENTRY_MALFORMED": authored(SIG_OK, SCHEMA_MALFORMED, REC_NOT_ATTEMPTED, "reject", "accept"),
+    "N6_NON_LIST_DECLARATION_MALFORMED": authored(SIG_OK, SCHEMA_MALFORMED, REC_NOT_ATTEMPTED, "reject", "accept"),
+    "N7_RECOMPUTE_FAILURE_MUST_NOT_BYPASS_AUTHORIZATION": authored(
+        SIG_OK, SCHEMA_NOT_REG, ("cannot_establish", "UNSUPPORTED_PREIMAGE_VALUE"), "reject", "accept"),
+    "N8_DECISION_REF_TAMPERED": authored(SIG_OK, SCHEMA_OK, ("violated", "DECISION_REF_MISMATCH"), "reject", "accept"),
+    "N9_SIGNATURE_INVALID_ISOLATED": authored(("violated", "SIGNATURE_INVALID"), SCHEMA_OK, REC_OK, "reject", "accept"),
+    "N10_CURRENT_SET_UNDER_OLD_VERSION": authored(SIG_OK, SCHEMA_NOT_REG, REC_OK, "reject", "accept"),
+}
+
+
 def main():
     path = HERE / "vectors.json"
     if "--registry" in sys.argv:
@@ -97,7 +141,11 @@ def main():
         event = make_event(case_id, next(ids), version, declared, hashed, universe, overrides, tamper)
         entry = {"case_id": case_id, "purpose": purpose,
                  "inputs": {"event": event, "observed_verification_outcome": observed}}
-        entry["expected"] = sc.evaluate(entry, registry, PUBKEY)
+        entry["expected"] = EXPECTED[case_id]
+        actual = sc.evaluate(entry, registry, PUBKEY)
+        if actual != entry["expected"]:
+            diff = {k: (entry["expected"][k], actual[k]) for k in entry["expected"] if actual.get(k) != entry["expected"][k]}
+            raise SystemExit("authored expectation disagrees with schema_check.py for %s: %s" % (case_id, diff))
         return entry
 
     cases = [

@@ -9,8 +9,10 @@
         "reason_codes": [
           "DECISION_REF_RECOMPUTED",
           "DECLARED_SET_REGISTERED",
+          "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID"
         ],
+        "registered_set_completeness_status": "cannot_establish",
         "required_verification_outcome": "accept",
         "signature_status": "satisfied",
         "verification_status": "satisfied"
@@ -43,8 +45,10 @@
         "reason_codes": [
           "DECISION_REF_RECOMPUTED",
           "DECLARED_SET_REGISTERED",
+          "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID"
         ],
+        "registered_set_completeness_status": "cannot_establish",
         "required_verification_outcome": "accept",
         "signature_status": "satisfied",
         "verification_status": "satisfied"
@@ -77,8 +81,10 @@
         "reason_codes": [
           "DECISION_REF_RECOMPUTED",
           "DECLARED_SET_REGISTERED",
+          "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID"
         ],
+        "registered_set_completeness_status": "cannot_establish",
         "required_verification_outcome": "accept",
         "signature_status": "satisfied",
         "verification_status": "satisfied"
@@ -111,8 +117,10 @@
         "reason_codes": [
           "DECISION_REF_RECOMPUTED",
           "DECLARED_SET_REGISTERED",
+          "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID"
         ],
+        "registered_set_completeness_status": "cannot_establish",
         "required_verification_outcome": "accept",
         "signature_status": "satisfied",
         "verification_status": "satisfied"
@@ -145,8 +153,10 @@
         "reason_codes": [
           "DECISION_REF_RECOMPUTED",
           "DECLARED_SET_NOT_REGISTERED_FOR_VERSION",
+          "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID"
         ],
+        "registered_set_completeness_status": "cannot_establish",
         "required_verification_outcome": "reject",
         "signature_status": "satisfied",
         "verification_status": "satisfied"
@@ -179,8 +189,10 @@
         "reason_codes": [
           "DECISION_REF_RECOMPUTED",
           "DECLARED_SET_NOT_REGISTERED_FOR_VERSION",
+          "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID"
         ],
+        "registered_set_completeness_status": "cannot_establish",
         "required_verification_outcome": "reject",
         "signature_status": "satisfied",
         "verification_status": "violated"
@@ -213,8 +225,10 @@
         "reason_codes": [
           "DECISION_REF_RECOMPUTED",
           "DECLARED_SET_NOT_REGISTERED_FOR_VERSION",
+          "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID"
         ],
+        "registered_set_completeness_status": "cannot_establish",
         "required_verification_outcome": "reject",
         "signature_status": "satisfied",
         "verification_status": "violated"
@@ -247,8 +261,10 @@
         "reason_codes": [
           "DECISION_REF_RECOMPUTED",
           "POLICY_VERSION_NOT_REGISTERED",
+          "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID"
         ],
+        "registered_set_completeness_status": "cannot_establish",
         "required_verification_outcome": "reject",
         "signature_status": "satisfied",
         "verification_status": "violated"
@@ -281,8 +297,10 @@
         "reason_codes": [
           "MALFORMED_DECLARED_LIST",
           "RECOMPUTE_NOT_ATTEMPTED_MALFORMED_LIST",
+          "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID"
         ],
+        "registered_set_completeness_status": "cannot_establish",
         "required_verification_outcome": "reject",
         "signature_status": "satisfied",
         "verification_status": "violated"
@@ -315,8 +333,10 @@
         "reason_codes": [
           "MALFORMED_DECLARED_LIST",
           "RECOMPUTE_NOT_ATTEMPTED_MALFORMED_LIST",
+          "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID"
         ],
+        "registered_set_completeness_status": "cannot_establish",
         "required_verification_outcome": "reject",
         "signature_status": "satisfied",
         "verification_status": "violated"
@@ -349,8 +369,10 @@
         "reason_codes": [
           "MALFORMED_DECLARED_LIST",
           "RECOMPUTE_NOT_ATTEMPTED_MALFORMED_LIST",
+          "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID"
         ],
+        "registered_set_completeness_status": "cannot_establish",
         "required_verification_outcome": "reject",
         "signature_status": "satisfied",
         "verification_status": "violated"
@@ -382,9 +404,11 @@
         "preimage_schema_status": "violated",
         "reason_codes": [
           "DECLARED_SET_NOT_REGISTERED_FOR_VERSION",
+          "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID",
           "UNSUPPORTED_PREIMAGE_VALUE"
         ],
+        "registered_set_completeness_status": "cannot_establish",
         "required_verification_outcome": "reject",
         "signature_status": "satisfied",
         "verification_status": "violated"
@@ -417,8 +441,10 @@
         "reason_codes": [
           "DECISION_REF_MISMATCH",
           "DECLARED_SET_REGISTERED",
+          "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID"
         ],
+        "registered_set_completeness_status": "cannot_establish",
         "required_verification_outcome": "reject",
         "signature_status": "satisfied",
         "verification_status": "violated"
@@ -451,8 +477,10 @@
         "reason_codes": [
           "DECISION_REF_RECOMPUTED",
           "DECLARED_SET_REGISTERED",
+          "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_INVALID"
         ],
+        "registered_set_completeness_status": "cannot_establish",
         "required_verification_outcome": "reject",
         "signature_status": "violated",
         "verification_status": "violated"
@@ -485,8 +513,10 @@
         "reason_codes": [
           "DECISION_REF_RECOMPUTED",
           "DECLARED_SET_NOT_REGISTERED_FOR_VERSION",
+          "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID"
         ],
+        "registered_set_completeness_status": "cannot_establish",
         "required_verification_outcome": "reject",
         "signature_status": "satisfied",
         "verification_status": "violated"
