@@ -2,7 +2,7 @@
   "profile": "authorized_preimage_schema.v0",
   "spec": {
     "path": "README.md",
-    "sha256": "44b33f0a7c39d3d55ed744221695d586a31ad2769a07da741ee1afcc52f4cb50"
+    "sha256": "341f5c588b0b184a411c7de6cbdbe982fdb6d9fb6aaebb64fe649b558311c051"
   },
   "checker": {
     "path": "schema_check.py",

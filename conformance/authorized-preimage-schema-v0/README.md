@@ -213,6 +213,23 @@ through the `rfc8785` library, computes a real hash, and finds the (tampered) `d
 match. Both reject by the schema dimension, so the outcome agrees. The test pins this exact pair so any
 change on either side fails it.
 
+
+### Named scope divergence: `N7`
+
+On `N7` the profile and the issuer's production verifier agree on the **final outcome** (`reject`) and disagree
+on the **epistemic basis**, deliberately:
+
+| | recompute | `decision_ref_recompute_status` | schema authority | outcome |
+|---|---|---|---|---|
+| production (`/verify-proof`, real `rfc8785`) | established, mismatch found | `violated` | rejects | `reject` |
+| this stdlib profile | outside the RFC 8785 domain it can guarantee (strings, `null`, safe integers) | `cannot_establish` | rejects | `reject` |
+
+Same final outcome is not the same epistemic basis. The profile does not widen its canonicalization to force
+parity of the intermediate status, and does not claim more of RFC 8785 than it implements; production is allowed
+to be stronger because it has the real implementation. In both, the schema authority still rejects, so no
+unauthorized proof is accepted through the gap. The parity test carries this as a named `KNOWN_DIVERGENCES`
+entry rather than an unexplained skip. (Boundary framing from the review of `8894e13`.)
+
 ## Test key and regeneration
 
 `trusted_pubkey` is derived from a fixed label (`test_key_label` in `vectors.json`) and authorizes
