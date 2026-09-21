@@ -53,6 +53,17 @@ complete or correct, and nothing inside the producer's boundary can.
   a verdict, and the verdict is wrong (fail-open). `N7` and `N14` pin the rule; mutant `M18` (admits floats) must be
   killed. (Scope rule proposed by Matthew Moore on #48; a second implementation with a real RFC 8785 library may be
   stronger, and the divergence below says so.)
+
+  **Reading a reject in this scope.** A profile `reject` whose `decision_ref_recompute_status` is `cannot_establish` is **not evidence
+  that the artifact is invalid**, only that this profile cannot vouch for it (its recompute is outside the supported value scope). A relying
+  party must be able to tell "rejected because out of scope" from "rejected because wrong": the reason code and the
+  `cannot_establish` status carry that distinction (`N14` is the worked case: the artifact is correct, the profile declines).
+
+  **Producer-side rule (profile SHOULD, motivated by two RFCs, cited narrowly).** Preimage values SHOULD be strings, `null` or safe
+  integers. That is a rule of this profile, not a requirement either RFC states: RFC 7493 (I-JSON) constrains interoperable numeric range
+  and precision and recommends strings where exact interchange cannot be relied on, and RFC 8785 carries the hard number-serialization
+  requirement (ECMAScript `Number::toString`). A producer that follows it removes `N14`'s case without widening any checker; the issuer
+  controls its own registered field list, so this costs a producer that registers a schema nothing.
 - **The serializer version is validated only when the proof declares it.** `canonicalization_version` is checked when it is in the declared
   field list (`N12`); a proof whose declared set omits it makes no serializer claim, and this profile recomputes with its own
   RFC 8785 subset (string, `null`, safe integer values). A proof under another serializer therefore reports `cannot_establish`, never `satisfied`.
