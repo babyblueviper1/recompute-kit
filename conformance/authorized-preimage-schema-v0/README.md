@@ -45,15 +45,20 @@ complete or correct, and nothing inside the producer's boundary can.
   party**, so they share one author's reading of the rule. A third implementation by someone else is the
   test that would actually stress the spec, and this profile invites it.
 - **The test key is not an issuer key** and proves nothing about any real issuer.
-- **Canonicalization scope.** Preimage values are strings, `null`, or safe integers, where RFC 8785
-  output equals compact sorted-key JSON. Any other value type makes the recompute `cannot_establish`
-  (`N7`), deliberately, rather than guessing a serialization.
+- **Canonicalization scope is normative (a conformance rule, not an implementation note).** Preimage values are
+  strings, `null`, or safe integers, where RFC 8785 output equals compact sorted-key JSON. Any other value type
+  makes the recompute `cannot_establish`, which gates the outcome to `reject`. An implementation of this profile
+  that admits floats is **non-conformant**: RFC 8785 number serialization is ECMAScript `Number::toString`, and
+  shortest-round-trip is where implementations diverge without an error, so a checker that gets one wrong reports
+  a verdict, and the verdict is wrong (fail-open). `N7` and `N14` pin the rule; mutant `M18` (admits floats) must be
+  killed. (Scope rule proposed by Matthew Moore on #48; a second implementation with a real RFC 8785 library may be
+  stronger, and the divergence below says so.)
 - **The serializer version is validated only when the proof declares it.** `canonicalization_version` is checked when it is in the declared
   field list (`N12`); a proof whose declared set omits it makes no serializer claim, and this profile recomputes with its own
   RFC 8785 subset (string, `null`, safe integer values). A proof under another serializer therefore reports `cannot_establish`, never `satisfied`.
-- **Coverage is finite.** 18 cases and 17 one-site mutations show these bugs are caught, not that no
+- **Coverage is finite.** 19 cases and 18 one-site mutations show these bugs are caught, not that no
   other bug exists.
-- **"18/18 reproduced" is not "18/18 agreed by an independent code path".** The expected results in
+- **"19/19 reproduced" is not "19/19 agreed by an independent code path".** The expected results in
   `vectors.json` are authored by hand in `generate_vectors.py` (`EXPECTED`) from each case's stated
   purpose, and the generator fails if the checker disagrees. They are no longer produced by the checker
   under test (an earlier revision did that, so the count only showed the checker was deterministic). The
@@ -67,8 +72,8 @@ complete or correct, and nothing inside the producer's boundary can.
 ## Recompute it (no dependencies beyond Python 3)
 
 ```sh
-python3 schema_check.py vectors.json   # 18/18 reproduced; exit 0
-python3 mutation_check.py              # 17/17 KILLED on the intended dimension, controls preserved; exit 0
+python3 schema_check.py vectors.json   # 19/19 reproduced; exit 0
+python3 mutation_check.py              # 18/18 KILLED on the intended dimension, controls preserved; exit 0
 ```
 
 ## What a case supplies
@@ -94,7 +99,7 @@ own answer and is never rewritten into `violated`.
 | `registered_set_completeness_status` | Is the registered set itself complete for every semantic dependency of the decision? | `REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE` (constant; **non-gating**) |
 
 `required_verification_outcome` is `accept` only when the first three are `satisfied`; otherwise `reject`.
-`registered_set_completeness_status` never gates it (it is `cannot_establish` on all 18 vectors).
+`registered_set_completeness_status` never gates it (it is `cannot_establish` on all 19 vectors).
 `verification_status` is `satisfied` when the observed outcome equals the required one and `violated`
 otherwise (an observed `accept` of a required `reject` is a fail-open).
 
@@ -129,7 +134,7 @@ exactly one field (`external_evidence_hash`) because its field list changed mid-
 bump. Both are accepted only because the registry says so (`A3`, `A4`), which is the positive historical
 control against a verifier that assumes one schema per version.
 
-## Corpus (18 cases)
+## Corpus (19 cases)
 
 | case | what it isolates | schema | recompute | required |
 |---|---|---|---|---|
@@ -149,6 +154,7 @@ control against a verifier that assumes one schema per version.
 | `N10_CURRENT_SET_UNDER_OLD_VERSION` | authority is per the proof's OWN version | violated | satisfied | reject |
 | `N11_DUPLICATE_CONTENT_MEMBER_MALFORMED` | the SIGNED content repeats a member name (last-wins and first-wins parsers read different verdicts) | cannot_establish | cannot_establish | reject |
 | `N12_UNSUPPORTED_CANONICALIZATION_VERSION` | the proof names a serializer version this profile does not implement | satisfied | cannot_establish | reject |
+| `N14_FLOAT_PREIMAGE_VALUE_OUT_OF_SCOPE` | a float (`0.5`) on an authorized set, `decision_ref` correct under RFC 8785: outside the profile's scope | satisfied | cannot_establish | reject |
 | `N13_LONE_SURROGATE_PREIMAGE_VALUE` | a preimage value is a lone UTF-16 surrogate escape: valid JSON, no UTF-8 bytes | satisfied | cannot_establish | reject |
 
 Every adversarial vector except `N9` has a valid signature under the test key, so each fixture isolates
@@ -162,7 +168,7 @@ dimension it targets changes on its witness case, judged against the full expect
 controls (`A1` and `N8` by default) stay exactly as expected on every other dimension. Every status-level
 dimension that changed is recorded (`changed_dimensions`, `also_changed`: the five status fields only, not
 reason codes, `observed_verification_outcome` or `verification_status`), so a mutant that dies for a different
-reason than intended is visible. 17 of 17 are killed.
+reason than intended is visible. 18 of 18 are killed.
 
 This replaces an earlier criterion that judged every mutant on the scalar `required_verification_outcome`
 alone. That collapsed the dimensions back into one verdict, the thing this profile exists to prevent:
@@ -188,6 +194,7 @@ preserved (`M12` below, reported by an independent reviewer on #48).
 | `M15_DUPLICATE_MEMBERS_PARSED_LAST_WINS` | the signed content is parsed last-wins instead of failing closed on a repeated member name; the duplicate-member proof is then fully accepted | `N11` |
 | `M16_CANONICALIZATION_VERSION_IGNORED` | the proof's `canonicalization_version` is never checked, so a proof naming another serializer is recomputed and accepted | `N12` |
 | `M17_LONE_SURROGATE_TREATED_AS_SUPPORTED` | a lone-surrogate string is accepted as a supported preimage value; canonicalization then fails and the generic error path collapses every dimension (the visible change lands on `preimage_schema_status`, with `signature_status` also changed) | `N13` |
+| `M18_FLOAT_ADMITTED_AS_SUPPORTED` | the checker admits float preimage values as supported; `json.dumps(0.5)` equals the RFC 8785 form so `N14` recomputes and reports satisfied/accept | `N14` |
 
 **On `M2` (proposed observable definition).** "Authorize after recompute instead of before" is not
 visible in an outcome when a verifier computes both and combines them. What is observable, and what this
@@ -214,8 +221,8 @@ The two implementations share no code (this checker is standard-library only; th
 uses the `rfc8785` library and its own signature path), but they share an author (see the limits above).
 
 Compared **dimension by dimension**, not only on accept/reject (an outcome-only comparison hid the one
-disagreement below): over all 18 events the production verifier and this checker agree on schema status,
-signature status, recompute status, the completeness constant and the outcome, with **one named divergence**.
+disagreement below): over all 19 events the production verifier and this checker agree on schema status,
+signature status, recompute status, the completeness constant and the outcome, with **two named divergences** (`N7`, `N14`).
 On `N7` the recompute dimension differs: production reports `violated` and this profile reports
 `cannot_establish`. `N7` puts a float in the preimage. The profile refuses floats on purpose (its
 standard-library canonicalizer cannot promise RFC 8785 identity for them); production canonicalizes them
@@ -224,7 +231,9 @@ match. Both reject by the schema dimension, so the outcome agrees. The test pins
 change on either side fails it.
 
 
-### Named scope divergence: `N7`
+### Named scope divergences: `N7` (same outcome) and `N14` (different outcome)
+
+The profile's answer is the narrower one **on purpose**: where production and this profile differ on a float, the profile's `cannot_establish` is the deliberate reading, not a gap to be closed by widening it.
 
 On `N7` the profile and the issuer's production verifier agree on the **final outcome** (`reject`) and disagree
 on the **epistemic basis**, deliberately:
@@ -239,6 +248,23 @@ parity of the intermediate status, and does not claim more of RFC 8785 than it i
 to be stronger because it has the real implementation. In both, the schema authority still rejects, so no
 unauthorized proof is accepted through the gap. The parity test carries this as a named `KNOWN_DIVERGENCES`
 entry rather than an unexplained skip. (Boundary framing from the review of `8894e13`.)
+
+`N14` is the harder half and is stated plainly: a float on an **authorized** set whose `decision_ref` is correct.
+
+| | recompute | `decision_ref_recompute_status` | schema authority | outcome |
+|---|---|---|---|---|
+| production (`/verify-proof`, real `rfc8785`) | established, matches | `satisfied` | authorized | `accept` (`combined_verification_outcome`) |
+| this stdlib profile | outside its scope | `cannot_establish` | authorized | `reject` |
+
+Here the **outcomes differ**, in the direction that matters: the profile is stricter. A consumer that needs this
+profile's fail-closed guarantee should not treat production's `accept` on such an artifact as profile-conformant;
+production is allowed to establish more than the profile because it carries the real implementation. Pinned as
+`OUTCOME_DIVERGENCES` in the parity test.
+
+**Production's outcome fields.** `relayed_from_verifier_registry.required_verification_outcome` keeps its
+documented meaning (schema authority only, kept unchanged for existing consumers). The second field
+`combined_verification_outcome` folds in every dimension (id integrity and signature, schema authorized, and the
+recompute matching) and is what the parity test compares against this profile's outcome.
 
 ## Test key and regeneration
 

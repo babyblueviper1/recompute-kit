@@ -130,6 +130,9 @@ EXPECTED = {
         SIG_OK, SCHEMA_OK, ("cannot_establish", "UNSUPPORTED_CANONICALIZATION_VERSION"), "reject", "accept"),
     "N13_LONE_SURROGATE_PREIMAGE_VALUE": authored(
         SIG_OK, SCHEMA_OK, ("cannot_establish", "UNSUPPORTED_PREIMAGE_VALUE"), "reject", "accept"),
+    # Reported on #48 (2026-09-21): scope of the profile's canonicalizer is normative, not an implementation note.
+    "N14_FLOAT_PREIMAGE_VALUE_OUT_OF_SCOPE": authored(
+        SIG_OK, SCHEMA_OK, ("cannot_establish", "UNSUPPORTED_PREIMAGE_VALUE"), "reject", "accept"),
 }
 
 
@@ -205,6 +208,11 @@ def main():
              "UTF-8 bytes, so it cannot be canonicalized. recompute is cannot_establish with the other dimensions "
              "intact, not a crash and not a generic INVALID_CASE.",
              current, current_set, None, "accept", overrides={"artifact_type": "\ud800"}, tamper="unhashable", ascii_body=True),
+        case("N14_FLOAT_PREIMAGE_VALUE_OUT_OF_SCOPE", "A preimage value is a float (0.5) on an AUTHORIZED set and the "
+             "decision_ref is correct under RFC 8785. The profile's scope is string, null and safe integer: a float is "
+             "outside it, so recompute is cannot_establish and the outcome is reject, even though a library that "
+             "implements ECMAScript Number::toString would establish it. Fail-closed by scope, not by disagreement.",
+             current, current_set, current_set, "accept", overrides={"artifact_type": 0.5}),
     ]
     document = {"profile": sc.PROFILE, "trusted_pubkey": PUBKEY, "test_key_label": KEY_LABEL.decode(),
                 "current_policy_version": current, "registry": registry,

@@ -646,6 +646,42 @@
         "observed_verification_outcome": "accept"
       },
       "purpose": "A preimage value is a lone UTF-16 surrogate escape: valid JSON, no UTF-8 bytes, so it cannot be canonicalized. recompute is cannot_establish with the other dimensions intact, not a crash and not a generic INVALID_CASE."
+    },
+    {
+      "case_id": "N14_FLOAT_PREIMAGE_VALUE_OUT_OF_SCOPE",
+      "expected": {
+        "decision_ref_recompute_status": "cannot_establish",
+        "observed_verification_outcome": "accept",
+        "preimage_schema_status": "satisfied",
+        "reason_codes": [
+          "DECLARED_SET_REGISTERED",
+          "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
+          "SIGNATURE_VALID",
+          "UNSUPPORTED_PREIMAGE_VALUE"
+        ],
+        "registered_set_completeness_status": "cannot_establish",
+        "required_verification_outcome": "reject",
+        "signature_status": "satisfied",
+        "verification_status": "violated"
+      },
+      "inputs": {
+        "event": {
+          "content": "{\"action_binding_agent_id\":\"example:action_binding_agent_id\",\"action_binding_args_hash\":\"example:action_binding_args_hash\",\"action_binding_nonce\":\"example:action_binding_nonce\",\"action_binding_tool_hash\":\"example:action_binding_tool_hash\",\"artifact_hash\":\"example:artifact_hash\",\"artifact_type\":0.5,\"canonicalization_version\":\"rfc8785.v1\",\"confidentiality_tier\":\"example:confidentiality_tier\",\"decision_ref\":\"sha256:1ffd4214e675eb39457e35c58b8a94c54974dc033cfef57c5a3eff977cb6bcc8\",\"decision_ref_preimage_fields\":[\"action_binding_agent_id\",\"action_binding_args_hash\",\"action_binding_nonce\",\"action_binding_tool_hash\",\"artifact_hash\",\"artifact_type\",\"canonicalization_version\",\"confidentiality_tier\",\"disclosed_summary\",\"epistemic_basis\",\"external_evidence_hash\",\"freshness_beacon_hash\",\"intended_audience\",\"intended_verifier\",\"policy_commitment\",\"policy_version\",\"registry_as_of\",\"registry_snapshot_sha256\",\"related_decision_ref\",\"source_class\",\"vantage_limitation\",\"verdict\",\"verified_at\"],\"disclosed_summary\":\"example:disclosed_summary\",\"epistemic_basis\":null,\"external_evidence_hash\":null,\"freshness_beacon_hash\":\"example:freshness_beacon_hash\",\"intended_audience\":null,\"intended_verifier\":null,\"policy_commitment\":\"example:policy_commitment\",\"policy_version\":\"invinoveritas.review.v19\",\"registry_as_of\":null,\"registry_snapshot_sha256\":null,\"related_decision_ref\":null,\"source_class\":\"example:source_class\",\"vantage_limitation\":null,\"verdict\":\"approve\",\"verified_at\":\"example:verified_at\",\"x_unregistered_field\":\"example:x_unregistered_field\"}",
+          "created_at": 1789900018,
+          "id": "7c905b0dcaebaa6f377dfc72187f3eada86387b75a6d1c5c5216019d0f3ac9ff",
+          "kind": 30078,
+          "pubkey": "a04b2492ce64234bdcfa5f191492c58dee16469f6675faaba6f2381b296a5ad8",
+          "sig": "6c520c2e74f1055d3d76140f63027aa0edec681ab3a21da6e0e6027b05c69576ba4f0b8416419a61811c619c554c46ab2ef687dd0001163cebeec7e0182e37a6",
+          "tags": [
+            [
+              "d",
+              "authorized-preimage-schema-v0/N14_FLOAT_PREIMAGE_VALUE_OUT_OF_SCOPE"
+            ]
+          ]
+        },
+        "observed_verification_outcome": "accept"
+      },
+      "purpose": "A preimage value is a float (0.5) on an AUTHORIZED set and the decision_ref is correct under RFC 8785. The profile's scope is string, null and safe integer: a float is outside it, so recompute is cannot_establish and the outcome is reject, even though a library that implements ECMAScript Number::toString would establish it. Fail-closed by scope, not by disagreement."
     }
   ],
   "current_policy_version": "invinoveritas.review.v19",

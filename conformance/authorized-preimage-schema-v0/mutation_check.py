@@ -77,6 +77,13 @@ MUTANTS = [
      "if False:  # M16", "decision_ref_recompute_status"),
     ("M17_LONE_SURROGATE_TREATED_AS_SUPPORTED", "N13_LONE_SURROGATE_PREIMAGE_VALUE",
      "return _encodable(value)  # M17", "return True  # M17", "preimage_schema_status"),
+    # M18 (2026-09-21, on the profile's normative scope): a stdlib checker that admits floats. json.dumps(0.5) happens
+    # to equal the RFC 8785 form, so N14's decision_ref recomputes and the mutant reports satisfied/accept; the
+    # profile's scope says a float is cannot_establish/reject. It is wrong exactly where shortest-round-trip diverges.
+    ("M18_FLOAT_ADMITTED_AS_SUPPORTED", "N14_FLOAT_PREIMAGE_VALUE_OUT_OF_SCOPE",
+     "return type(value) is int and -MAX_SAFE_INT < value < MAX_SAFE_INT",
+     "return type(value) in (int, float) and -MAX_SAFE_INT < value < MAX_SAFE_INT  # M18",
+     "decision_ref_recompute_status"),
 ]
 
 
