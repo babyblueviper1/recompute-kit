@@ -53,16 +53,22 @@ def field_value(name, version):
     return "example:" + name
 
 
-def make_event(case_id, index, version, declared, hashed_names, universe, overrides=None, tamper=None, raw_edit=None, ascii_body=False):
+def make_event(case_id, index, version, declared, hashed_names, universe, overrides=None, tamper=None, raw_edit=None, ascii_body=False, kind=30078, utf16_keys=False):
     """A signed NIP-01 event whose content carries every field in `universe`, the declared list as given,
     and a decision_ref computed over `hashed_names` (what an honest producer of THAT declaration hashed)."""
     content = {name: field_value(name, version) for name in universe}
+    content["schema"] = "invinoveritas.verdict_proof.v1"   # not in any preimage; lets the issuer's is_proof_event (kind + schema prefix) hold on the fixture
     content.update(overrides or {})
     content["policy_version"] = version
     content["decision_ref_preimage_fields"] = declared
     if hashed_names is not None:
         preimage = {name: content.get(name) for name in hashed_names}
-        content["decision_ref"] = "sha256:" + hashlib.sha256(sc.canonical(preimage)).hexdigest()
+        if utf16_keys:   # RFC 8785 order: property names by UTF-16 code unit (differs from the stdlib code-point order)
+            canon = json.dumps({k: preimage[k] for k in sorted(preimage, key=lambda n: n.encode("utf-16-be"))},
+                               separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+        else:
+            canon = sc.canonical(preimage)
+        content["decision_ref"] = "sha256:" + hashlib.sha256(canon).hexdigest()
     if tamper == "decision_ref":
         content["decision_ref"] = "sha256:" + hashlib.sha256(b"a different preimage").hexdigest()
     if tamper == "unhashable":
@@ -72,12 +78,12 @@ def make_event(case_id, index, version, declared, hashed_names, universe, overri
         body = raw_edit(body)   # edits the SIGNED content text itself (e.g. to repeat a member name)
     tags = [["d", "authorized-preimage-schema-v0/" + case_id]]
     created = CREATED_AT + index
-    serialized = json.dumps([0, PUBKEY, created, 30078, tags, body], separators=(",", ":"), ensure_ascii=False)
+    serialized = json.dumps([0, PUBKEY, created, kind, tags, body], separators=(",", ":"), ensure_ascii=False)
     digest = hashlib.sha256(serialized.encode("utf-8")).digest()
     signature = schnorr_sign(digest, SECKEY).hex()
     if tamper == "signature":
         signature = signature[:-1] + ("0" if signature[-1] != "0" else "1")
-    return {"id": digest.hex(), "pubkey": PUBKEY, "created_at": created, "kind": 30078, "tags": tags,
+    return {"id": digest.hex(), "pubkey": PUBKEY, "created_at": created, "kind": kind, "tags": tags,
             "content": body, "sig": signature}
 
 
@@ -133,6 +139,15 @@ EXPECTED = {
     # Reported on #48 (2026-09-21): scope of the profile's canonicalizer is normative, not an implementation note.
     "N14_FLOAT_PREIMAGE_VALUE_OUT_OF_SCOPE": authored(
         SIG_OK, SCHEMA_OK, ("cannot_establish", "UNSUPPORTED_PREIMAGE_VALUE"), "reject", "accept"),
+    # Reported by pipavlo82 on #48 (2026-09-21, tree-level pass):
+    "N15_AUTHENTIC_EVENT_UNDER_WRONG_KIND": authored(
+        ("violated", "EVENT_KIND_NOT_AUTHORIZED"), SCHEMA_OK, REC_OK, "reject", "accept"),
+    "N16_NON_ASCII_DECLARED_NAMES": authored(SIG_OK, SCHEMA_MALFORMED, REC_NOT_ATTEMPTED, "reject", "accept"),
+    "N17_INVALID_CASE_MUST_KEEP_OBSERVED_OUTCOME": {
+        "signature_status": "cannot_establish", "preimage_schema_status": "cannot_establish",
+        "decision_ref_recompute_status": "cannot_establish", "registered_set_completeness_status": "cannot_establish",
+        "required_verification_outcome": "reject", "observed_verification_outcome": "accept", "verification_status": "violated",
+        "reason_codes": sorted(["INVALID_CASE", "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE"])},
 }
 
 
@@ -150,10 +165,11 @@ def main():
     reduced = [n for n in current_set if n != "action_binding_args_hash"]
     ids = iter(range(1000))
 
-    def case(case_id, purpose, version, declared, hashed, observed, overrides=None, tamper=None, raw_edit=None, ascii_body=False):
-        event = make_event(case_id, next(ids), version, declared, hashed, universe, overrides, tamper, raw_edit, ascii_body)
+    def case(case_id, purpose, version, declared, hashed, observed, overrides=None, tamper=None, raw_edit=None, ascii_body=False,
+             kind=30078, utf16_keys=False, extra_inputs=None):
+        event = make_event(case_id, next(ids), version, declared, hashed, universe, overrides, tamper, raw_edit, ascii_body, kind, utf16_keys)
         entry = {"case_id": case_id, "purpose": purpose,
-                 "inputs": {"event": event, "observed_verification_outcome": observed}}
+                 "inputs": {"event": event, "observed_verification_outcome": observed, **(extra_inputs or {})}}
         entry["expected"] = EXPECTED[case_id]
         actual = sc.evaluate(entry, registry, PUBKEY)
         if actual != entry["expected"]:
@@ -213,6 +229,17 @@ def main():
              "outside it, so recompute is cannot_establish and the outcome is reject, even though a library that "
              "implements ECMAScript Number::toString would establish it. Fail-closed by scope, not by disagreement.",
              current, current_set, current_set, "accept", overrides={"artifact_type": 0.5}),
+        case("N15_AUTHENTIC_EVENT_UNDER_WRONG_KIND", "The authorized set, a correct decision_ref and a VALID signature, but the event is "
+             "kind 1, not the proof-event kind 30078: authentic signed content is not an authorized proof-event type.",
+             current, current_set, current_set, "accept", kind=1),
+        case("N16_NON_ASCII_DECLARED_NAMES", "Declared preimage names U+E000 and U+10000 sort differently by code point (stdlib) and by "
+             "UTF-16 code unit (RFC 8785). The decision_ref is correct under RFC 8785; the profile requires ASCII names, so the declaration "
+             "is malformed and the recompute is not attempted rather than computed in a possibly-wrong order.",
+             current, current_set + ["\ue000", "\U00010000"], current_set + ["\ue000", "\U00010000"], "accept",
+             overrides={"\ue000": "example:private-use", "\U00010000": "example:linear-b"}, utf16_keys=True),
+        case("N17_INVALID_CASE_MUST_KEEP_OBSERVED_OUTCOME", "The harness input is malformed (an unexpected extra key), so the verifier cannot "
+             "evaluate it. What the implementation under test actually did (accept) must be preserved, not rewritten to reject.",
+             current, current_set, current_set, "accept", extra_inputs={"unexpected_key": "makes this an invalid case"}),
     ]
     document = {"profile": sc.PROFILE, "trusted_pubkey": PUBKEY, "test_key_label": KEY_LABEL.decode(),
                 "current_policy_version": current, "registry": registry,

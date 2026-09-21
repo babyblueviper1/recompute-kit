@@ -84,11 +84,22 @@ MUTANTS = [
      "return type(value) is int and -MAX_SAFE_INT < value < MAX_SAFE_INT",
      "return type(value) in (int, float) and -MAX_SAFE_INT < value < MAX_SAFE_INT  # M18",
      "decision_ref_recompute_status"),
+    # Reported by pipavlo82 on #48 (2026-09-21, tree-level pass). M19: authentic signed content under another Nostr kind is
+    # accepted as a proof event. M20: declared preimage names are not required to be ASCII, so the stdlib key order (code
+    # point) can silently differ from RFC 8785 (UTF-16 code unit). M21: a case the verifier could not evaluate rewrites the
+    # observed outcome to "reject" instead of preserving what the implementation under test actually did.
+    ("M19_EVENT_KIND_NOT_GATED", "N15_AUTHENTIC_EVENT_UNDER_WRONG_KIND",
+     'if event["kind"] != PROOF_EVENT_KIND:  # M19', "if False:  # M19", "signature_status"),
+    ("M20_NON_ASCII_NAMES_ACCEPTED", "N16_NON_ASCII_DECLARED_NAMES",
+     "if not all(f.isascii() for f in declared):  # M20", "if False:  # M20", "decision_ref_recompute_status"),
+    ("M21_INVALID_CASE_REWRITES_OBSERVED_TO_REJECT", "N17_INVALID_CASE_MUST_KEEP_OBSERVED_OUTCOME",
+     '_supplied_observed(case), ["INVALID_CASE"])  # M21', '"reject", ["INVALID_CASE"])  # M21', "observed_verification_outcome"),
 ]
 
 
 DIMENSIONS = ("signature_status", "preimage_schema_status", "decision_ref_recompute_status",
-              "registered_set_completeness_status", "required_verification_outcome")
+              "registered_set_completeness_status", "required_verification_outcome",
+              "observed_verification_outcome", "verification_status")
 
 
 def changed_dimensions(actual, expected):

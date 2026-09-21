@@ -93,6 +93,7 @@ def supported(value):
     return type(value) is int and -MAX_SAFE_INT < value < MAX_SAFE_INT
 
 
+PROOF_EVENT_KIND = 30078   # the Nostr kind of an authorized proof event; authentic content under another kind is not one
 SUPPORTED_CANONICALIZATION = "rfc8785.v1"   # the serializer this profile's canonical() implements
 
 
@@ -130,6 +131,8 @@ def signature_status(event, trusted_pubkey):
             return "violated", "EVENT_ID_MISMATCH"
         if not schnorr_verify(digest, bytes.fromhex(event["pubkey"]), bytes.fromhex(event["sig"])):
             return "violated", "SIGNATURE_INVALID"
+        if event["kind"] != PROOF_EVENT_KIND:  # M19
+            return "violated", "EVENT_KIND_NOT_AUTHORIZED"   # authentic signed content != an authorized proof-event type
         return "satisfied", "SIGNATURE_VALID"
     except (KeyError, TypeError, ValueError):
         return "cannot_establish", "MALFORMED_EVENT"
@@ -145,6 +148,8 @@ def declared_names(declared):
         return None
     if len(set(declared)) != len(declared):  # M3
         return None
+    if not all(f.isascii() for f in declared):  # M20
+        return None    # declared names MUST be ASCII: the stdlib key order is by code point, RFC 8785 sorts by UTF-16 code unit
     return tuple(declared)
 
 
@@ -196,8 +201,9 @@ def result(signature, schema, recompute, required, observed, reasons):
             "decision_ref_recompute_status": recompute,
             "registered_set_completeness_status": COMPLETENESS_STATUS,
             "required_verification_outcome": required,
-            "observed_verification_outcome": observed,
-            "verification_status": "satisfied" if observed == required else "violated",
+            "observed_verification_outcome": observed if observed is not None else "unavailable",
+            "verification_status": ("cannot_establish" if observed is None
+                                    else "satisfied" if observed == required else "violated"),
             "reason_codes": sorted(list(reasons) + [COMPLETENESS_REASON])}
 
 
@@ -205,8 +211,18 @@ def evaluate(case, registry, trusted_pubkey):
     try:
         return _evaluate(case["inputs"], registry, trusted_pubkey)
     except (ValueError, KeyError, TypeError):
-        return result("cannot_establish", "cannot_establish", "cannot_establish", "reject", "reject",
-                      ["INVALID_CASE"])
+        # The verifier could not evaluate the input. That must not rewrite what the implementation under test did: keep a
+        # valid supplied observed outcome, otherwise report it as unavailable (never invent "reject").
+        return result("cannot_establish", "cannot_establish", "cannot_establish", "reject",
+                      _supplied_observed(case), ["INVALID_CASE"])  # M21
+
+
+def _supplied_observed(case):
+    try:
+        observed = case["inputs"]["observed_verification_outcome"]
+    except (KeyError, TypeError):
+        return None
+    return observed if observed in ("accept", "reject") else None
 
 
 def _evaluate(data, registry, trusted_pubkey):
