@@ -48,9 +48,12 @@ complete or correct, and nothing inside the producer's boundary can.
 - **Canonicalization scope.** Preimage values are strings, `null`, or safe integers, where RFC 8785
   output equals compact sorted-key JSON. Any other value type makes the recompute `cannot_establish`
   (`N7`), deliberately, rather than guessing a serialization.
-- **Coverage is finite.** 15 cases and 14 one-site mutations show these bugs are caught, not that no
+- **The serializer version is validated only when the proof declares it.** `canonicalization_version` is checked when it is in the declared
+  field list (`N12`); a proof whose declared set omits it makes no serializer claim, and this profile recomputes with its own
+  RFC 8785 subset (string, `null`, safe integer values). A proof under another serializer therefore reports `cannot_establish`, never `satisfied`.
+- **Coverage is finite.** 18 cases and 17 one-site mutations show these bugs are caught, not that no
   other bug exists.
-- **"15/15 reproduced" is not "15/15 agreed by an independent code path".** The expected results in
+- **"18/18 reproduced" is not "18/18 agreed by an independent code path".** The expected results in
   `vectors.json` are authored by hand in `generate_vectors.py` (`EXPECTED`) from each case's stated
   purpose, and the generator fails if the checker disagrees. They are no longer produced by the checker
   under test (an earlier revision did that, so the count only showed the checker was deterministic). The
@@ -64,8 +67,8 @@ complete or correct, and nothing inside the producer's boundary can.
 ## Recompute it (no dependencies beyond Python 3)
 
 ```sh
-python3 schema_check.py vectors.json   # 15/15 reproduced; exit 0
-python3 mutation_check.py              # 14/14 KILLED on the intended dimension, controls preserved; exit 0
+python3 schema_check.py vectors.json   # 18/18 reproduced; exit 0
+python3 mutation_check.py              # 17/17 KILLED on the intended dimension, controls preserved; exit 0
 ```
 
 ## What a case supplies
@@ -78,7 +81,7 @@ python3 mutation_check.py              # 14/14 KILLED on the intended dimension,
 
 The checker computes the **required** outcome independently and never reads the observed one.
 
-## Three dimensions, established separately
+## Four dimensions, established separately (three gate the outcome; the fourth is constant and non-gating)
 
 Each dimension is tri-state (`satisfied` / `violated` / `cannot_establish`). `cannot_establish` is its
 own answer and is never rewritten into `violated`.
@@ -91,7 +94,7 @@ own answer and is never rewritten into `violated`.
 | `registered_set_completeness_status` | Is the registered set itself complete for every semantic dependency of the decision? | `REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE` (constant; **non-gating**) |
 
 `required_verification_outcome` is `accept` only when the first three are `satisfied`; otherwise `reject`.
-`registered_set_completeness_status` never gates it (it is `cannot_establish` on all 15 vectors).
+`registered_set_completeness_status` never gates it (it is `cannot_establish` on all 18 vectors).
 `verification_status` is `satisfied` when the observed outcome equals the required one and `violated`
 otherwise (an observed `accept` of a required `reject` is a fail-open).
 
@@ -126,7 +129,7 @@ exactly one field (`external_evidence_hash`) because its field list changed mid-
 bump. Both are accepted only because the registry says so (`A3`, `A4`), which is the positive historical
 control against a verifier that assumes one schema per version.
 
-## Corpus (15 cases)
+## Corpus (18 cases)
 
 | case | what it isolates | schema | recompute | required |
 |---|---|---|---|---|
@@ -144,6 +147,9 @@ control against a verifier that assumes one schema per version.
 | `N8_DECISION_REF_TAMPERED` | authorized set, recompute fails | satisfied | violated | reject |
 | `N9_SIGNATURE_INVALID_ISOLATED` | only the signature is bad; dimensions are independent | satisfied | satisfied | reject |
 | `N10_CURRENT_SET_UNDER_OLD_VERSION` | authority is per the proof's OWN version | violated | satisfied | reject |
+| `N11_DUPLICATE_CONTENT_MEMBER_MALFORMED` | the SIGNED content repeats a member name (last-wins and first-wins parsers read different verdicts) | cannot_establish | cannot_establish | reject |
+| `N12_UNSUPPORTED_CANONICALIZATION_VERSION` | the proof names a serializer version this profile does not implement | satisfied | cannot_establish | reject |
+| `N13_LONE_SURROGATE_PREIMAGE_VALUE` | a preimage value is a lone UTF-16 surrogate escape: valid JSON, no UTF-8 bytes | satisfied | cannot_establish | reject |
 
 Every adversarial vector except `N9` has a valid signature under the test key, so each fixture isolates
 schema authorization instead of conflating it with cryptographic validity. `N9` is the deliberate
@@ -153,12 +159,13 @@ exception that proves the signature dimension is independent of the other two.
 
 `mutation_check.py` applies one-site edits to `schema_check.py`. A mutant is **killed** only when the
 dimension it targets changes on its witness case, judged against the full expected result, while the
-controls (`A1` and `N8` by default) stay exactly as expected on every other dimension. All dimensions that
-changed are recorded (`changed_dimensions`, `also_changed`), so a mutant that dies for a different reason
-than intended is visible. 14 of 14 are killed.
+controls (`A1` and `N8` by default) stay exactly as expected on every other dimension. Every status-level
+dimension that changed is recorded (`changed_dimensions`, `also_changed`: the five status fields only, not
+reason codes, `observed_verification_outcome` or `verification_status`), so a mutant that dies for a different
+reason than intended is visible. 17 of 17 are killed.
 
 This replaces an earlier criterion that judged every mutant on the scalar `required_verification_outcome`
-alone. That collapsed the three dimensions back into one verdict, the thing this profile exists to prevent:
+alone. That collapsed the dimensions back into one verdict, the thing this profile exists to prevent:
 a mutant that corrupted *which dimension reported what* survived whenever accept/reject happened to be
 preserved (`M12` below, reported by an independent reviewer on #48).
 
@@ -178,6 +185,9 @@ preserved (`M12` below, reported by an independent reviewer on #48).
 | `M12_RECOMPUTE_OVER_REGISTERED_SET_NOT_DECLARED` | `decision_ref` recomputed over the registered set instead of the declared one; every authorized case unchanged and every unauthorized case rejected either way, so it **survived the scalar-outcome criterion**; it flips `decision_ref_recompute_status` on `N1`, `N2`, `N10`, `A5` | `N1` (dimension: recompute) |
 | `M13_COMPLETENESS_CLAIMED_SATISFIED` | the constant completeness dimension reports `satisfied` | `A1` (dimension: completeness) |
 | `M14_COMPLETENESS_NON_CLAIM_PROMOTED_TO_FAILURE` | `cannot_establish` completeness gates the outcome, rejecting authorized proofs | `A4` (dimension: outcome; controls are the two reject controls `N8`, `N9`, since the positive controls break by design) |
+| `M15_DUPLICATE_MEMBERS_PARSED_LAST_WINS` | the signed content is parsed last-wins instead of failing closed on a repeated member name; the duplicate-member proof is then fully accepted | `N11` |
+| `M16_CANONICALIZATION_VERSION_IGNORED` | the proof's `canonicalization_version` is never checked, so a proof naming another serializer is recomputed and accepted | `N12` |
+| `M17_LONE_SURROGATE_TREATED_AS_SUPPORTED` | a lone-surrogate string is accepted as a supported preimage value; canonicalization then fails and the generic error path collapses every dimension (the visible change lands on `preimage_schema_status`, with `signature_status` also changed) | `N13` |
 
 **On `M2` (proposed observable definition).** "Authorize after recompute instead of before" is not
 visible in an outcome when a verifier computes both and combines them. What is observable, and what this
@@ -204,7 +214,7 @@ The two implementations share no code (this checker is standard-library only; th
 uses the `rfc8785` library and its own signature path), but they share an author (see the limits above).
 
 Compared **dimension by dimension**, not only on accept/reject (an outcome-only comparison hid the one
-disagreement below): over all 15 events the production verifier and this checker agree on schema status,
+disagreement below): over all 18 events the production verifier and this checker agree on schema status,
 signature status, recompute status, the completeness constant and the outcome, with **one named divergence**.
 On `N7` the recompute dimension differs: production reports `violated` and this profile reports
 `cannot_establish`. `N7` puts a float in the preimage. The profile refuses floats on purpose (its

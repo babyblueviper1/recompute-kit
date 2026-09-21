@@ -2,15 +2,15 @@
   "profile": "authorized_preimage_schema.v0",
   "spec": {
     "path": "README.md",
-    "sha256": "341f5c588b0b184a411c7de6cbdbe982fdb6d9fb6aaebb64fe649b558311c051"
+    "sha256": "eb0c6ecdacddcc255b17bad2953c6693a375fd3a70c8b0680e0e3ad1eb21d26e"
   },
   "checker": {
     "path": "schema_check.py",
-    "sha256": "af403e58596c264b303fcb2b20a205e4e421c16c3f0453e328bdaead6b6a0442"
+    "sha256": "ca57c954bdbc801b558c44d06579c682725ded90a51ac20443de8d1494fd5e41"
   },
   "mutation_checker": {
     "path": "mutation_check.py",
-    "sha256": "e18b7dca71472e91d6b53fb10318f269a5c63e2b6311930688c294da23186514"
+    "sha256": "f9a27938bc6c8074fe028fc37f716d4419a7a575c4c33e4c42cefe12e4882355"
   },
   "laneHint": "recomputable",
   "checks": [
@@ -18,7 +18,7 @@
       "name": "conformance",
       "vectors": {
         "path": "vectors.json",
-        "sha256": "7e138a82ce95c5eeac893fe52063cd12e483ec3dbbaed21ec9dfd31c17e676ad"
+        "sha256": "84b40740480189c60463ae4c61349c215cbe93cc54c30bfd60119f50bafe764b"
       },
       "adapter": {
         "kind": "stdio",
@@ -29,7 +29,7 @@
       "name": "mutation-coverage",
       "vectors": {
         "path": "vectors.json",
-        "sha256": "7e138a82ce95c5eeac893fe52063cd12e483ec3dbbaed21ec9dfd31c17e676ad"
+        "sha256": "84b40740480189c60463ae4c61349c215cbe93cc54c30bfd60119f50bafe764b"
       },
       "adapter": {
         "kind": "stdio",

@@ -65,6 +65,18 @@ MUTANTS = [
      'if signature == "satisfied" and schema == "satisfied" and recompute == "satisfied" and '
      'COMPLETENESS_STATUS == "satisfied":  # M2/M8',
      "required_verification_outcome", ["N8_DECISION_REF_TAMPERED", "N9_SIGNATURE_INVALID_ISOLATED"]),
+    # Reported on #48 (independent reviewer, 2026-09-21). M15: parse the signed content last-wins instead of failing
+    # closed on a repeated member name. M16: ignore the proof's canonicalization_version. M17: treat a lone UTF-16
+    # surrogate string as a supported preimage value (it then cannot be encoded; the verifier's generic error path
+    # collapses every dimension to cannot_establish, which is why the visible change lands on the schema dimension).
+    ("M15_DUPLICATE_MEMBERS_PARSED_LAST_WINS", "N11_DUPLICATE_CONTENT_MEMBER_MALFORMED",
+     'content = json.loads(data["event"]["content"], object_pairs_hook=no_duplicate_members)  # M15',
+     'content = json.loads(data["event"]["content"])  # M15', "preimage_schema_status"),
+    ("M16_CANONICALIZATION_VERSION_IGNORED", "N12_UNSUPPORTED_CANONICALIZATION_VERSION",
+     'if "canonicalization_version" in names and content.get("canonicalization_version") != SUPPORTED_CANONICALIZATION:  # M16',
+     "if False:  # M16", "decision_ref_recompute_status"),
+    ("M17_LONE_SURROGATE_TREATED_AS_SUPPORTED", "N13_LONE_SURROGATE_PREIMAGE_VALUE",
+     "return _encodable(value)  # M17", "return True  # M17", "preimage_schema_status"),
 ]
 
 

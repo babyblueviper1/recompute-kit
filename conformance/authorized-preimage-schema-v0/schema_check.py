@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Authorized preimage schema: a self-consistent decision_ref is not an authorized one.
 
-Standard library only. Three independent dimensions are established separately and only then
-combined: signature (BIP-340 over the NIP-01 event id), preimage-schema authority (the declared
+Standard library only. Three independent gating dimensions (plus a constant, non-gating fourth) are established
+separately and only then combined: signature (BIP-340 over the NIP-01 event id), preimage-schema authority (the declared
 field list against a pinned registry, as a SET), and recompute (decision_ref over exactly the
 declared names). "cannot_establish" is its own answer and is never rewritten into "violated".
 """
@@ -75,11 +75,36 @@ def schnorr_verify(message, pubkey, signature):
 
 
 # ---- canonical bytes ---------------------------------------------------------------------------
+def _encodable(text):
+    """A str that has UTF-8 bytes. json.loads accepts a lone surrogate escape (\\ud800), which cannot be encoded."""
+    try:
+        text.encode("utf-8")
+    except UnicodeEncodeError:
+        return False
+    return True
+
+
 def supported(value):
     """Preimage values this profile can canonicalize identically to RFC 8785: string, null, safe int."""
-    if value is None or type(value) is str:
+    if value is None:
         return True
+    if type(value) is str:
+        return _encodable(value)  # M17
     return type(value) is int and -MAX_SAFE_INT < value < MAX_SAFE_INT
+
+
+SUPPORTED_CANONICALIZATION = "rfc8785.v1"   # the serializer this profile's canonical() implements
+
+
+def no_duplicate_members(pairs):
+    """object_pairs_hook: a JSON object with a repeated member name is malformed, not last-wins. Two parsers can
+    read different values from the same signed bytes (RFC 7493 s2.3 forbids it)."""
+    out = {}
+    for key, value in pairs:
+        if key in out:
+            raise ValueError("duplicate member name %r" % key)
+        out[key] = value
+    return out
 
 
 def canonical(value):
@@ -141,8 +166,10 @@ def recompute_status(content, declared):
     names = declared_names(declared)
     if names is None:
         return "cannot_establish", "RECOMPUTE_NOT_ATTEMPTED_MALFORMED_LIST"
+    if "canonicalization_version" in names and content.get("canonicalization_version") != SUPPORTED_CANONICALIZATION:  # M16
+        return "cannot_establish", "UNSUPPORTED_CANONICALIZATION_VERSION"
     preimage = {name: content.get(name) for name in names}
-    if not all(supported(v) for v in preimage.values()):
+    if not all(_encodable(name) and supported(v) for name, v in preimage.items()):
         return "cannot_establish", "UNSUPPORTED_PREIMAGE_VALUE"
     if "sha256:" + hashlib.sha256(canonical(preimage)).hexdigest() != content.get("decision_ref"):
         return "violated", "DECISION_REF_MISMATCH"
@@ -188,7 +215,7 @@ def _evaluate(data, registry, trusted_pubkey):
         raise ValueError("invalid case")
     signature, sig_reason = signature_status(data["event"], trusted_pubkey)
     try:
-        content = json.loads(data["event"]["content"])
+        content = json.loads(data["event"]["content"], object_pairs_hook=no_duplicate_members)  # M15
         if not isinstance(content, dict):
             raise ValueError("content is not an object")
     except (ValueError, KeyError, TypeError):
@@ -203,7 +230,7 @@ def _evaluate(data, registry, trusted_pubkey):
 
 
 def load_document(path):
-    document = json.loads(Path(path).read_text(encoding="utf-8"))
+    document = json.loads(Path(path).read_text(encoding="utf-8"), object_pairs_hook=no_duplicate_members)
     if not (document["profile"] == PROFILE and bool(document["cases"])):
         raise ValueError("invalid document")
     if registry_digest(document["registry"]) != document["registry_sha256"]:

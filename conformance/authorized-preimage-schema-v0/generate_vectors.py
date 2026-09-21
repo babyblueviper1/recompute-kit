@@ -53,7 +53,7 @@ def field_value(name, version):
     return "example:" + name
 
 
-def make_event(case_id, index, version, declared, hashed_names, universe, overrides=None, tamper=None):
+def make_event(case_id, index, version, declared, hashed_names, universe, overrides=None, tamper=None, raw_edit=None, ascii_body=False):
     """A signed NIP-01 event whose content carries every field in `universe`, the declared list as given,
     and a decision_ref computed over `hashed_names` (what an honest producer of THAT declaration hashed)."""
     content = {name: field_value(name, version) for name in universe}
@@ -67,7 +67,9 @@ def make_event(case_id, index, version, declared, hashed_names, universe, overri
         content["decision_ref"] = "sha256:" + hashlib.sha256(b"a different preimage").hexdigest()
     if tamper == "unhashable":
         content["decision_ref"] = "sha256:" + "00" * 32
-    body = json.dumps(content, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    body = json.dumps(content, sort_keys=True, separators=(",", ":"), ensure_ascii=bool(ascii_body))
+    if raw_edit is not None:
+        body = raw_edit(body)   # edits the SIGNED content text itself (e.g. to repeat a member name)
     tags = [["d", "authorized-preimage-schema-v0/" + case_id]]
     created = CREATED_AT + index
     serialized = json.dumps([0, PUBKEY, created, 30078, tags, body], separators=(",", ":"), ensure_ascii=False)
@@ -120,6 +122,14 @@ EXPECTED = {
     "N8_DECISION_REF_TAMPERED": authored(SIG_OK, SCHEMA_OK, ("violated", "DECISION_REF_MISMATCH"), "reject", "accept"),
     "N9_SIGNATURE_INVALID_ISOLATED": authored(("violated", "SIGNATURE_INVALID"), SCHEMA_OK, REC_OK, "reject", "accept"),
     "N10_CURRENT_SET_UNDER_OLD_VERSION": authored(SIG_OK, SCHEMA_NOT_REG, REC_OK, "reject", "accept"),
+    # Reported by an independent reviewer on #48 (2026-09-21):
+    "N11_DUPLICATE_CONTENT_MEMBER_MALFORMED": dict(
+        authored(SIG_OK, ("cannot_establish", "MALFORMED_CONTENT"), ("cannot_establish", "MALFORMED_CONTENT"), "reject", "accept"),
+        reason_codes=sorted(["SIGNATURE_VALID", "MALFORMED_CONTENT", "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE"])),
+    "N12_UNSUPPORTED_CANONICALIZATION_VERSION": authored(
+        SIG_OK, SCHEMA_OK, ("cannot_establish", "UNSUPPORTED_CANONICALIZATION_VERSION"), "reject", "accept"),
+    "N13_LONE_SURROGATE_PREIMAGE_VALUE": authored(
+        SIG_OK, SCHEMA_OK, ("cannot_establish", "UNSUPPORTED_PREIMAGE_VALUE"), "reject", "accept"),
 }
 
 
@@ -137,8 +147,8 @@ def main():
     reduced = [n for n in current_set if n != "action_binding_args_hash"]
     ids = iter(range(1000))
 
-    def case(case_id, purpose, version, declared, hashed, observed, overrides=None, tamper=None):
-        event = make_event(case_id, next(ids), version, declared, hashed, universe, overrides, tamper)
+    def case(case_id, purpose, version, declared, hashed, observed, overrides=None, tamper=None, raw_edit=None, ascii_body=False):
+        event = make_event(case_id, next(ids), version, declared, hashed, universe, overrides, tamper, raw_edit, ascii_body)
         entry = {"case_id": case_id, "purpose": purpose,
                  "inputs": {"event": event, "observed_verification_outcome": observed}}
         entry["expected"] = EXPECTED[case_id]
@@ -185,6 +195,16 @@ def main():
         case("N10_CURRENT_SET_UNDER_OLD_VERSION", "The current field set declared under v1: authority is per the "
              "proof's OWN policy_version, not any version.",
              "invinoveritas.review.v1", current_set, current_set, "accept"),
+        case("N11_DUPLICATE_CONTENT_MEMBER_MALFORMED", "The SIGNED content repeats a member name (verdict). A last-wins "
+             "parser reads 'approve', a first-wins parser reads 'reject': malformed, not silently resolved.",
+             current, current_set, current_set, "accept", raw_edit=lambda b: '{"verdict":"reject",' + b[1:]),
+        case("N12_UNSUPPORTED_CANONICALIZATION_VERSION", "The proof names a serializer version this profile does not "
+             "implement: recompute cannot be established (not violated, not satisfied), so the outcome is reject.",
+             current, current_set, current_set, "accept", overrides={"canonicalization_version": "rfc8785.v2"}),
+        case("N13_LONE_SURROGATE_PREIMAGE_VALUE", "A preimage value is a lone UTF-16 surrogate escape: valid JSON, no "
+             "UTF-8 bytes, so it cannot be canonicalized. recompute is cannot_establish with the other dimensions "
+             "intact, not a crash and not a generic INVALID_CASE.",
+             current, current_set, None, "accept", overrides={"artifact_type": "\ud800"}, tamper="unhashable", ascii_body=True),
     ]
     document = {"profile": sc.PROFILE, "trusted_pubkey": PUBKEY, "test_key_label": KEY_LABEL.decode(),
                 "current_policy_version": current, "registry": registry,

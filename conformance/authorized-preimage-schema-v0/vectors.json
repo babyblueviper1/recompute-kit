@@ -539,6 +539,113 @@
         "observed_verification_outcome": "accept"
       },
       "purpose": "The current field set declared under v1: authority is per the proof's OWN policy_version, not any version."
+    },
+    {
+      "case_id": "N11_DUPLICATE_CONTENT_MEMBER_MALFORMED",
+      "expected": {
+        "decision_ref_recompute_status": "cannot_establish",
+        "observed_verification_outcome": "accept",
+        "preimage_schema_status": "cannot_establish",
+        "reason_codes": [
+          "MALFORMED_CONTENT",
+          "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
+          "SIGNATURE_VALID"
+        ],
+        "registered_set_completeness_status": "cannot_establish",
+        "required_verification_outcome": "reject",
+        "signature_status": "satisfied",
+        "verification_status": "violated"
+      },
+      "inputs": {
+        "event": {
+          "content": "{\"verdict\":\"reject\",\"action_binding_agent_id\":\"example:action_binding_agent_id\",\"action_binding_args_hash\":\"example:action_binding_args_hash\",\"action_binding_nonce\":\"example:action_binding_nonce\",\"action_binding_tool_hash\":\"example:action_binding_tool_hash\",\"artifact_hash\":\"example:artifact_hash\",\"artifact_type\":\"code_diff\",\"canonicalization_version\":\"rfc8785.v1\",\"confidentiality_tier\":\"example:confidentiality_tier\",\"decision_ref\":\"sha256:c86ce45746ab85446712958cb5b0540d03b0929c0c2b1a8eae7cb8225cd7f275\",\"decision_ref_preimage_fields\":[\"action_binding_agent_id\",\"action_binding_args_hash\",\"action_binding_nonce\",\"action_binding_tool_hash\",\"artifact_hash\",\"artifact_type\",\"canonicalization_version\",\"confidentiality_tier\",\"disclosed_summary\",\"epistemic_basis\",\"external_evidence_hash\",\"freshness_beacon_hash\",\"intended_audience\",\"intended_verifier\",\"policy_commitment\",\"policy_version\",\"registry_as_of\",\"registry_snapshot_sha256\",\"related_decision_ref\",\"source_class\",\"vantage_limitation\",\"verdict\",\"verified_at\"],\"disclosed_summary\":\"example:disclosed_summary\",\"epistemic_basis\":null,\"external_evidence_hash\":null,\"freshness_beacon_hash\":\"example:freshness_beacon_hash\",\"intended_audience\":null,\"intended_verifier\":null,\"policy_commitment\":\"example:policy_commitment\",\"policy_version\":\"invinoveritas.review.v19\",\"registry_as_of\":null,\"registry_snapshot_sha256\":null,\"related_decision_ref\":null,\"source_class\":\"example:source_class\",\"vantage_limitation\":null,\"verdict\":\"approve\",\"verified_at\":\"example:verified_at\",\"x_unregistered_field\":\"example:x_unregistered_field\"}",
+          "created_at": 1789900015,
+          "id": "86949f8c70c3ebfb1a92c6584e0686a6ab4e1848c0efb1c1a7f16a50eb50dff5",
+          "kind": 30078,
+          "pubkey": "a04b2492ce64234bdcfa5f191492c58dee16469f6675faaba6f2381b296a5ad8",
+          "sig": "5579af94102cc1e18b517b23621284f661a7b78458e4bde3c6bee1b24d1a6a1aff43833af9ef283d756b9762b599ce4557803deb083284bc77c4fffe3aaad579",
+          "tags": [
+            [
+              "d",
+              "authorized-preimage-schema-v0/N11_DUPLICATE_CONTENT_MEMBER_MALFORMED"
+            ]
+          ]
+        },
+        "observed_verification_outcome": "accept"
+      },
+      "purpose": "The SIGNED content repeats a member name (verdict). A last-wins parser reads 'approve', a first-wins parser reads 'reject': malformed, not silently resolved."
+    },
+    {
+      "case_id": "N12_UNSUPPORTED_CANONICALIZATION_VERSION",
+      "expected": {
+        "decision_ref_recompute_status": "cannot_establish",
+        "observed_verification_outcome": "accept",
+        "preimage_schema_status": "satisfied",
+        "reason_codes": [
+          "DECLARED_SET_REGISTERED",
+          "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
+          "SIGNATURE_VALID",
+          "UNSUPPORTED_CANONICALIZATION_VERSION"
+        ],
+        "registered_set_completeness_status": "cannot_establish",
+        "required_verification_outcome": "reject",
+        "signature_status": "satisfied",
+        "verification_status": "violated"
+      },
+      "inputs": {
+        "event": {
+          "content": "{\"action_binding_agent_id\":\"example:action_binding_agent_id\",\"action_binding_args_hash\":\"example:action_binding_args_hash\",\"action_binding_nonce\":\"example:action_binding_nonce\",\"action_binding_tool_hash\":\"example:action_binding_tool_hash\",\"artifact_hash\":\"example:artifact_hash\",\"artifact_type\":\"code_diff\",\"canonicalization_version\":\"rfc8785.v2\",\"confidentiality_tier\":\"example:confidentiality_tier\",\"decision_ref\":\"sha256:f25839173d35b4b460808d4317332bbc68445999bade2ef223b6f7f3bcbb45fd\",\"decision_ref_preimage_fields\":[\"action_binding_agent_id\",\"action_binding_args_hash\",\"action_binding_nonce\",\"action_binding_tool_hash\",\"artifact_hash\",\"artifact_type\",\"canonicalization_version\",\"confidentiality_tier\",\"disclosed_summary\",\"epistemic_basis\",\"external_evidence_hash\",\"freshness_beacon_hash\",\"intended_audience\",\"intended_verifier\",\"policy_commitment\",\"policy_version\",\"registry_as_of\",\"registry_snapshot_sha256\",\"related_decision_ref\",\"source_class\",\"vantage_limitation\",\"verdict\",\"verified_at\"],\"disclosed_summary\":\"example:disclosed_summary\",\"epistemic_basis\":null,\"external_evidence_hash\":null,\"freshness_beacon_hash\":\"example:freshness_beacon_hash\",\"intended_audience\":null,\"intended_verifier\":null,\"policy_commitment\":\"example:policy_commitment\",\"policy_version\":\"invinoveritas.review.v19\",\"registry_as_of\":null,\"registry_snapshot_sha256\":null,\"related_decision_ref\":null,\"source_class\":\"example:source_class\",\"vantage_limitation\":null,\"verdict\":\"approve\",\"verified_at\":\"example:verified_at\",\"x_unregistered_field\":\"example:x_unregistered_field\"}",
+          "created_at": 1789900016,
+          "id": "5bc2525f545d76020ca8e99958e77fe22ac1ec7c325a8d19fa86f55543792f91",
+          "kind": 30078,
+          "pubkey": "a04b2492ce64234bdcfa5f191492c58dee16469f6675faaba6f2381b296a5ad8",
+          "sig": "af689976a5dccab9e3fab933c0470e70465354b60a8d3d4b94ed9551dab586498e61cfad739121e38bfd33b10e873c7f864de998df2e8434ee10f7f152b57435",
+          "tags": [
+            [
+              "d",
+              "authorized-preimage-schema-v0/N12_UNSUPPORTED_CANONICALIZATION_VERSION"
+            ]
+          ]
+        },
+        "observed_verification_outcome": "accept"
+      },
+      "purpose": "The proof names a serializer version this profile does not implement: recompute cannot be established (not violated, not satisfied), so the outcome is reject."
+    },
+    {
+      "case_id": "N13_LONE_SURROGATE_PREIMAGE_VALUE",
+      "expected": {
+        "decision_ref_recompute_status": "cannot_establish",
+        "observed_verification_outcome": "accept",
+        "preimage_schema_status": "satisfied",
+        "reason_codes": [
+          "DECLARED_SET_REGISTERED",
+          "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
+          "SIGNATURE_VALID",
+          "UNSUPPORTED_PREIMAGE_VALUE"
+        ],
+        "registered_set_completeness_status": "cannot_establish",
+        "required_verification_outcome": "reject",
+        "signature_status": "satisfied",
+        "verification_status": "violated"
+      },
+      "inputs": {
+        "event": {
+          "content": "{\"action_binding_agent_id\":\"example:action_binding_agent_id\",\"action_binding_args_hash\":\"example:action_binding_args_hash\",\"action_binding_nonce\":\"example:action_binding_nonce\",\"action_binding_tool_hash\":\"example:action_binding_tool_hash\",\"artifact_hash\":\"example:artifact_hash\",\"artifact_type\":\"\\ud800\",\"canonicalization_version\":\"rfc8785.v1\",\"confidentiality_tier\":\"example:confidentiality_tier\",\"decision_ref\":\"sha256:0000000000000000000000000000000000000000000000000000000000000000\",\"decision_ref_preimage_fields\":[\"action_binding_agent_id\",\"action_binding_args_hash\",\"action_binding_nonce\",\"action_binding_tool_hash\",\"artifact_hash\",\"artifact_type\",\"canonicalization_version\",\"confidentiality_tier\",\"disclosed_summary\",\"epistemic_basis\",\"external_evidence_hash\",\"freshness_beacon_hash\",\"intended_audience\",\"intended_verifier\",\"policy_commitment\",\"policy_version\",\"registry_as_of\",\"registry_snapshot_sha256\",\"related_decision_ref\",\"source_class\",\"vantage_limitation\",\"verdict\",\"verified_at\"],\"disclosed_summary\":\"example:disclosed_summary\",\"epistemic_basis\":null,\"external_evidence_hash\":null,\"freshness_beacon_hash\":\"example:freshness_beacon_hash\",\"intended_audience\":null,\"intended_verifier\":null,\"policy_commitment\":\"example:policy_commitment\",\"policy_version\":\"invinoveritas.review.v19\",\"registry_as_of\":null,\"registry_snapshot_sha256\":null,\"related_decision_ref\":null,\"source_class\":\"example:source_class\",\"vantage_limitation\":null,\"verdict\":\"approve\",\"verified_at\":\"example:verified_at\",\"x_unregistered_field\":\"example:x_unregistered_field\"}",
+          "created_at": 1789900017,
+          "id": "e842f08f841ef699e6e56bfd5f4dd71ebb4e61b4555bc5df6716bebe8a0dabd8",
+          "kind": 30078,
+          "pubkey": "a04b2492ce64234bdcfa5f191492c58dee16469f6675faaba6f2381b296a5ad8",
+          "sig": "411971847cc0e1dfb5321f2413d8ce3a8d1fa66872446d41eb593eb3720bf2d7c33e8a17e6454c4b0e6596c78f92b400a28d19c8656a8e751fd0c907d091ec2e",
+          "tags": [
+            [
+              "d",
+              "authorized-preimage-schema-v0/N13_LONE_SURROGATE_PREIMAGE_VALUE"
+            ]
+          ]
+        },
+        "observed_verification_outcome": "accept"
+      },
+      "purpose": "A preimage value is a lone UTF-16 surrogate escape: valid JSON, no UTF-8 bytes, so it cannot be canonicalized. recompute is cannot_establish with the other dimensions intact, not a crash and not a generic INVALID_CASE."
     }
   ],
   "current_policy_version": "invinoveritas.review.v19",
