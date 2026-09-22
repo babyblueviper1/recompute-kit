@@ -4,11 +4,15 @@
       "case_id": "A1_CONTROL_CURRENT_AUTHORIZED",
       "expected": {
         "decision_ref_recompute_status": "satisfied",
+        "issuer_status": "satisfied",
         "observed_verification_outcome": "accept",
         "preimage_schema_status": "satisfied",
+        "proof_event_status": "satisfied",
         "reason_codes": [
           "DECISION_REF_RECOMPUTED",
           "DECLARED_SET_REGISTERED",
+          "ISSUER_TRUSTED",
+          "PROOF_EVENT_KIND",
           "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID"
         ],
@@ -40,11 +44,15 @@
       "case_id": "A2_REORDERED_DECLARED_LIST_SAME_SET",
       "expected": {
         "decision_ref_recompute_status": "satisfied",
+        "issuer_status": "satisfied",
         "observed_verification_outcome": "accept",
         "preimage_schema_status": "satisfied",
+        "proof_event_status": "satisfied",
         "reason_codes": [
           "DECISION_REF_RECOMPUTED",
           "DECLARED_SET_REGISTERED",
+          "ISSUER_TRUSTED",
+          "PROOF_EVENT_KIND",
           "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID"
         ],
@@ -76,11 +84,15 @@
       "case_id": "A3_V18_REGISTERED_STATE_1",
       "expected": {
         "decision_ref_recompute_status": "satisfied",
+        "issuer_status": "satisfied",
         "observed_verification_outcome": "accept",
         "preimage_schema_status": "satisfied",
+        "proof_event_status": "satisfied",
         "reason_codes": [
           "DECISION_REF_RECOMPUTED",
           "DECLARED_SET_REGISTERED",
+          "ISSUER_TRUSTED",
+          "PROOF_EVENT_KIND",
           "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID"
         ],
@@ -112,11 +124,15 @@
       "case_id": "A4_V18_REGISTERED_STATE_2",
       "expected": {
         "decision_ref_recompute_status": "satisfied",
+        "issuer_status": "satisfied",
         "observed_verification_outcome": "accept",
         "preimage_schema_status": "satisfied",
+        "proof_event_status": "satisfied",
         "reason_codes": [
           "DECISION_REF_RECOMPUTED",
           "DECLARED_SET_REGISTERED",
+          "ISSUER_TRUSTED",
+          "PROOF_EVENT_KIND",
           "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID"
         ],
@@ -148,11 +164,15 @@
       "case_id": "A5_CORE_NEGATIVE_CORRECTLY_REJECTED",
       "expected": {
         "decision_ref_recompute_status": "satisfied",
+        "issuer_status": "satisfied",
         "observed_verification_outcome": "reject",
         "preimage_schema_status": "violated",
+        "proof_event_status": "satisfied",
         "reason_codes": [
           "DECISION_REF_RECOMPUTED",
           "DECLARED_SET_NOT_REGISTERED_FOR_VERSION",
+          "ISSUER_TRUSTED",
+          "PROOF_EVENT_KIND",
           "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID"
         ],
@@ -184,11 +204,15 @@
       "case_id": "N1_SELF_CONSISTENT_REDUCED_PREIMAGE",
       "expected": {
         "decision_ref_recompute_status": "satisfied",
+        "issuer_status": "satisfied",
         "observed_verification_outcome": "accept",
         "preimage_schema_status": "violated",
+        "proof_event_status": "satisfied",
         "reason_codes": [
           "DECISION_REF_RECOMPUTED",
           "DECLARED_SET_NOT_REGISTERED_FOR_VERSION",
+          "ISSUER_TRUSTED",
+          "PROOF_EVENT_KIND",
           "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID"
         ],
@@ -220,11 +244,15 @@
       "case_id": "N2_SUPERSET_WITH_UNREGISTERED_FIELD",
       "expected": {
         "decision_ref_recompute_status": "satisfied",
+        "issuer_status": "satisfied",
         "observed_verification_outcome": "accept",
         "preimage_schema_status": "violated",
+        "proof_event_status": "satisfied",
         "reason_codes": [
           "DECISION_REF_RECOMPUTED",
           "DECLARED_SET_NOT_REGISTERED_FOR_VERSION",
+          "ISSUER_TRUSTED",
+          "PROOF_EVENT_KIND",
           "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID"
         ],
@@ -256,11 +284,15 @@
       "case_id": "N3_UNREGISTERED_POLICY_VERSION",
       "expected": {
         "decision_ref_recompute_status": "satisfied",
+        "issuer_status": "satisfied",
         "observed_verification_outcome": "accept",
         "preimage_schema_status": "cannot_establish",
+        "proof_event_status": "satisfied",
         "reason_codes": [
           "DECISION_REF_RECOMPUTED",
+          "ISSUER_TRUSTED",
           "POLICY_VERSION_NOT_REGISTERED",
+          "PROOF_EVENT_KIND",
           "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID"
         ],
@@ -292,10 +324,14 @@
       "case_id": "N4_DUPLICATE_NAME_MALFORMED",
       "expected": {
         "decision_ref_recompute_status": "cannot_establish",
+        "issuer_status": "satisfied",
         "observed_verification_outcome": "accept",
         "preimage_schema_status": "violated",
+        "proof_event_status": "satisfied",
         "reason_codes": [
+          "ISSUER_TRUSTED",
           "MALFORMED_DECLARED_LIST",
+          "PROOF_EVENT_KIND",
           "RECOMPUTE_NOT_ATTEMPTED_MALFORMED_LIST",
           "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID"
@@ -328,10 +364,14 @@
       "case_id": "N5_NON_STRING_ENTRY_MALFORMED",
       "expected": {
         "decision_ref_recompute_status": "cannot_establish",
+        "issuer_status": "satisfied",
         "observed_verification_outcome": "accept",
         "preimage_schema_status": "violated",
+        "proof_event_status": "satisfied",
         "reason_codes": [
+          "ISSUER_TRUSTED",
           "MALFORMED_DECLARED_LIST",
+          "PROOF_EVENT_KIND",
           "RECOMPUTE_NOT_ATTEMPTED_MALFORMED_LIST",
           "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID"
@@ -364,10 +404,14 @@
       "case_id": "N6_NON_LIST_DECLARATION_MALFORMED",
       "expected": {
         "decision_ref_recompute_status": "cannot_establish",
+        "issuer_status": "satisfied",
         "observed_verification_outcome": "accept",
         "preimage_schema_status": "violated",
+        "proof_event_status": "satisfied",
         "reason_codes": [
+          "ISSUER_TRUSTED",
           "MALFORMED_DECLARED_LIST",
+          "PROOF_EVENT_KIND",
           "RECOMPUTE_NOT_ATTEMPTED_MALFORMED_LIST",
           "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID"
@@ -400,10 +444,14 @@
       "case_id": "N7_RECOMPUTE_FAILURE_MUST_NOT_BYPASS_AUTHORIZATION",
       "expected": {
         "decision_ref_recompute_status": "cannot_establish",
+        "issuer_status": "satisfied",
         "observed_verification_outcome": "accept",
         "preimage_schema_status": "violated",
+        "proof_event_status": "satisfied",
         "reason_codes": [
           "DECLARED_SET_NOT_REGISTERED_FOR_VERSION",
+          "ISSUER_TRUSTED",
+          "PROOF_EVENT_KIND",
           "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID",
           "UNSUPPORTED_PREIMAGE_VALUE"
@@ -436,11 +484,15 @@
       "case_id": "N8_DECISION_REF_TAMPERED",
       "expected": {
         "decision_ref_recompute_status": "violated",
+        "issuer_status": "satisfied",
         "observed_verification_outcome": "accept",
         "preimage_schema_status": "satisfied",
+        "proof_event_status": "satisfied",
         "reason_codes": [
           "DECISION_REF_MISMATCH",
           "DECLARED_SET_REGISTERED",
+          "ISSUER_TRUSTED",
+          "PROOF_EVENT_KIND",
           "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID"
         ],
@@ -472,11 +524,15 @@
       "case_id": "N9_SIGNATURE_INVALID_ISOLATED",
       "expected": {
         "decision_ref_recompute_status": "satisfied",
+        "issuer_status": "satisfied",
         "observed_verification_outcome": "accept",
         "preimage_schema_status": "satisfied",
+        "proof_event_status": "satisfied",
         "reason_codes": [
           "DECISION_REF_RECOMPUTED",
           "DECLARED_SET_REGISTERED",
+          "ISSUER_TRUSTED",
+          "PROOF_EVENT_KIND",
           "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_INVALID"
         ],
@@ -508,11 +564,15 @@
       "case_id": "N10_CURRENT_SET_UNDER_OLD_VERSION",
       "expected": {
         "decision_ref_recompute_status": "satisfied",
+        "issuer_status": "satisfied",
         "observed_verification_outcome": "accept",
         "preimage_schema_status": "violated",
+        "proof_event_status": "satisfied",
         "reason_codes": [
           "DECISION_REF_RECOMPUTED",
           "DECLARED_SET_NOT_REGISTERED_FOR_VERSION",
+          "ISSUER_TRUSTED",
+          "PROOF_EVENT_KIND",
           "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID"
         ],
@@ -544,10 +604,14 @@
       "case_id": "N11_DUPLICATE_CONTENT_MEMBER_MALFORMED",
       "expected": {
         "decision_ref_recompute_status": "cannot_establish",
+        "issuer_status": "satisfied",
         "observed_verification_outcome": "accept",
         "preimage_schema_status": "cannot_establish",
+        "proof_event_status": "satisfied",
         "reason_codes": [
+          "ISSUER_TRUSTED",
           "MALFORMED_CONTENT",
+          "PROOF_EVENT_KIND",
           "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID"
         ],
@@ -579,10 +643,14 @@
       "case_id": "N12_UNSUPPORTED_CANONICALIZATION_VERSION",
       "expected": {
         "decision_ref_recompute_status": "cannot_establish",
+        "issuer_status": "satisfied",
         "observed_verification_outcome": "accept",
         "preimage_schema_status": "satisfied",
+        "proof_event_status": "satisfied",
         "reason_codes": [
           "DECLARED_SET_REGISTERED",
+          "ISSUER_TRUSTED",
+          "PROOF_EVENT_KIND",
           "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID",
           "UNSUPPORTED_CANONICALIZATION_VERSION"
@@ -615,10 +683,14 @@
       "case_id": "N13_LONE_SURROGATE_PREIMAGE_VALUE",
       "expected": {
         "decision_ref_recompute_status": "cannot_establish",
+        "issuer_status": "satisfied",
         "observed_verification_outcome": "accept",
         "preimage_schema_status": "satisfied",
+        "proof_event_status": "satisfied",
         "reason_codes": [
           "DECLARED_SET_REGISTERED",
+          "ISSUER_TRUSTED",
+          "PROOF_EVENT_KIND",
           "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID",
           "UNSUPPORTED_PREIMAGE_VALUE"
@@ -651,10 +723,14 @@
       "case_id": "N14_FLOAT_PREIMAGE_VALUE_OUT_OF_SCOPE",
       "expected": {
         "decision_ref_recompute_status": "cannot_establish",
+        "issuer_status": "satisfied",
         "observed_verification_outcome": "accept",
         "preimage_schema_status": "satisfied",
+        "proof_event_status": "satisfied",
         "reason_codes": [
           "DECLARED_SET_REGISTERED",
+          "ISSUER_TRUSTED",
+          "PROOF_EVENT_KIND",
           "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID",
           "UNSUPPORTED_PREIMAGE_VALUE"
@@ -687,17 +763,21 @@
       "case_id": "N15_AUTHENTIC_EVENT_UNDER_WRONG_KIND",
       "expected": {
         "decision_ref_recompute_status": "satisfied",
+        "issuer_status": "satisfied",
         "observed_verification_outcome": "accept",
         "preimage_schema_status": "satisfied",
+        "proof_event_status": "violated",
         "reason_codes": [
           "DECISION_REF_RECOMPUTED",
           "DECLARED_SET_REGISTERED",
           "EVENT_KIND_NOT_AUTHORIZED",
-          "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE"
+          "ISSUER_TRUSTED",
+          "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
+          "SIGNATURE_VALID"
         ],
         "registered_set_completeness_status": "cannot_establish",
         "required_verification_outcome": "reject",
-        "signature_status": "violated",
+        "signature_status": "satisfied",
         "verification_status": "violated"
       },
       "inputs": {
@@ -723,10 +803,14 @@
       "case_id": "N16_NON_ASCII_DECLARED_NAMES",
       "expected": {
         "decision_ref_recompute_status": "cannot_establish",
+        "issuer_status": "satisfied",
         "observed_verification_outcome": "accept",
         "preimage_schema_status": "violated",
+        "proof_event_status": "satisfied",
         "reason_codes": [
+          "ISSUER_TRUSTED",
           "MALFORMED_DECLARED_LIST",
+          "PROOF_EVENT_KIND",
           "RECOMPUTE_NOT_ATTEMPTED_MALFORMED_LIST",
           "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
           "SIGNATURE_VALID"
@@ -759,8 +843,10 @@
       "case_id": "N17_INVALID_CASE_MUST_KEEP_OBSERVED_OUTCOME",
       "expected": {
         "decision_ref_recompute_status": "cannot_establish",
+        "issuer_status": "cannot_establish",
         "observed_verification_outcome": "accept",
         "preimage_schema_status": "cannot_establish",
+        "proof_event_status": "cannot_establish",
         "reason_codes": [
           "INVALID_CASE",
           "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE"
@@ -789,6 +875,46 @@
         "unexpected_key": "makes this an invalid case"
       },
       "purpose": "The harness input is malformed (an unexpected extra key), so the verifier cannot evaluate it. What the implementation under test actually did (accept) must be preserved, not rewritten to reject."
+    },
+    {
+      "case_id": "N18_AUTHENTIC_EVENT_UNDER_UNTRUSTED_KEY",
+      "expected": {
+        "decision_ref_recompute_status": "satisfied",
+        "issuer_status": "violated",
+        "observed_verification_outcome": "accept",
+        "preimage_schema_status": "satisfied",
+        "proof_event_status": "satisfied",
+        "reason_codes": [
+          "DECISION_REF_RECOMPUTED",
+          "DECLARED_SET_REGISTERED",
+          "PROOF_EVENT_KIND",
+          "REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE",
+          "SIGNATURE_VALID",
+          "UNTRUSTED_PUBKEY"
+        ],
+        "registered_set_completeness_status": "cannot_establish",
+        "required_verification_outcome": "reject",
+        "signature_status": "satisfied",
+        "verification_status": "violated"
+      },
+      "inputs": {
+        "event": {
+          "content": "{\"action_binding_agent_id\":\"example:action_binding_agent_id\",\"action_binding_args_hash\":\"example:action_binding_args_hash\",\"action_binding_nonce\":\"example:action_binding_nonce\",\"action_binding_tool_hash\":\"example:action_binding_tool_hash\",\"artifact_hash\":\"example:artifact_hash\",\"artifact_type\":\"code_diff\",\"canonicalization_version\":\"rfc8785.v1\",\"confidentiality_tier\":\"example:confidentiality_tier\",\"decision_ref\":\"sha256:c86ce45746ab85446712958cb5b0540d03b0929c0c2b1a8eae7cb8225cd7f275\",\"decision_ref_preimage_fields\":[\"action_binding_agent_id\",\"action_binding_args_hash\",\"action_binding_nonce\",\"action_binding_tool_hash\",\"artifact_hash\",\"artifact_type\",\"canonicalization_version\",\"confidentiality_tier\",\"disclosed_summary\",\"epistemic_basis\",\"external_evidence_hash\",\"freshness_beacon_hash\",\"intended_audience\",\"intended_verifier\",\"policy_commitment\",\"policy_version\",\"registry_as_of\",\"registry_snapshot_sha256\",\"related_decision_ref\",\"source_class\",\"vantage_limitation\",\"verdict\",\"verified_at\"],\"disclosed_summary\":\"example:disclosed_summary\",\"epistemic_basis\":null,\"external_evidence_hash\":null,\"freshness_beacon_hash\":\"example:freshness_beacon_hash\",\"intended_audience\":null,\"intended_verifier\":null,\"policy_commitment\":\"example:policy_commitment\",\"policy_version\":\"invinoveritas.review.v19\",\"registry_as_of\":null,\"registry_snapshot_sha256\":null,\"related_decision_ref\":null,\"schema\":\"invinoveritas.verdict_proof.v1\",\"source_class\":\"example:source_class\",\"vantage_limitation\":null,\"verdict\":\"approve\",\"verified_at\":\"example:verified_at\",\"x_unregistered_field\":\"example:x_unregistered_field\"}",
+          "created_at": 1789900022,
+          "id": "48deba7e08b7bcacd14cd816eeb62c4c6c41fbf7c2a2e2d76ba63cf54013fa0d",
+          "kind": 30078,
+          "pubkey": "f5630ad1d5a310e714bc2fc96ab3eec30ae998b21e7423d3f725e3e94d2416b8",
+          "sig": "a525333fec8af68ef5eb9b01b92ebe0c69ba46dfb5bc98cf38f607e4b57f0261d212ed9e68141e81edca3b6a190306f6f612add0cb4d73a8f63e57554c0a04e1",
+          "tags": [
+            [
+              "d",
+              "authorized-preimage-schema-v0/N18_AUTHENTIC_EVENT_UNDER_UNTRUSTED_KEY"
+            ]
+          ]
+        },
+        "observed_verification_outcome": "accept"
+      },
+      "purpose": "The authorized set, a correct decision_ref, the right kind, and a genuinely VALID signature -- but over the event's OWN (real, self-consistent) key, which is simply not the one this registry trusts. signature_status is satisfied (the signature over this event by its own pubkey checks out); issuer_status alone is violated."
     }
   ],
   "current_policy_version": "invinoveritas.review.v19",

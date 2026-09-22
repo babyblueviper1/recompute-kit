@@ -20,9 +20,9 @@ ANY_STATE = "any(set(names) == set(state) for state in states)"
 MUTANTS = [
     ("M1_DECLARED_SET_TRUSTED_DIRECTLY", "N1_SELF_CONSISTENT_REDUCED_PREIMAGE", ANY_STATE, "True", "preimage_schema_status"),
     ("M2_RECOMPUTE_FAILURE_BYPASSES_AUTHORIZATION", "N7_RECOMPUTE_FAILURE_MUST_NOT_BYPASS_AUTHORIZATION",
-     'if signature == "satisfied" and schema == "satisfied" and recompute == "satisfied":  # M2/M8',
-     'if recompute == "cannot_establish" and signature == "satisfied" or (signature == "satisfied" and '
-     'schema == "satisfied" and recompute == "satisfied"):  # M2/M8', "required_verification_outcome"),
+     'if signature == "satisfied" and issuer == "satisfied" and proof_event == "satisfied" and schema == "satisfied" and recompute == "satisfied":  # M2/M8/M14/M22',
+     'if recompute == "cannot_establish" and signature == "satisfied" or (signature == "satisfied" and issuer == "satisfied" and '
+     'proof_event == "satisfied" and schema == "satisfied" and recompute == "satisfied"):  # M2/M8/M14/M22', "required_verification_outcome"),
     ("M3_DUPLICATE_NAMES_SILENTLY_DEDUPED", "N4_DUPLICATE_NAME_MALFORMED",
      "if len(set(declared)) != len(declared):  # M3", "if False:  # M3", "preimage_schema_status"),
     ("M4_NON_STRING_ENTRIES_COERCED_AWAY", "N5_NON_STRING_ENTRY_MALFORMED",
@@ -37,8 +37,8 @@ MUTANTS = [
     ("M7_SUPERSET_ACCEPTED", "N2_SUPERSET_WITH_UNREGISTERED_FIELD",
      ANY_STATE, "any(set(names) >= set(state) for state in states)", "preimage_schema_status"),
     ("M8_SIGNATURE_NOT_CHECKED", "N9_SIGNATURE_INVALID_ISOLATED",
-     'if signature == "satisfied" and schema == "satisfied" and recompute == "satisfied":  # M2/M8',
-     'if schema == "satisfied" and recompute == "satisfied":  # M2/M8', "required_verification_outcome"),
+     'if signature == "satisfied" and issuer == "satisfied" and proof_event == "satisfied" and schema == "satisfied" and recompute == "satisfied":  # M2/M8/M14/M22',
+     'if issuer == "satisfied" and proof_event == "satisfied" and schema == "satisfied" and recompute == "satisfied":  # M2/M8/M14/M22', "required_verification_outcome"),
     ("M9_LIST_ORDER_TREATED_AS_IDENTITY", "A2_REORDERED_DECLARED_LIST_SAME_SET",
      ANY_STATE, "any(list(names) == list(state) for state in states)", "preimage_schema_status"),
     ("M10_ANY_VERSIONS_REGISTRY_ACCEPTED", "N10_CURRENT_SET_UNDER_OLD_VERSION",
@@ -61,9 +61,9 @@ MUTANTS = [
      'COMPLETENESS_STATUS = "cannot_establish"', 'COMPLETENESS_STATUS = "satisfied"',
      "registered_set_completeness_status"),
     ("M14_COMPLETENESS_NON_CLAIM_PROMOTED_TO_FAILURE", "A4_V18_REGISTERED_STATE_2",
-     'if signature == "satisfied" and schema == "satisfied" and recompute == "satisfied":  # M2/M8',
-     'if signature == "satisfied" and schema == "satisfied" and recompute == "satisfied" and '
-     'COMPLETENESS_STATUS == "satisfied":  # M2/M8',
+     'if signature == "satisfied" and issuer == "satisfied" and proof_event == "satisfied" and schema == "satisfied" and recompute == "satisfied":  # M2/M8/M14/M22',
+     'if signature == "satisfied" and issuer == "satisfied" and proof_event == "satisfied" and schema == "satisfied" and recompute == "satisfied" and '
+     'COMPLETENESS_STATUS == "satisfied":  # M2/M8/M14/M22',
      "required_verification_outcome", ["N8_DECISION_REF_TAMPERED", "N9_SIGNATURE_INVALID_ISOLATED"]),
     # Reported on #48 (independent reviewer, 2026-09-21). M15: parse the signed content last-wins instead of failing
     # closed on a repeated member name. M16: ignore the proof's canonicalization_version. M17: treat a lone UTF-16
@@ -89,15 +89,21 @@ MUTANTS = [
     # point) can silently differ from RFC 8785 (UTF-16 code unit). M21: a case the verifier could not evaluate rewrites the
     # observed outcome to "reject" instead of preserving what the implementation under test actually did.
     ("M19_EVENT_KIND_NOT_GATED", "N15_AUTHENTIC_EVENT_UNDER_WRONG_KIND",
-     'if event["kind"] != PROOF_EVENT_KIND:  # M19', "if False:  # M19", "signature_status"),
+     'if event["kind"] != PROOF_EVENT_KIND:  # M19', "if False:  # M19", "proof_event_status"),
     ("M20_NON_ASCII_NAMES_ACCEPTED", "N16_NON_ASCII_DECLARED_NAMES",
      "if not all(f.isascii() for f in declared):  # M20", "if False:  # M20", "decision_ref_recompute_status"),
     ("M21_INVALID_CASE_REWRITES_OBSERVED_TO_REJECT", "N17_INVALID_CASE_MUST_KEEP_OBSERVED_OUTCOME",
      '_supplied_observed(case), ["INVALID_CASE"])  # M21', '"reject", ["INVALID_CASE"])  # M21', "observed_verification_outcome"),
+    # 2026-09-22 (MattyIceMatrix on #48, closing the N15/issuer_status split): a valid signature by a key that is
+    # simply not the pinned one must be reported as a real, separate fact (issuer_status), not silently absorbed
+    # into whether the signature itself checks out. M22 gates nothing on it.
+    ("M22_ISSUER_NOT_GATED", "N18_AUTHENTIC_EVENT_UNDER_UNTRUSTED_KEY",
+     'if event["pubkey"] != trusted_pubkey:  # M22', "if False:  # M22", "issuer_status"),
 ]
 
 
-DIMENSIONS = ("signature_status", "preimage_schema_status", "decision_ref_recompute_status",
+DIMENSIONS = ("signature_status", "issuer_status", "proof_event_status", "preimage_schema_status",
+              "decision_ref_recompute_status",
               "registered_set_completeness_status", "required_verification_outcome",
               "observed_verification_outcome", "verification_status")
 

@@ -67,9 +67,9 @@ complete or correct, and nothing inside the producer's boundary can.
 - **The serializer version is validated only when the proof declares it.** `canonicalization_version` is checked when it is in the declared
   field list (`N12`); a proof whose declared set omits it makes no serializer claim, and this profile recomputes with its own
   RFC 8785 subset (string, `null`, safe integer values). A proof under another serializer therefore reports `cannot_establish`, never `satisfied`.
-- **Coverage is finite.** 22 cases and 21 one-site mutations show these bugs are caught, not that no
+- **Coverage is finite.** 23 cases and 22 one-site mutations show these bugs are caught, not that no
   other bug exists.
-- **"22/22 reproduced" is not "22/22 agreed by an independent code path".** The expected results in
+- **"23/23 reproduced" is not "23/23 agreed by an independent code path".** The expected results in
   `vectors.json` are authored by hand in `generate_vectors.py` (`EXPECTED`) from each case's stated
   purpose, and the generator fails if the checker disagrees. They are no longer produced by the checker
   under test (an earlier revision did that, so the count only showed the checker was deterministic). The
@@ -83,8 +83,8 @@ complete or correct, and nothing inside the producer's boundary can.
 ## Recompute it (no dependencies beyond Python 3)
 
 ```sh
-python3 schema_check.py vectors.json   # 22/22 reproduced; exit 0
-python3 mutation_check.py              # 21/21 KILLED on the intended dimension, controls preserved; exit 0
+python3 schema_check.py vectors.json   # 23/23 reproduced; exit 0
+python3 mutation_check.py              # 22/22 KILLED on the intended dimension, controls preserved; exit 0
 ```
 
 ## What a case supplies
@@ -97,20 +97,30 @@ python3 mutation_check.py              # 21/21 KILLED on the intended dimension,
 
 The checker computes the **required** outcome independently and never reads the observed one.
 
-## Four dimensions, established separately (three gate the outcome; the fourth is constant and non-gating)
+## Six dimensions, established separately (five gate the outcome; the sixth is constant and non-gating)
 
 Each dimension is tri-state (`satisfied` / `violated` / `cannot_establish`). `cannot_establish` is its
 own answer and is never rewritten into `violated`.
 
+**2026-09-22: `signature_status` split into three independent facts.** It used to also gate the
+trusted-key check and the proof-event kind, collapsing three different reasons an event can fail into
+one status (`N15`, tree-level review by pipavlo82; the split itself by MattyIceMatrix). A valid
+signature by an untrusted key, or a valid signature by the trusted key under the wrong kind, are each
+their own honest answer now, not a shared status that can't say which failed. Mirrors production
+(`services/proof_signing.py`): `id_integrity`+`signature_valid`, `issued_by_invinoveritas`, and the kind
+half of `is_proof_event` are three independent checks there too, computed regardless of one another.
+
 | dimension | question | reason codes |
 |---|---|---|
-| `signature_status` | Does the BIP-340 signature verify over the NIP-01 event id, under the trusted key, **and is the event the authorized proof-event kind (30078)**? Authentic signed content under another kind is not a proof event (`N15`). | `SIGNATURE_VALID`, `SIGNATURE_INVALID`, `EVENT_ID_MISMATCH`, `UNTRUSTED_PUBKEY`, `EVENT_KIND_NOT_AUTHORIZED`, `MALFORMED_EVENT` |
+| `signature_status` | Does the event's own id recompute correctly and does the BIP-340 signature verify over it, **under the event's own embedded pubkey** (regardless of whether that pubkey is the trusted one)? | `SIGNATURE_VALID`, `SIGNATURE_INVALID`, `EVENT_ID_MISMATCH`, `MALFORMED_EVENT` |
+| `issuer_status` | Is the event's pubkey the pinned/trusted key? Independent of whether the signature over that pubkey is itself valid — an event can be authentically self-signed by a real key that simply is not the one this verifier trusts (`N18`). | `ISSUER_TRUSTED`, `UNTRUSTED_PUBKEY`, `MALFORMED_EVENT` |
+| `proof_event_status` | Is the event kind the authorized proof-event kind (30078)? Authentic signed content under another kind is real signed content, just not an authorized proof-event type (`N15`). | `PROOF_EVENT_KIND`, `EVENT_KIND_NOT_AUTHORIZED`, `MALFORMED_EVENT` |
 | `preimage_schema_status` | Is the declared field **set** registered for the proof's own `policy_version`? | `DECLARED_SET_REGISTERED`, `DECLARED_SET_NOT_REGISTERED_FOR_VERSION`, `POLICY_VERSION_NOT_REGISTERED`, `MALFORMED_DECLARED_LIST` |
 | `decision_ref_recompute_status` | Does `decision_ref` equal `sha256(JCS({name: content[name]}))` over **exactly the declared names** (absent -> `null`)? | `DECISION_REF_RECOMPUTED`, `DECISION_REF_MISMATCH`, `UNSUPPORTED_PREIMAGE_VALUE`, `RECOMPUTE_NOT_ATTEMPTED_MALFORMED_LIST` |
 | `registered_set_completeness_status` | Is the registered set itself complete for every semantic dependency of the decision? | `REGISTERED_SET_COMPLETENESS_NOT_ESTABLISHABLE` (constant; **non-gating**) |
 
-`required_verification_outcome` is `accept` only when the first three are `satisfied`; otherwise `reject`.
-`registered_set_completeness_status` never gates it (it is `cannot_establish` on all 22 vectors).
+`required_verification_outcome` is `accept` only when the first five are `satisfied`; otherwise `reject`.
+`registered_set_completeness_status` never gates it (it is `cannot_establish` on all 23 vectors).
 `verification_status` is `satisfied` when the observed outcome equals the required one and `violated`
 otherwise (an observed `accept` of a required `reject` is a fail-open).
 
@@ -145,7 +155,7 @@ exactly one field (`external_evidence_hash`) because its field list changed mid-
 bump. Both are accepted only because the registry says so (`A3`, `A4`), which is the positive historical
 control against a verifier that assumes one schema per version.
 
-## Corpus (22 cases)
+## Corpus (23 cases)
 
 | case | what it isolates | schema | recompute | required |
 |---|---|---|---|---|
@@ -165,7 +175,8 @@ control against a verifier that assumes one schema per version.
 | `N10_CURRENT_SET_UNDER_OLD_VERSION` | authority is per the proof's OWN version | violated | satisfied | reject |
 | `N11_DUPLICATE_CONTENT_MEMBER_MALFORMED` | the SIGNED content repeats a member name (last-wins and first-wins parsers read different verdicts) | cannot_establish | cannot_establish | reject |
 | `N12_UNSUPPORTED_CANONICALIZATION_VERSION` | the proof names a serializer version this profile does not implement | satisfied | cannot_establish | reject |
-| `N15_AUTHENTIC_EVENT_UNDER_WRONG_KIND` | a correctly signed event, authorized set, correct `decision_ref`, but kind `1` instead of `30078` | violated (`EVENT_KIND_NOT_AUTHORIZED`) | satisfied | reject |
+| `N15_AUTHENTIC_EVENT_UNDER_WRONG_KIND` | a correctly signed event by the trusted key, authorized set, correct `decision_ref`, but kind `1` instead of `30078` — `proof_event_status: violated (EVENT_KIND_NOT_AUTHORIZED)`, `signature_status`/`issuer_status` both satisfied | satisfied | satisfied | reject |
+| `N18_AUTHENTIC_EVENT_UNDER_UNTRUSTED_KEY` | a correctly self-signed event, authorized set, correct `decision_ref`, but signed by a different, real, untrusted key — `issuer_status: violated (UNTRUSTED_PUBKEY)`, `signature_status`/`proof_event_status` both satisfied | satisfied | satisfied | reject |
 | `N16_NON_ASCII_DECLARED_NAMES` | declared names U+E000 and U+10000 (stdlib code-point order differs from RFC 8785 UTF-16 order); `decision_ref` correct under RFC 8785 | satisfied | cannot_establish | reject |
 | `N17_INVALID_CASE_MUST_KEEP_OBSERVED_OUTCOME` | a malformed harness input (unexpected extra key) with observed `accept`: the observed outcome is preserved, not rewritten to `reject` | cannot_establish | cannot_establish | reject |
 | `N14_FLOAT_PREIMAGE_VALUE_OUT_OF_SCOPE` | a float (`0.5`) on an authorized set, `decision_ref` correct under RFC 8785: outside the profile's scope | satisfied | cannot_establish | reject |
@@ -182,7 +193,7 @@ dimension it targets changes on its witness case, judged against the full expect
 controls (`A1` and `N8` by default) stay exactly as expected on every other dimension. Every status-level
 dimension that changed is recorded (`changed_dimensions`, `also_changed`: the seven status fields: the five verification dimensions plus
 `observed_verification_outcome` and `verification_status`; not reason codes), so a mutant that dies for a different
-reason than intended is visible. 21 of 21 are killed.
+reason than intended is visible. 22 of 22 are killed.
 
 This replaces an earlier criterion that judged every mutant on the scalar `required_verification_outcome`
 alone. That collapsed the dimensions back into one verdict, the thing this profile exists to prevent:
@@ -209,9 +220,10 @@ preserved (`M12` below, reported by an independent reviewer on #48).
 | `M16_CANONICALIZATION_VERSION_IGNORED` | the proof's `canonicalization_version` is never checked, so a proof naming another serializer is recomputed and accepted | `N12` |
 | `M17_LONE_SURROGATE_TREATED_AS_SUPPORTED` | a lone-surrogate string is accepted as a supported preimage value; canonicalization then fails and the generic error path collapses every dimension (the visible change lands on `preimage_schema_status`, with `signature_status` also changed) | `N13` |
 | `M18_FLOAT_ADMITTED_AS_SUPPORTED` | the checker admits float preimage values as supported; `json.dumps(0.5)` equals the RFC 8785 form so `N14` recomputes and reports satisfied/accept | `N14` |
-| `M19_EVENT_KIND_NOT_GATED` | authentic signed content under another Nostr kind is accepted as a proof event | `N15` |
+| `M19_EVENT_KIND_NOT_GATED` | authentic signed content under another Nostr kind is accepted as a proof event | `N15` (dimension: `proof_event_status`) |
 | `M20_NON_ASCII_NAMES_ACCEPTED` | declared names are not required to be ASCII, so the stdlib key order silently differs from RFC 8785 | `N16` |
 | `M21_INVALID_CASE_REWRITES_OBSERVED_TO_REJECT` | a case the verifier could not evaluate rewrites the implementation's observed outcome to `reject` | `N17` |
+| `M22_ISSUER_NOT_GATED` | a valid signature by an untrusted key is accepted regardless of who signed it | `N18` (dimension: `issuer_status`) |
 
 **On `M2` (proposed observable definition).** "Authorize after recompute instead of before" is not
 visible in an outcome when a verifier computes both and combines them. What is observable, and what this
@@ -232,14 +244,16 @@ same split in `trust_basis`:
 | `preimage_schema_status` `satisfied` / `violated` / `cannot_establish` | `relayed_from_verifier_registry.preimage_schema_status` = `authorized` / `not_authorized_for_version` or `malformed_declared_list` / `cannot_establish` |
 | `registered_set_completeness_status` | `relayed_from_verifier_registry.registered_set_completeness_status` (constant `cannot_establish`, non-gating) |
 | `signature_status` | `checks.id_integrity` and `checks.signature_valid` |
+| `issuer_status` | whether the event's pubkey equals the trusted key being compared against (`checks.issued_by_invinoveritas` checks it against production's own real pin, which is a *different* key than this profile's test key by design — the parity test compares the underlying pubkey-equality mechanism, not literal agreement on which key is trusted) |
+| `proof_event_status` | the kind half of `checks.is_proof_event` (which also requires an `invinoveritas.*` schema string this profile does not check) |
 | `required_verification_outcome` | `relayed_from_verifier_registry.required_verification_outcome` |
 
 The two implementations share no code (this checker is standard-library only; the production verifier
 uses the `rfc8785` library and its own signature path), but they share an author (see the limits above).
 
 Compared **dimension by dimension**, not only on accept/reject (an outcome-only comparison hid the one
-disagreement below): over all 22 events the production verifier (N17 is a harness-input case with no event to compare, so 21 are compared) and this checker agree on schema status,
-signature status, recompute status, the completeness constant and the outcome, with **three named divergences** (`N7`, `N14`, `N16`).
+disagreement below): over all 23 events the production verifier (N17 is a harness-input case with no event to compare, so 22 are compared) and this checker agree on schema status,
+signature status, issuer status, proof-event status, recompute status, the completeness constant and the outcome, with **four named divergences** (`N7`, `N14`, `N16`, `N18`).
 On `N7` the recompute dimension differs: production reports `violated` and this profile reports
 `cannot_establish`. `N7` puts a float in the preimage. The profile refuses floats on purpose (its
 standard-library canonicalizer cannot promise RFC 8785 identity for them); production canonicalizes them
@@ -250,9 +264,28 @@ change on either side fails it.
 
 ### Three boundaries added on the second tree-level review (pipavlo82, 2026-09-21)
 
-- **Authentic signed content is not an authorized proof-event type (`N15`, `M19`).** `signature_status` also requires kind `30078`. The issuer's `is_proof_event` additionally requires an `invinoveritas.*` `schema` in the content; **this profile does not check that string** (the fixture's content carries one so the issuer's check holds, but the profile does not establish it).
-- **Declared names MUST be ASCII (`N16`, `M20`).** The stdlib canonicalizer orders keys by code point; RFC 8785 orders property names by UTF-16 code unit, and the two differ for valid Unicode names (U+E000 vs U+10000). No registered name is non-ASCII, so nothing current is affected; the rule keeps the profile's canonicalization domain from being wider than what it guarantees. A non-ASCII declaration is `MALFORMED_DECLARED_LIST` and the recompute is not attempted. **`N16` is the third named divergence:** production (real `rfc8785`) recomputes the correct hash and reports `satisfied`; the profile declines (`cannot_establish`); both reject (the declared set is not registered), so the outcome agrees.
+- **Authentic signed content is not an authorized proof-event type (`N15`, `M19`).** The event kind must be `30078`. The issuer's `is_proof_event` additionally requires an `invinoveritas.*` `schema` in the content; **this profile does not check that string** (the fixture's content carries one so the issuer's check holds, but the profile does not establish it).
+- **Declared names MUST be ASCII (`N16`, `M20`).** The stdlib canonicalizer orders keys by code point; RFC 8785 orders property names by UTF-16 code unit, and the two differ for valid Unicode names (U+E000 vs U+10000). No registered name is non-ASCII, so nothing current is affected; the rule keeps the profile's canonicalization domain from being wider than what it guarantees. A non-ASCII declaration is `MALFORMED_DECLARED_LIST` and the recompute is not attempted. **`N16` is a named divergence:** production (real `rfc8785`) recomputes the correct hash and reports `satisfied`; the profile declines (`cannot_establish`); both reject (the declared set is not registered), so the outcome agrees.
 - **A verifier that could not evaluate an input must not rewrite what the implementation under test did (`N17`, `M21`).** The invalid-case path keeps a valid supplied observed outcome, and reports it `unavailable` (with `verification_status: cannot_establish`) only when none was supplied. `N17` has no event to compare, so it is profile-only in the production parity test.
+
+### `signature_status` split into three (pipavlo82's own follow-up on N15, MattyIceMatrix, 2026-09-22)
+
+`N15`'s own fixture exposed the gap: an authentic, correctly-signed, trusted-key event under the wrong
+kind reported `signature_status: violated`, and the README's own parity table mapped `signature_status`
+to production's `id_integrity` + `signature_valid` alone — both of which production reports `satisfied`
+for that exact event. The status collapsed a fact about the event's *type* into the same field as facts
+about its *cryptographic authenticity*, contradicting the parity table it was compared against.
+
+Split into `signature_status` (id + BIP-340 only), `issuer_status` (is the pubkey the pinned one), and
+`proof_event_status` (is the kind `30078`) — see the dimension table above. `N15` moved to
+`proof_event_status: violated` with `signature_status`/`issuer_status` both `satisfied` (an authentic
+signed event by the trusted key, just the wrong kind). **`N18` is new: an authentic signed event by a
+*different*, real, self-consistently-signing key** — `signature_status` is `satisfied` (the signature
+over this event, by its own pubkey, genuinely checks out), `issuer_status` alone is `violated`
+(`UNTRUSTED_PUBKEY`). `N18` is the fourth named divergence: `combined_verification_outcome` in
+production deliberately does not gate on `issued_by_invinoveritas` ("the caller pins the key it
+trusts"), so production reports `accept` while this profile's `required_verification_outcome`, which
+gates on all five dimensions, reports `reject`.
 
 **What production's `combined_verification_outcome` includes.** id integrity + signature, `is_proof_event` (kind 30078 and an `invinoveritas.*` schema), schema authorized, and the recompute matching. It does **not** include `issued_by_invinoveritas` (the caller pins the key it trusts), nor the freshness, PQ or beacon checks: it is not equivalent to endpoint-level `valid`.
 
