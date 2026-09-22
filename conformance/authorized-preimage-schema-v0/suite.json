@@ -2,15 +2,15 @@
   "profile": "authorized_preimage_schema.v0",
   "spec": {
     "path": "README.md",
-    "sha256": "56422ee0b4947952625936bad9721ea39582112532449e2b870f2d36694a51d0"
+    "sha256": "ef819fe9383e95cc7cd237cfb2b4bdeb7c1e6e5998d4c68b64162129c7914f99"
   },
   "checker": {
     "path": "schema_check.py",
-    "sha256": "426df871e74b6a7525001a2c3df593f24ad9f5efdba1e53afc7ea189ad308b44"
+    "sha256": "42e7de94fe56507e3538025f503efb882b4dc808a0ec89e3380f242f18f06ebc"
   },
   "mutation_checker": {
     "path": "mutation_check.py",
-    "sha256": "29240d6f1e39c58be77025906738ea2eebf689e47d8a74d4ca28894c55d6cd13"
+    "sha256": "7da25472626b2ff87c9a116ea0b194b11057239b903e8b39e73d782340bef442"
   },
   "laneHint": "recomputable",
   "checks": [

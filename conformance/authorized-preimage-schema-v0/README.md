@@ -12,8 +12,10 @@ proof is self-consistent, and the promoted claim ("this decision is bound to its
 
 This profile pins the missing relation. A verifier must establish that the **declared field set is
 registered for the proof's own policy version** before it treats a clean recompute as evidence, and it
-must report the dimensions separately instead of one scalar "verified". A fourth dimension,
-`registered_set_completeness_status`, is reported so the profile states its own epistemic boundary
+must report the dimensions separately instead of one scalar "verified". A sixth dimension,
+`registered_set_completeness_status` -- constant, non-gating, alongside the five gating dimensions
+(`signature_status`, `issuer_status`, `proof_event_status`, `preimage_schema_status`,
+`decision_ref_recompute_status`) -- is reported so the profile states its own epistemic boundary
 instead of leaving it in prose.
 
 Status: `authorized_preimage_schema.v0`, vectors + checker + mutation evidence. Shaped like
@@ -67,7 +69,7 @@ complete or correct, and nothing inside the producer's boundary can.
 - **The serializer version is validated only when the proof declares it.** `canonicalization_version` is checked when it is in the declared
   field list (`N12`); a proof whose declared set omits it makes no serializer claim, and this profile recomputes with its own
   RFC 8785 subset (string, `null`, safe integer values). A proof under another serializer therefore reports `cannot_establish`, never `satisfied`.
-- **Coverage is finite.** 23 cases and 22 one-site mutations show these bugs are caught, not that no
+- **Coverage is finite.** 23 cases and 24 one-site mutations show these bugs are caught, not that no
   other bug exists.
 - **"23/23 reproduced" is not "23/23 agreed by an independent code path".** The expected results in
   `vectors.json` are authored by hand in `generate_vectors.py` (`EXPECTED`) from each case's stated
@@ -84,7 +86,7 @@ complete or correct, and nothing inside the producer's boundary can.
 
 ```sh
 python3 schema_check.py vectors.json   # 23/23 reproduced; exit 0
-python3 mutation_check.py              # 22/22 KILLED on the intended dimension, controls preserved; exit 0
+python3 mutation_check.py              # 24/24 KILLED on the intended dimension, controls preserved; exit 0
 ```
 
 ## What a case supplies
@@ -191,9 +193,10 @@ exception that proves the signature dimension is independent of the other two.
 `mutation_check.py` applies one-site edits to `schema_check.py`. A mutant is **killed** only when the
 dimension it targets changes on its witness case, judged against the full expected result, while the
 controls (`A1` and `N8` by default) stay exactly as expected on every other dimension. Every status-level
-dimension that changed is recorded (`changed_dimensions`, `also_changed`: the seven status fields: the five verification dimensions plus
+dimension that changed is recorded (`changed_dimensions`, `also_changed`: the nine status fields: the seven verification
+dimensions (the five gating dimensions, `registered_set_completeness_status`, and `required_verification_outcome`) plus
 `observed_verification_outcome` and `verification_status`; not reason codes), so a mutant that dies for a different
-reason than intended is visible. 22 of 22 are killed.
+reason than intended is visible. 24 of 24 are killed.
 
 This replaces an earlier criterion that judged every mutant on the scalar `required_verification_outcome`
 alone. That collapsed the dimensions back into one verdict, the thing this profile exists to prevent:
@@ -224,6 +227,8 @@ preserved (`M12` below, reported by an independent reviewer on #48).
 | `M20_NON_ASCII_NAMES_ACCEPTED` | declared names are not required to be ASCII, so the stdlib key order silently differs from RFC 8785 | `N16` |
 | `M21_INVALID_CASE_REWRITES_OBSERVED_TO_REJECT` | a case the verifier could not evaluate rewrites the implementation's observed outcome to `reject` | `N17` |
 | `M22_ISSUER_NOT_GATED` | a valid signature by an untrusted key is accepted regardless of who signed it | `N18` (dimension: `issuer_status`) |
+| `M23_ISSUER_STATUS_NOT_GATING` | `issuer_status` is computed correctly as `violated` but `required_outcome()` drops the conjunct, so the verdict still accepts | `N18` (dimension: `required_verification_outcome`) |
+| `M24_PROOF_EVENT_STATUS_NOT_GATING` | `proof_event_status` is computed correctly as `violated` but `required_outcome()` drops the conjunct, so the verdict still accepts | `N15` (dimension: `required_verification_outcome`) |
 
 **On `M2` (proposed observable definition).** "Authorize after recompute instead of before" is not
 visible in an outcome when a verifier computes both and combines them. What is observable, and what this

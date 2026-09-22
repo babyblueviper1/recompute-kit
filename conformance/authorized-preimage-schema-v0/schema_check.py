@@ -163,10 +163,11 @@ def issuer_status(event, trusted_pubkey):
 
 def proof_event_status(event):
     """Is the event kind the authorized proof-event kind (30078)? Maps to the kind half of production's
-    is_proof_event (the schema-prefix half is preimage_schema_status's concern, established separately).
-    An authentic, correctly-signed, correctly-issued event under a different Nostr kind is real signed
-    content -- it is simply not an authorized proof-event type, which is a fact about the event, not a
-    signature failure."""
+    is_proof_event. Production's is_proof_event also requires an `invinoveritas.*` schema string in the
+    content; this profile does not establish that string (see README) -- it is not preimage_schema_status's
+    concern either, which checks the declared field SET, not this schema-prefix string. An authentic,
+    correctly-signed, correctly-issued event under a different Nostr kind is real signed content -- it is
+    simply not an authorized proof-event type, which is a fact about the event, not a signature failure."""
     try:
         if not (isinstance(event, dict) and type(event.get("kind")) is int):
             return "cannot_establish", "MALFORMED_EVENT"

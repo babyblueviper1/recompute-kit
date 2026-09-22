@@ -99,6 +99,21 @@ MUTANTS = [
     # into whether the signature itself checks out. M22 gates nothing on it.
     ("M22_ISSUER_NOT_GATED", "N18_AUTHENTIC_EVENT_UNDER_UNTRUSTED_KEY",
      'if event["pubkey"] != trusted_pubkey:  # M22', "if False:  # M22", "issuer_status"),
+    # 2026-09-22 (pipavlo82 on #48): M19/M22 prove signature_status/issuer_status/proof_event_status are each
+    # COMPUTED correctly in isolation, but neither proves the resulting status is actually load-bearing in
+    # required_outcome()'s final conjunction -- a verifier could compute issuer_status/proof_event_status as
+    # "violated" and still forget to require it for an accept, and neither existing mutant would catch that
+    # class of bug. These two drop a conjunct from required_outcome() itself; both reuse a vector already in
+    # the suite (N18, N15) rather than needing a new one, since those cases already isolate exactly one
+    # dimension to "violated" with every other dimension "satisfied".
+    ("M23_ISSUER_STATUS_NOT_GATING", "N18_AUTHENTIC_EVENT_UNDER_UNTRUSTED_KEY",
+     'if signature == "satisfied" and issuer == "satisfied" and proof_event == "satisfied" and schema == "satisfied" and recompute == "satisfied":  # M2/M8/M14/M22',
+     'if signature == "satisfied" and proof_event == "satisfied" and schema == "satisfied" and recompute == "satisfied":  # M2/M8/M14/M22',
+     "required_verification_outcome"),
+    ("M24_PROOF_EVENT_STATUS_NOT_GATING", "N15_AUTHENTIC_EVENT_UNDER_WRONG_KIND",
+     'if signature == "satisfied" and issuer == "satisfied" and proof_event == "satisfied" and schema == "satisfied" and recompute == "satisfied":  # M2/M8/M14/M22',
+     'if signature == "satisfied" and issuer == "satisfied" and schema == "satisfied" and recompute == "satisfied":  # M2/M8/M14/M22',
+     "required_verification_outcome"),
 ]
 
 
