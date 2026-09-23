@@ -2,7 +2,7 @@
   "profile": "permission_consumption_boundary.v0",
   "spec": {
     "path": "README.md",
-    "sha256": "7bfcef71b880df245cf3bdf96e72a7dcfa08693d52b4e266ed96a271ebbae1ef"
+    "sha256": "709191665e27aa497bd81128e6f94809e5cd8f93e76131f2f9a4997dc04940ad"
   },
   "checker": {
     "path": "permission_check.py",
