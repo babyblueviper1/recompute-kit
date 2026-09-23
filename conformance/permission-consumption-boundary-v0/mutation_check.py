@@ -25,7 +25,7 @@ MUTANTS = [
      CURRENT, CURRENT + '\n        current["capacity"] = "satisfied"'),
     ("M7_ALLOW_WRONG_CAPACITY_DOMAIN", ["P11"],
      'if d["domain_id"] == grant["capacity_domain"]]  # M7', 'if True]  # M7'),
-    ("M8_MISSING_EVIDENCE_BECOMES_AUTHORIZED", ["P12", "P13", "P14"],
+    ("M8_MISSING_EVIDENCE_BECOMES_AUTHORIZED", ["P12", "P13", "P14", "P16", "P21"],
      'status = combine(current)  # M8',
      'status = "satisfied" if combine(current) == "cannot_establish" else combine(current)  # M8'),
     ("M9_IGNORE_GRANT_IDENTITY_MISMATCH", ["P17", "P18"],

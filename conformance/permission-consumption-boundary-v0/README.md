@@ -165,7 +165,7 @@ outcomes. There are no runtime mutation switches in the checker.
 | M5 allow unrelated grant substitution | P8 |
 | M6 ignore current capacity | P9 |
 | M7 allow unrelated capacity domain | P11 |
-| M8 promote missing evidence to authorization | P12, P13, P14 |
+| M8 promote missing evidence to authorization | P12, P13, P14, P16, P21 |
 | M9 ignore consumed grant identity/epoch mismatch | P17, P18 |
 | M10 ignore consumed capacity-domain mismatch | P19 |
 
