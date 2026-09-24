@@ -2,7 +2,7 @@
   "profile": "permission_consumption_boundary.v0",
   "spec": {
     "path": "README.md",
-    "sha256": "67b2f4d7902e441f45bfad34f33247a641ce317393e7d13c201ecc3badd182bb"
+    "sha256": "32dab8c2b4c3cbe1002c9ee900626c18dec5609a9f843480ad09236a239363f5"
   },
   "checker": {
     "path": "permission_check.py",
@@ -10,7 +10,7 @@
   },
   "mutation_checker": {
     "path": "mutation_check.py",
-    "sha256": "7cd7137216a1b3bf7bb27544355e484a9e223144186b064b368bacf60d4a8485"
+    "sha256": "71e01aa6e011d886e754d4c6de259bda8aa30ca4cf985c2f541d18532cfe0f11"
   },
   "dependencies": [
     {
