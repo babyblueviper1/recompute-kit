@@ -149,9 +149,17 @@ There are 21 histories and one independent P6 assertion, not 22 histories.
 | P22 | Explicit policy with no capacity requirement remains admissible. |
 
 `mutation_check.py` applies each source replacement exactly once in a temporary
-in-memory module, never editing dependencies. All required killers must change
+in-memory module, never editing dependencies. Each mutant names its witness
+predicate. The default (`reject_to_admit`) requires every killer to change
 current authorization to satisfied and required reject to admit while preserving
-historical results and observed behavior. Full expected results of all four
+historical results and observed behavior. Mutants that move a status or the
+evaluation order rather than the final decision name the field that must move
+instead: `current_evaluated` (current authorization evaluated although the
+historical check failed) and `violated_to_cannot_establish` (the precedence of a
+witnessed violation over missing evidence inverted). Every record also lists
+`changed_cases` and `unexpected_changes` (changed cases outside the required
+killers): a required killer proves the intended case moved, not that nothing
+else did. Full expected results of all four
 positive controls P1/P2/P10/P22 must remain identical. Crashes, import/compile
 failures, unapplied mutations and control failures are separate unsuccessful
 outcomes. There are no runtime mutation switches in the checker.
@@ -165,11 +173,16 @@ outcomes. There are no runtime mutation switches in the checker.
 | M5 allow unrelated grant substitution | P8 |
 | M6 ignore current capacity | P9 |
 | M7 allow unrelated capacity domain | P11 |
-| M8 promote missing evidence to authorization | P12, P13, P14 |
+| M8 promote missing evidence to authorization | P12, P13, P14, P16, P21 |
+| M9 ignore consumed grant identity/epoch mismatch | P17, P18 |
+| M10 ignore consumed capacity-domain mismatch | P19 |
+| M11 evaluate current authorization after a historical failure (`current_evaluated`) | P15 |
+| M12 missing evidence outranks a witnessed violation (`violated_to_cannot_establish`) | P20 |
 
-M9 is not added: historical results are computed once before the current phase;
-P6 independently pins nonretroactivity without inventing a current-to-historical
-assignment solely to mutate it.
+No mutant assigns current results into the historical phase: historical results
+are computed once before the current phase, and P6 independently pins
+nonretroactivity without inventing a current-to-historical assignment solely to
+mutate it.
 
 ## Relationship to #46 and limits
 
