@@ -29,5 +29,22 @@ class LiveExclusionLifecycleTests(unittest.TestCase):
         self.assertEqual(overdue, [])
 
 
+class OverdueIsDeterministicTests(unittest.TestCase):
+    def test_expired_exclusion_whose_suite_passes_is_still_unverifiable(self):
+        # the regression pipavlo82 asked for on #55: expired + the (mocked) live suite PASSES -> still exit 2
+        rs = [runner.Result("ens-write-v0", True, "", "all vectors reproduced")]
+        runner.apply_overdue(rs, ["ens-write-v0"])
+        self.assertFalse(rs[0].ok)
+        self.assertEqual(rs[0].kind, "NOT COVERED")
+        self.assertIn("PASS", rs[0].detail)
+        self.assertEqual(runner.exit_code_for_failures(rs), 2)
+
+    def test_multi_check_sub_results_are_covered_and_others_untouched(self):
+        rs = [runner.Result("x-live/a", True, "", ""), runner.Result("x-live/b", False, "SUITE", "bad"), runner.Result("other", True, "", "")]
+        runner.apply_overdue(rs, ["x-live"])
+        self.assertEqual([r.kind for r in rs[:2]], ["NOT COVERED", "NOT COVERED"])
+        self.assertTrue(rs[2].ok)
+
+
 if __name__ == "__main__":
     unittest.main()

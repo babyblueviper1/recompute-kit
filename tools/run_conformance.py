@@ -271,6 +271,19 @@ def _live_exclusion_overdue(e: dict, today: str | None = None) -> bool:
     return str(ra) < today
 
 
+def apply_overdue(results: list, overdue: list[str]) -> None:
+    """An EXPIRED requires_live exclusion is its own deterministic failure (pipavlo82 on #55): the suite still runs for diagnostic
+    value, but a live call that happens to pass must not satisfy the re-review obligation. Every result of an overdue suite (incl.
+    its multi-check sub-results) becomes NOT COVERED -> exit 2 (UNVERIFIABLE), with the suite's own outcome kept in the detail."""
+    for r in results:
+        base = r.name.split("/")[0]
+        if base in overdue:
+            outcome = "PASS" if r.ok else r.kind
+            r.ok, r.kind = False, "NOT COVERED"
+            r.detail = (f"requires_live exclusion EXPIRED (past review_after) -- re-review and re-date it in conformance/uncovered.json; "
+                        f"this run's suite outcome was {outcome} (diagnostic only)")
+
+
 def live_exclusion_lifecycle(today: str | None = None) -> tuple[list[str], list[str]]:
     """(undated, overdue) requires_live suite names, for the report."""
     f = CONFORMANCE / "uncovered.json"
@@ -357,6 +370,9 @@ def main() -> int:
                 r.kind = "DECLARED UNCOVERED"
             else:
                 stale.append(r.name)
+
+    # an EXPIRED requires_live exclusion is a deterministic NOT COVERED whatever the suite did (before any status/exit is computed)
+    apply_overdue(results, live_exclusion_lifecycle()[1])
 
     width = max(len(r.name) for r in results)
     for r in results:
