@@ -57,6 +57,16 @@ class UnpinnedExecutablesTests(unittest.TestCase):
             d = _suite(tmp, {"adapter": {"cmd": "python3 -m json.tool missing.py"}}, {})
             self.assertEqual(runner.unpinned_executables(d), [])
 
+    def test_scope_is_direct_closure_only_imports_and_dash_m_are_not_reported(self):
+        # Documented scope (#54): an imported helper and a `python -m` target are outside this check -- the empty
+        # result must not be read as transitive closure.
+        with tempfile.TemporaryDirectory() as tmp:
+            d = _suite(tmp, {"adapter": {"cmd": "python gate.py && python -m helpers.grade"},
+                             "checker": {"path": "gate.py", "sha256": "abc"}},
+                       {"gate.py": "import helper\n", "helper.py": "", "helpers.py": ""})
+            self.assertEqual(runner.unpinned_executables(d), [])
+            self.assertIn("does NOT establish transitive closure", runner.unpinned_executables.__doc__)
+
 
 if __name__ == "__main__":
     unittest.main()

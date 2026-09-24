@@ -302,6 +302,11 @@ def unpinned_executables(d) -> list[str]:
     (trustless-ai/recompute-kit#53 review, pipavlo82). Paths are resolved relative to the suite dir; only
     tokens that name an existing file with an executable extension count. Report-only by default; set
     RECOMPUTE_STRICT_EXEC_PINS=1 to make each suite with an unpinned executable NOT COVERED.
+
+    SCOPE (stated so it is not read as more, pipavlo82 on #54): this is DIRECT command-executable closure only -- the files a
+    command line names (`python gate.py`, `node ref.mjs`). It does NOT establish transitive closure: modules those files
+    import, `python -m package.module` targets, and anything loaded at run time are out of scope and never reported here.
+    An empty result means "every file a command names is pinned", not "the executed code surface is pinned".
     """
     import os
     import re
