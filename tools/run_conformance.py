@@ -290,6 +290,43 @@ def undeclared_json_files(d) -> list[str]:
                   if p.name not in ({"suite.json"} | declared_paths))
 
 
+EXEC_EXT = (".py", ".mjs", ".cjs", ".js", ".ts")
+
+
+def unpinned_executables(d) -> list[str]:
+    """Files a suite's adapter / check commands EXECUTE that no declared pin covers.
+
+    A declared pin (checker, mutation_checker, dependencies[], implementations[], vectors, spec -- each a
+    {path, sha256}) is enforced; a file that is executed but never declared cannot drift detectably at all,
+    so every declared pin can be valid while the code that decides PASS/FAIL changes silently
+    (trustless-ai/recompute-kit#53 review, pipavlo82). Paths are resolved relative to the suite dir; only
+    tokens that name an existing file with an executable extension count. Report-only by default; set
+    RECOMPUTE_STRICT_EXEC_PINS=1 to make each suite with an unpinned executable NOT COVERED.
+    """
+    import os
+    import re
+    man = d / "suite.json"
+    if not man.is_file():
+        return []
+    try:
+        m = json.loads(man.read_text())
+    except Exception:
+        return []
+    units = [m] + [c for c in (m.get("checks") or []) if isinstance(c, dict)]
+    executed, pinned = set(), set()
+    for u in units:
+        cmd = (u.get("adapter") or {}).get("cmd") or ""
+        for tok in re.findall(r"[\w./-]+", cmd):
+            if tok.endswith(EXEC_EXT) and (d / tok).is_file():
+                executed.add(os.path.normpath(tok))
+        entries = [u.get(k) for k in ("checker", "mutation_checker", "vectors", "spec")]
+        entries += list(u.get("dependencies") or []) + list(u.get("implementations") or [])
+        for e in entries:
+            if isinstance(e, dict) and e.get("path") and e.get("sha256"):
+                pinned.add(os.path.normpath(e["path"]))
+    return sorted(executed - pinned)
+
+
 def main() -> int:
     if not CONFORMANCE.is_dir():
         print(f"no conformance/ directory at {CONFORMANCE}", file=sys.stderr)
@@ -301,6 +338,9 @@ def main() -> int:
         return 2
 
     declared, declared_undeclared_vectors, requires_live = load_declared_uncovered()
+    import os
+    strict_exec = os.environ.get("RECOMPUTE_STRICT_EXEC_PINS") == "1"
+    unpinned_exec = [(d.name, u) for d in dirs if d.name not in requires_live for u in [unpinned_executables(d)] if u]
     results = []
     for d in dirs:
         if d.name in requires_live:
@@ -308,6 +348,11 @@ def main() -> int:
             results.append(Result(d.name, False, "REQUIRES LIVE", "needs external binary / live service — not hermetic"))
             continue
         results.extend(run_suite(d))
+
+    if strict_exec:
+        for n, files in unpinned_exec:
+            results.append(Result(f"{n}/exec-pins", False, "NOT COVERED",
+                                  f"executes files no declared pin covers: {', '.join(files)}"))
 
     # Separate axis from pass/fail: a suite.json declares ONE vectors file, so any other
     # .json beside it is executed by nothing. The suite still runs — dropping it would
@@ -368,6 +413,13 @@ def main() -> int:
             print(f"  {mark}{n}: {', '.join(files)}")
         if undeclared_undisclosed:
             print("  (! = not listed in conformance/uncovered.json — add it or declare the vectors)")
+
+    if unpinned_exec and not strict_exec:
+        print()
+        print(f"executed files that NO declared pin covers ({len(unpinned_exec)} suites) -- a change to these cannot")
+        print("surface as DRIFT; report-only (RECOMPUTE_STRICT_EXEC_PINS=1 makes each one NOT COVERED):")
+        for n, files in unpinned_exec:
+            print(f"    - {n}: {', '.join(files)}")
 
     if live:
         print(f"{len(live)}/{len(results)} SKIPPED as non-hermetic (conformance/uncovered.json requires_live) — not passing:")
