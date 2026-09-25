@@ -39,6 +39,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import hashlib
 import json
+import re
 import pathlib
 import subprocess
 import sys
@@ -144,14 +145,26 @@ def run_suite(d: pathlib.Path) -> list:
     return [_run_one(d, m, d.name)]
 
 
+_HEX64 = re.compile(r"[0-9a-f]{64}")
+
+
 def _check_declared_pins(d: pathlib.Path, m: dict):
     """A pin the suite declares for its checker, mutation checker or dependencies is part of the claim,
     same as vectors.sha256 and spec.sha256: a stale pin must fail here, not pass silently."""
-    pins = [(k, m.get(k)) for k in ("checker", "mutation_checker")]
-    pins += [("dependencies", x) for x in (m.get("dependencies") or [])]
+    # A key that is absent declares nothing. A key that is PRESENT declares a pin, and a declared pin that
+    # cannot be enforced (bare string, empty or non-hex sha256, a typo such as "sha265") is NOT COVERED,
+    # never skipped: skipping it would read as enforced. Extra annotation keys (e.g. "note") are allowed.
+    pins = [(k, m[k]) for k in ("checker", "mutation_checker") if k in m]
+    if "dependencies" in m:
+        deps = m["dependencies"]
+        if not isinstance(deps, list):
+            return "NOT COVERED", f"dependencies declared but not a list of {{path, sha256}} pins: {deps!r:.80}"
+        pins += [("dependencies", x) for x in deps]
     for key, entry in pins:
-        if not (isinstance(entry, dict) and entry.get("path") and entry.get("sha256")):
-            continue
+        if not (isinstance(entry, dict) and isinstance(entry.get("path"), str) and entry["path"]
+                and isinstance(entry.get("sha256"), str) and _HEX64.fullmatch(entry["sha256"])):
+            return "NOT COVERED", (f"{key} pin declared but malformed (need {{path, sha256: 64 lowercase hex}}), "
+                                   f"so it cannot be enforced: {entry!r:.120}")
         f = d / entry["path"]
         if not f.is_file():
             return "NOT COVERED", f"{key} declared but missing: {entry['path']}"

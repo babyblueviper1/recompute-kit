@@ -4,7 +4,8 @@ vectors.sha256 and spec.sha256. Before this, editing mutation_check.py without r
   - control: every declared pin matches -> the suite runs and passes;
   - each of checker, mutation_checker and a dependency edited after pinning -> DRIFT;
   - a pinned file that is missing -> NOT COVERED, never a silent skip;
-  - a manifest that pins none of them is unchanged.
+  - a manifest that pins none of them is unchanged;
+  - a pin that is declared but malformed (bare string, empty/non-hex sha256, typo'd key) -> NOT COVERED, not skipped.
 """
 from __future__ import annotations
 
@@ -74,6 +75,45 @@ class CheckerPinTests(unittest.TestCase):
             d = _suite(t, pin_checker=False, pin_mutation=False, pin_dep=False)
             (d / "check.py").write_bytes(b"import sys\nsys.stdin.read()\n# edited\n")
             self.assertTrue(self._run(d).ok)
+
+    def test_declared_but_malformed_pins_are_not_covered(self):
+        """Zexo (damon/receiptos, 2026-09-25): a declared pin that cannot be enforced was skipped, so it read as enforced."""
+        good = _h(b"import sys\nsys.stdin.read()\n")
+        cases = {
+            "bare string": "check.py",
+            "empty sha256": {"path": "check.py", "sha256": ""},
+            "typo sha265": {"path": "check.py", "sha265": good},
+            "uppercase hex": {"path": "check.py", "sha256": good.upper()},
+            "short hex": {"path": "check.py", "sha256": good[:63]},
+            "empty path": {"path": "", "sha256": good},
+            "null": None,
+        }
+        for name, entry in cases.items():
+            with self.subTest(name):
+                with tempfile.TemporaryDirectory() as t:
+                    d = _suite(t, pin_checker=False)
+                    m = json.loads((d / "suite.json").read_text()); m["checker"] = entry
+                    (d / "suite.json").write_text(json.dumps(m))
+                    r = self._run(d)
+                    self.assertFalse(r.ok)
+                    self.assertEqual(r.kind, "NOT COVERED", r.detail)
+                    self.assertIn("malformed", r.detail)
+
+    def test_dependencies_not_a_list_is_not_covered(self):
+        with tempfile.TemporaryDirectory() as t:
+            d = _suite(t, pin_dep=False)
+            m = json.loads((d / "suite.json").read_text()); m["dependencies"] = {"path": "dep.py", "sha256": "0" * 64}
+            (d / "suite.json").write_text(json.dumps(m))
+            r = self._run(d)
+            self.assertEqual((r.ok, r.kind), (False, "NOT COVERED"), r.detail)
+
+    def test_annotation_keys_on_a_wellformed_pin_are_allowed(self):
+        with tempfile.TemporaryDirectory() as t:
+            d = _suite(t)
+            m = json.loads((d / "suite.json").read_text()); m["checker"]["note"] = "reused unmodified from another suite"
+            (d / "suite.json").write_text(json.dumps(m))
+            r = self._run(d)
+            self.assertTrue(r.ok, (r.kind, r.detail))
 
 
 if __name__ == "__main__":
