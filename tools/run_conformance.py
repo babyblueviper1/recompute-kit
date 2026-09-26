@@ -280,7 +280,8 @@ def apply_overdue(results: list, overdue: list[str]) -> None:
     precedence. Only PASS and non-determinate results are rewritten to NOT COVERED -> exit 2 (UNVERIFIABLE)."""
     for r in results:
         base = r.name.split("/")[0]
-        if base in overdue and r.kind not in DETERMINATE:
+        # a PASS carries kind "SUITE" too (run_suite returns Result(label, True, "SUITE", ...)): keep only DETERMINATE *failures*
+        if base in overdue and (r.ok or r.kind not in DETERMINATE):
             outcome = "PASS" if r.ok else r.kind
             r.ok, r.kind = False, "NOT COVERED"
             r.detail = (f"requires_live exclusion EXPIRED (past review_after) -- re-review and re-date it in conformance/uncovered.json; "

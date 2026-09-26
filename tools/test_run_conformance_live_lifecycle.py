@@ -55,6 +55,16 @@ class OverdueIsDeterministicTests(unittest.TestCase):
         self.assertEqual(rs[0].kind, "NOT COVERED")
         self.assertEqual(runner.exit_code_for_failures(rs), 2)
 
+    def test_expired_exclusion_realistic_pass_kind_suite_is_still_unverifiable(self):
+        # run_suite() returns a PASS as Result(label, True, "SUITE", ...) -- kind is "SUITE", not "": a precedence rule keyed on kind alone
+        # would let a lucky live pass satisfy an expired review obligation (exit 0). It must still become NOT COVERED -> exit 2.
+        rs = [runner.Result("ens-write-v0", True, "SUITE", "all vectors reproduced")]
+        runner.apply_overdue(rs, ["ens-write-v0"])
+        self.assertFalse(rs[0].ok)
+        self.assertEqual(rs[0].kind, "NOT COVERED")
+        self.assertIn("PASS", rs[0].detail)
+        self.assertEqual(runner.exit_code_for_failures([r for r in rs if not r.ok]), 2)
+
     def test_expired_suite_failure_is_preserved_exit_1(self):
         # zexoverz's pinned control: expired + SUITE -> preserve SUITE, exit 1. Expiry must not soften
         # an independently-verified refutation into "could not check" -- the bug on 7ab0017.
