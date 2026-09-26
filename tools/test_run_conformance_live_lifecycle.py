@@ -40,10 +40,37 @@ class OverdueIsDeterministicTests(unittest.TestCase):
         self.assertEqual(runner.exit_code_for_failures(rs), 2)
 
     def test_multi_check_sub_results_are_covered_and_others_untouched(self):
+        # the pass sub-result of an overdue suite is covered; a sibling suite is untouched.
+        # the SUITE sub-result is a real refutation (see the precedence tests below) and is NOT covered.
         rs = [runner.Result("x-live/a", True, "", ""), runner.Result("x-live/b", False, "SUITE", "bad"), runner.Result("other", True, "", "")]
         runner.apply_overdue(rs, ["x-live"])
-        self.assertEqual([r.kind for r in rs[:2]], ["NOT COVERED", "NOT COVERED"])
+        self.assertEqual(rs[0].kind, "NOT COVERED")
+        self.assertEqual(rs[1].kind, "SUITE")
         self.assertTrue(rs[2].ok)
+
+    def test_expired_runner_failure_stays_not_covered_exit_2(self):
+        # zexoverz's pinned control: expired + RUNNER/NOT COVERED -> exit 2 (not determinate either way)
+        rs = [runner.Result("ens-write-v0", False, "RUNNER", "environment could not execute it")]
+        runner.apply_overdue(rs, ["ens-write-v0"])
+        self.assertEqual(rs[0].kind, "NOT COVERED")
+        self.assertEqual(runner.exit_code_for_failures(rs), 2)
+
+    def test_expired_suite_failure_is_preserved_exit_1(self):
+        # zexoverz's pinned control: expired + SUITE -> preserve SUITE, exit 1. Expiry must not soften
+        # an independently-verified refutation into "could not check" -- the bug on 7ab0017.
+        rs = [runner.Result("ens-write-v0", False, "SUITE", "a vector did not reproduce")]
+        runner.apply_overdue(rs, ["ens-write-v0"])
+        self.assertEqual(rs[0].kind, "SUITE")
+        self.assertFalse(rs[0].ok)
+        self.assertEqual(runner.exit_code_for_failures(rs), 1)
+
+    def test_expired_drift_failure_is_preserved_exit_1(self):
+        # zexoverz's pinned control: expired + DRIFT -> preserve DRIFT, exit 1.
+        rs = [runner.Result("ens-write-v0", False, "DRIFT", "pinned digest mismatch")]
+        runner.apply_overdue(rs, ["ens-write-v0"])
+        self.assertEqual(rs[0].kind, "DRIFT")
+        self.assertFalse(rs[0].ok)
+        self.assertEqual(runner.exit_code_for_failures(rs), 1)
 
 
 if __name__ == "__main__":

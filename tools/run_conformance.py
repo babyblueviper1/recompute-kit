@@ -273,11 +273,14 @@ def _live_exclusion_overdue(e: dict, today: str | None = None) -> bool:
 
 def apply_overdue(results: list, overdue: list[str]) -> None:
     """An EXPIRED requires_live exclusion is its own deterministic failure (pipavlo82 on #55): the suite still runs for diagnostic
-    value, but a live call that happens to pass must not satisfy the re-review obligation. Every result of an overdue suite (incl.
-    its multi-check sub-results) becomes NOT COVERED -> exit 2 (UNVERIFIABLE), with the suite's own outcome kept in the detail."""
+    value, and a live call that happens to pass -- or one that could not run at all -- must not satisfy the re-review obligation.
+    But expiry is a lifecycle failure, not a refutation: a result that is ALREADY determinate (SUITE/DRIFT, a vector that actually
+    failed to reproduce or a pinned digest that actually drifted) keeps that outcome and exit 1 (zexoverz on #55) -- rewriting it to
+    NOT COVERED would soften an independently-verified break down to exit 2's "could not check", the opposite of repository
+    precedence. Only PASS and non-determinate results are rewritten to NOT COVERED -> exit 2 (UNVERIFIABLE)."""
     for r in results:
         base = r.name.split("/")[0]
-        if base in overdue:
+        if base in overdue and r.kind not in DETERMINATE:
             outcome = "PASS" if r.ok else r.kind
             r.ok, r.kind = False, "NOT COVERED"
             r.detail = (f"requires_live exclusion EXPIRED (past review_after) -- re-review and re-date it in conformance/uncovered.json; "
