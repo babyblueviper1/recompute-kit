@@ -23,6 +23,16 @@ class LiveExclusionLifecycleTests(unittest.TestCase):
     def test_undated_entry_is_not_overdue_but_is_reported_undated(self):
         self.assertFalse(runner._live_exclusion_overdue({}, today="2030-01-01"))
 
+    def test_malformed_review_after_is_overdue_not_forever(self):
+        # zexoverz on #55: a string comparison let these excuse the suite forever
+        for bad in ("2026-9-1", "never", "9999-99-99", "2026-10-24T00:00:00", 20261024, "20261024"):
+            with self.subTest(review_after=bad):
+                self.assertTrue(runner._live_exclusion_overdue({"review_after": bad}, today="2026-09-24"))
+
+    def test_review_after_compared_as_date_across_years(self):
+        self.assertTrue(runner._live_exclusion_overdue({"review_after": "2026-12-31"}, today="2027-01-01"))
+        self.assertFalse(runner._live_exclusion_overdue({"review_after": "2027-01-01"}, today="2026-12-31"))
+
     def test_current_manifest_entries_are_dated(self):
         undated, overdue = runner.live_exclusion_lifecycle(today="2026-09-24")
         self.assertEqual(undated, [])

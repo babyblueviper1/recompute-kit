@@ -267,8 +267,16 @@ def _live_exclusion_overdue(e: dict, today: str | None = None) -> bool:
     ra = e.get("review_after")
     if not ra:
         return False
-    today = today or _dt.date.today().isoformat()
-    return str(ra) < today
+    # Parse, don't compare strings (zexoverz on #55): as a string, "2026-9-1" sorts after every real date and "never" after
+    # every digit, so either would excuse the suite forever. A review_after that is not a real ISO date is treated as
+    # overdue, the same fail-closed reading #53 applies to an unparseable date.
+    try:
+        due = _dt.date.fromisoformat(ra) if isinstance(ra, str) and len(ra) == 10 else None
+    except ValueError:
+        due = None
+    if due is None:
+        return True
+    return due < _dt.date.fromisoformat(today or _dt.date.today().isoformat())
 
 
 def apply_overdue(results: list, overdue: list[str]) -> None:
