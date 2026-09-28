@@ -19,8 +19,10 @@ inserted document; signatures, Merkle roots and exact replay all verify for both
 
 Every NO_FINDING carries an `evidence_grade`, and the two grades claim different things:
 
-- **AUTHENTICATED_REPORT**: the checker verified a *signed scanner claim* bound to a named subject. It did **not** rerun the
-  scanner. What is established is who asserted "nothing found" over which bytes, not that the bytes are clean under that scanner.
+- **AUTHENTICATED_REPORT**: the checker verified an authenticated, manifest-carried assertion over a bound subject. It did
+  **not** rerun the scanner, so scanner-origin execution is not established: what is proven is that someone signed "nothing
+  found" over these bytes under this declared `scanner_version`, not that the named scanner actually produced that result. Do
+  not read this grade as stronger evidence than that.
 - **REPRODUCED**: the checker **reran** a published deterministic scanner (`toy_scan` in `vectors.json`) over the subject bytes
   itself and got the same answer. Only this grade says the scan result follows from the data. A rerun can also disagree: in c4b
   the signed result is `clean`, the rerun over the bound subject finds the inserted document, and the verdict is CONTRADICTED,
