@@ -2,7 +2,7 @@
   "profile": "scan_subject_binding.v0",
   "spec": {
     "path": "README.md",
-    "sha256": "69e6bc74ca834523ba0f7da512c6090e06c46aa4c860fc06f2b11c1136e46c33"
+    "sha256": "5c88a28458341bb54cc732bc50970dd20fe1ac59f251cb83bba4cd3a99cb37df"
   },
   "checker": {
     "path": "scan_check.py",
