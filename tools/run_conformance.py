@@ -255,7 +255,58 @@ def load_declared_uncovered() -> dict[str, str]:
         raise SystemExit(2)
     return ({e["suite"]: e.get("reason", "") for e in data.get("uncovered", [])},
             {e["suite"] for e in data.get("undeclared_vectors", [])},
-            {e["suite"]: e.get("reason", "") for e in data.get("requires_live", [])})
+            {e["suite"]: e.get("reason", "") for e in data.get("requires_live", [])
+             if not _live_exclusion_overdue(e)})
+
+
+def _live_exclusion_overdue(e: dict, today: str | None = None) -> bool:
+    """A requires_live exclusion carries owner / reviewed_at / review_after (ISO dates; pipavlo82 on #52: live exclusions
+    must age visibly, not become permanent unaudited state). Past review_after it no longer excuses the suite: the suite
+    is RUN (and, being non-hermetic, is expected to report NOT COVERED / RUNNER) until someone re-reviews and re-dates it."""
+    import datetime as _dt
+    ra = e.get("review_after")
+    if not ra:
+        return False
+    # Parse, don't compare strings (zexoverz on #55): as a string, "2026-9-1" sorts after every real date and "never" after
+    # every digit, so either would excuse the suite forever. A review_after that is not a real ISO date is treated as
+    # overdue, the same fail-closed reading #53 applies to an unparseable date.
+    try:
+        due = _dt.date.fromisoformat(ra) if isinstance(ra, str) and len(ra) == 10 else None
+    except ValueError:
+        due = None
+    if due is None:
+        return True
+    return due < _dt.date.fromisoformat(today or _dt.date.today().isoformat())
+
+
+def apply_overdue(results: list, overdue: list[str]) -> None:
+    """An EXPIRED requires_live exclusion is its own deterministic failure (pipavlo82 on #55): the suite still runs for diagnostic
+    value, and a live call that happens to pass -- or one that could not run at all -- must not satisfy the re-review obligation.
+    But expiry is a lifecycle failure, not a refutation: a result that is ALREADY determinate (SUITE/DRIFT, a vector that actually
+    failed to reproduce or a pinned digest that actually drifted) keeps that outcome and exit 1 (zexoverz on #55) -- rewriting it to
+    NOT COVERED would soften an independently-verified break down to exit 2's "could not check", the opposite of repository
+    precedence. Only PASS and non-determinate results are rewritten to NOT COVERED -> exit 2 (UNVERIFIABLE)."""
+    for r in results:
+        base = r.name.split("/")[0]
+        # a PASS carries kind "SUITE" too (run_suite returns Result(label, True, "SUITE", ...)): keep only DETERMINATE *failures*
+        if base in overdue and (r.ok or r.kind not in DETERMINATE):
+            outcome = "PASS" if r.ok else r.kind
+            r.ok, r.kind = False, "NOT COVERED"
+            r.detail = (f"requires_live exclusion EXPIRED (past review_after) -- re-review and re-date it in conformance/uncovered.json; "
+                        f"this run's suite outcome was {outcome} (diagnostic only)")
+
+
+def live_exclusion_lifecycle(today: str | None = None) -> tuple[list[str], list[str]]:
+    """(undated, overdue) requires_live suite names, for the report."""
+    f = CONFORMANCE / "uncovered.json"
+    try:
+        data = json.loads(f.read_text())
+    except Exception:
+        return [], []
+    live = data.get("requires_live", [])
+    undated = [e["suite"] for e in live if not (e.get("reviewed_at") and e.get("review_after"))]
+    overdue = [e["suite"] for e in live if _live_exclusion_overdue(e, today)]
+    return undated, overdue
 
 
 def undeclared_json_files(d) -> list[str]:
@@ -382,6 +433,9 @@ def main() -> int:
             else:
                 stale.append(r.name)
 
+    # an EXPIRED requires_live exclusion is a deterministic NOT COVERED whatever the suite did (before any status/exit is computed)
+    apply_overdue(results, live_exclusion_lifecycle()[1])
+
     width = max(len(r.name) for r in results)
     for r in results:
         status = {
@@ -425,6 +479,17 @@ def main() -> int:
         print("surface as DRIFT; report-only (RECOMPUTE_STRICT_EXEC_PINS=1 makes each one NOT COVERED):")
         for n, files in unpinned_exec:
             print(f"    - {n}: {', '.join(files)}")
+    live_undated, live_overdue = live_exclusion_lifecycle()
+    if live_undated or live_overdue:
+        print()
+        if live_overdue:
+            print("requires_live exclusions PAST review_after -- no longer excused, run as normal suites (re-review and re-date them):")
+            for n in live_overdue:
+                print(f"    - {n}")
+        if live_undated:
+            print("requires_live exclusions with no reviewed_at/review_after -- they age invisibly (add both):")
+            for n in live_undated:
+                print(f"    - {n}")
 
     if live:
         print(f"{len(live)}/{len(results)} SKIPPED as non-hermetic (conformance/uncovered.json requires_live) — not passing:")
