@@ -22,6 +22,9 @@ MUTANTS = [
      '    if s.get("scanner_version") == toy["scanner_version"]:\n', '    if False:  # M6\n'),
     ("M7_SKIP_INCLUSION_PROOFS", ["c3b_scan_bound_to_root_subset_no_proofs"],
      '        if not (cons and cons <= proved): return "CANNOT_ESTABLISH", None\n', '        pass  # M7\n'),
+    # Pavlo on #56: the primitive controls test ed25519_verify directly, not that check_decision() calls it.
+    ("M8_DROP_SIGNATURE_GUARD_IN_CHECK_DECISION", ["c6_manifest_signature_corrupted"],
+     '    if not sig_ok(pub, man): f.append("signature")\n', '    pass  # M8\n'),
 ]
 CONTROLS = ["c0_answer_flips_while_all_bindings_valid"]
 
