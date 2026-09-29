@@ -42,11 +42,12 @@ Agent Manifest itself requires of a clean scan; that word is outside the checker
 | c3c | c3's bytes, scanner declares `corpus_statistical` (not hereditary) -> CANNOT_ESTABLISH |
 | c4 / c4b | published deterministic scanner rerun -> NO_FINDING / CONTRADICTED, both REPRODUCED |
 | c5 | k=2: `effective_dataset_digest = root(retrieved)` is unordered, profile frozen to k=1 -> CANNOT_ESTABLISH |
+| c6 | c2 with one manifest-signature byte flipped: `check_decision()` must refuse it on `signature` and nothing else (end-to-end control; the primitive controls alone cannot see a deleted guard) |
 
 ## Run
 
-    python3 scan_check.py vectors.json   # 10/10 reproduced, exit 0 (standard library only)
-    python3 mutation_check.py            # 7 one-site mutants, each killed by its named case(s); Ed25519 primitive controls
+    python3 scan_check.py vectors.json   # 11/11 reproduced, exit 0 (standard library only)
+    python3 mutation_check.py            # 8 one-site mutants, each killed by its named case(s); Ed25519 primitive controls
 
 `scan_check.py` recomputes every Merkle root (Agent Manifest s3.2.5.1), inclusion proof, Ed25519 signature (RFC 8032 reference
 verify, stdlib) and answer from the vector bytes. The signing key is a public test key derived from a fixed seed.

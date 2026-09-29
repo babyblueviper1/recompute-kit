@@ -149,6 +149,9 @@ def evaluate(name, c, pub, toy):
     got = {"replay_bindings": "valid" if not f else "FAIL", "result_only_check": result_only(c["manifest"]),
            "subject_bound_check": verdict, "evidence_grade": grade}
     e = c["expect"]
+    if "replay_failures" in e:                     # a case that MUST be refused by check_decision(), on exactly these checks
+        got["replay_failures"] = f
+        return got, f == e["replay_failures"]
     ok = (not f and verdict in VOCAB and
           all(got[k] == e[k] for k in ("result_only_check", "subject_bound_check", "evidence_grade") if k in e))
     return got, ok
