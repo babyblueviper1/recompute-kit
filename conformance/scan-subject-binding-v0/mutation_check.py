@@ -25,6 +25,12 @@ MUTANTS = [
     # Pavlo on #56: the primitive controls test ed25519_verify directly, not that check_decision() calls it.
     ("M8_DROP_SIGNATURE_GUARD_IN_CHECK_DECISION", ["c6_manifest_signature_corrupted"],
      '    if not sig_ok(pub, man): f.append("signature")\n', '    pass  # M8\n'),
+    # Zexo on #59: subject_bound() computed its own verdict/grade without ever looking at the signature,
+    # so check_decision() refusing c6 on "signature" did not stop subject_bound_check/evidence_grade from
+    # still reporting NO_FINDING/AUTHENTICATED_REPORT for an unsigned report.
+    ("M9_DROP_SIGNATURE_GUARD_IN_SUBJECT_BOUND", ["c6_manifest_signature_corrupted"],
+     '    if not sig_valid: return "CANNOT_ESTABLISH", None                      # unsigned/corrupted report binds nothing\n',
+     '    pass  # M9\n'),
 ]
 CONTROLS = ["c0_answer_flips_while_all_bindings_valid"]
 

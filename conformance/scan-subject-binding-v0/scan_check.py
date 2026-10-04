@@ -111,8 +111,9 @@ def check_decision(pub, corpus, man, dec):
 
 def result_only(man): return "VALID" if man["body"]["rag_corpus"]["poisoning_scan"]["result"] == "clean" else "NOT_VALID"
 
-def subject_bound(corpus, man, dec, toy):
+def subject_bound(corpus, man, dec, toy, sig_valid):
     """Returns (verdict, evidence_grade)."""
+    if not sig_valid: return "CANNOT_ESTABLISH", None                      # unsigned/corrupted report binds nothing
     s = man["body"]["rag_corpus"]["poisoning_scan"]
     if s.get("result") != "clean": return "NOT_VALID", None
     subj = s.get("subject_digest")
@@ -145,13 +146,14 @@ def evaluate(name, c, pub, toy):
                "answer_B": c["decision_B"]["answer"]}
         return got, all(got[k] == c["expect"][k] for k in got)
     f = check_decision(pub, c["corpus"], c["manifest"], c["decision"])
-    verdict, grade = subject_bound(c["corpus"], c["manifest"], c["decision"], toy)
+    sig_valid = sig_ok(pub, c["manifest"])
+    verdict, grade = subject_bound(c["corpus"], c["manifest"], c["decision"], toy, sig_valid)
     got = {"replay_bindings": "valid" if not f else "FAIL", "result_only_check": result_only(c["manifest"]),
            "subject_bound_check": verdict, "evidence_grade": grade}
     e = c["expect"]
     if "replay_failures" in e:                     # a case that MUST be refused by check_decision(), on exactly these checks
         got["replay_failures"] = f
-        return got, f == e["replay_failures"]
+        return got, f == e["replay_failures"] and all(got[k] == e[k] for k in ("subject_bound_check", "evidence_grade") if k in e)
     ok = (not f and verdict in VOCAB and
           all(got[k] == e[k] for k in ("result_only_check", "subject_bound_check", "evidence_grade") if k in e))
     return got, ok

@@ -800,10 +800,12 @@
     ]
    },
    "expect": {
-    "note": "END-TO-END signature control (Pavlo, PR #56): c2 with one manifest-signature byte flipped. check_decision() must refuse it on 'signature' and nothing else; deleting the guard in check_decision() makes this case fail even though the Ed25519 primitive controls still pass.",
+    "note": "END-TO-END signature control (Pavlo, PR #56): c2 with one manifest-signature byte flipped. check_decision() must refuse it on 'signature' and nothing else; deleting the guard in check_decision() makes this case fail even though the Ed25519 primitive controls still pass. subject_bound_check/evidence_grade pinned too (Zexo, PR #59): an unsigned/corrupted report must never earn a grade regardless of what check_decision() finds.",
     "replay_failures": [
      "signature"
-    ]
+    ],
+    "subject_bound_check": "CANNOT_ESTABLISH",
+    "evidence_grade": null
    },
    "manifest": {
     "body": {
