@@ -153,7 +153,9 @@ def evaluate(name, c, pub, toy):
     e = c["expect"]
     if "replay_failures" in e:                     # a case that MUST be refused by check_decision(), on exactly these checks
         got["replay_failures"] = f
-        return got, f == e["replay_failures"] and all(got[k] == e[k] for k in ("subject_bound_check", "evidence_grade") if k in e)
+        # a refused case must also pin what subject_bound() reports for it: without both fields a future replay_failures vector
+        # would pass on check_decision() alone and quietly reopen the c6 gap (zexoverz, review of a725f2e)
+        return got, (f == e["replay_failures"] and all(k in e and got[k] == e[k] for k in ("subject_bound_check", "evidence_grade")))
     ok = (not f and verdict in VOCAB and
           all(got[k] == e[k] for k in ("result_only_check", "subject_bound_check", "evidence_grade") if k in e))
     return got, ok
