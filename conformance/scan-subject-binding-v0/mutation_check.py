@@ -31,6 +31,33 @@ MUTANTS = [
     ("M9_DROP_SIGNATURE_GUARD_IN_SUBJECT_BOUND", ["c6_manifest_signature_corrupted"],
      '    if not sig_valid: return "CANNOT_ESTABLISH", None                      # unsigned/corrupted report binds nothing\n',
      '    pass  # M9\n'),
+    # Zexo + Pavlo on #59 (TAWG, 2026-10-07): a grade handed back WITH a refusal survived the whole suite on every refusal
+    # branch but c6, and result_only() hard-wired to VALID survived because no vector had a non-clean scan. Killed now by
+    # the verdict-wide invariant in evaluate() (only NO_FINDING / CONTRADICTED may carry a grade) and by c7.
+    ('M10a_GRADE_ON_UNSIGNED_REFUSAL', ['c6_manifest_signature_corrupted'],
+     '    if not sig_valid: return "CANNOT_ESTABLISH", None                      # unsigned/corrupted report binds nothing\n',
+     '    if not sig_valid: return "CANNOT_ESTABLISH", "AUTHENTICATED_REPORT"                      # unsigned/corrupted report binds nothing  # M10a\n'),
+    ('M10b_GRADE_ON_NOT_VALID_SCAN', ['c7_scan_result_not_clean'],
+     '    if s.get("result") != "clean": return "NOT_VALID", None\n',
+     '    if s.get("result") != "clean": return "NOT_VALID", "AUTHENTICATED_REPORT"  # M10b\n'),
+    ('M10c_GRADE_ON_NO_SUBJECT', ['c1_scan_of_A_presented_with_B_unbound'],
+     '    if subj is None: return "CANNOT_ESTABLISH", None                       # scan names no subject\n',
+     '    if subj is None: return "CANNOT_ESTABLISH", "AUTHENTICATED_REPORT"                       # scan names no subject  # M10c\n'),
+    ('M10d_GRADE_ON_K1_FREEZE', ['c5_k2_unordered_effective_digest'],
+     '        return "CANNOT_ESTABLISH", None                                      # unordered effective digest: frozen to k=1\n',
+     '        return "CANNOT_ESTABLISH", "AUTHENTICATED_REPORT"                                      # unordered effective digest: frozen to k=1  # M10d\n'),
+    ('M10e_GRADE_ON_NON_HEREDITARY', ['c3c_scan_bound_to_root_subset_not_hereditary'],
+     '            return "CANNOT_ESTABLISH", None                                  # corpus -> subset needs a hereditary scanner\n',
+     '            return "CANNOT_ESTABLISH", "AUTHENTICATED_REPORT"                                  # corpus -> subset needs a hereditary scanner  # M10e\n'),
+    ('M10f_GRADE_ON_MISSING_PROOFS', ['c3b_scan_bound_to_root_subset_no_proofs'],
+     '        if not (cons and cons <= proved): return "CANNOT_ESTABLISH", None\n',
+     '        if not (cons and cons <= proved): return "CANNOT_ESTABLISH", "AUTHENTICATED_REPORT"  # M10f\n'),
+    ('M10g_GRADE_ON_SUBJECT_MISMATCH', ['c1b_scan_of_A_presented_with_B_bound'],
+     '    else:\n        return "CANNOT_ESTABLISH", None\n',
+     '    else:\n        return "CANNOT_ESTABLISH", "AUTHENTICATED_REPORT"  # M10g\n'),
+    ('M11_RESULT_ONLY_ALWAYS_VALID', ['c7_scan_result_not_clean'],
+     'def result_only(man): return "VALID" if man["body"]["rag_corpus"]["poisoning_scan"]["result"] == "clean" else "NOT_VALID"\n',
+     'def result_only(man): return "VALID"  # M11\n'),
 ]
 CONTROLS = ["c0_answer_flips_while_all_bindings_valid"]
 

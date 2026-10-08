@@ -17,6 +17,8 @@ inserted document; signatures, Merkle roots and exact replay all verify for both
 
 ## Evidence grade: a scan assertion is not a scan execution
 
+Only NO_FINDING and CONTRADICTED carry an `evidence_grade`: the checker refuses any other verdict that comes back with one (CANNOT_ESTABLISH, NOT_VALID, and any future refusal), at the common `evaluate()` boundary, so a refusal path cannot earn a grade without a vector of its own (mutants M10a-g). c7 is the non-clean control: a signed `flagged` result, the one case where `result_only` must say NOT_VALID (mutant M11).
+
 Every NO_FINDING carries an `evidence_grade`, and the two grades claim different things:
 
 - **AUTHENTICATED_REPORT**: the checker verified an authenticated, manifest-carried assertion over a bound subject. It did
@@ -46,8 +48,8 @@ Agent Manifest itself requires of a clean scan; that word is outside the checker
 
 ## Run
 
-    python3 scan_check.py vectors.json   # 11/11 reproduced, exit 0 (standard library only)
-    python3 mutation_check.py            # 8 one-site mutants, each killed by its named case(s); Ed25519 primitive controls
+    python3 scan_check.py vectors.json   # 12/12 reproduced, exit 0 (standard library only)
+    python3 mutation_check.py            # 17 one-site mutants, each killed by its named case(s); Ed25519 primitive controls
 
 `scan_check.py` recomputes every Merkle root (Agent Manifest s3.2.5.1), inclusion proof, Ed25519 signature (RFC 8032 reference
 verify, stdlib) and answer from the vector bytes. The signing key is a public test key derived from a fixed seed.

@@ -151,6 +151,11 @@ def evaluate(name, c, pub, toy):
     got = {"replay_bindings": "valid" if not f else "FAIL", "result_only_check": result_only(c["manifest"]),
            "subject_bound_check": verdict, "evidence_grade": grade}
     e = c["expect"]
+    # Verdict-wide invariant (Zexo + Pavlo, PR #59): only NO_FINDING / CONTRADICTED may carry an evidence grade. Checked here, at the
+    # common boundary, so no refusal path (CANNOT_ESTABLISH, NOT_VALID, any future one) can acquire a grade without its own vector.
+    if verdict not in ("NO_FINDING", "CONTRADICTED") and grade is not None:
+        got["invariant_violation"] = "grade_on_refusal"
+        return got, False
     if "replay_failures" in e:                     # a case that MUST be refused by check_decision(), on exactly these checks
         got["replay_failures"] = f
         # a refused case must also pin what subject_bound() reports for it: without both fields a future replay_failures vector

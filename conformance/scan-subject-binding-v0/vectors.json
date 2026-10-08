@@ -800,12 +800,12 @@
     ]
    },
    "expect": {
+    "evidence_grade": null,
     "note": "END-TO-END signature control (Pavlo, PR #56): c2 with one manifest-signature byte flipped. check_decision() must refuse it on 'signature' and nothing else; deleting the guard in check_decision() makes this case fail even though the Ed25519 primitive controls still pass. subject_bound_check/evidence_grade pinned too (Zexo, PR #59): an unsigned/corrupted report must never earn a grade regardless of what check_decision() finds.",
     "replay_failures": [
      "signature"
     ],
-    "subject_bound_check": "CANNOT_ESTABLISH",
-    "evidence_grade": null
+    "subject_bound_check": "CANNOT_ESTABLISH"
    },
    "manifest": {
     "body": {
@@ -823,6 +823,74 @@
      }
     },
     "sig": "1175c51a2b8043a2f1569130960119f053544259e1dae87ed6a3dbb408440ee808cf324d16aab1653afd763ee6b97852d4a071f0f7db21d234a8140a519b9605"
+   }
+  },
+  "c7_scan_result_not_clean": {
+   "corpus": [
+    {
+     "content": "Wire transfer limit for unverified agents is 10000 USD per day.",
+     "id": "policy-001"
+    },
+    {
+     "content": "Refunds are processed within 5 business days.",
+     "id": "policy-002"
+    },
+    {
+     "content": "Escalate any transfer above the limit to a human approver.",
+     "id": "policy-003"
+    },
+    {
+     "content": "Support hours are 09:00 to 17:00 UTC on weekdays.",
+     "id": "faq-004"
+    }
+   ],
+   "decision": {
+    "answer": "10000 USD",
+    "corpus_root": "sha256:173bfd8fbf659a829609248c4ba5875a8d1f303792de30d57791d18473ba54d8",
+    "effective_dataset_digest": "sha256:2e0fd3f83765caa834606b1bd16f123d4f8a2b18a6f092bcf0a657f802d032b5",
+    "inclusion_proofs": [
+     {
+      "doc_id": "policy-001",
+      "index": 0,
+      "leaf": "2e0fd3f83765caa834606b1bd16f123d4f8a2b18a6f092bcf0a657f802d032b5",
+      "path": [
+       "7795dc5cc4c26f62651626e2f6b2d1bd65c21099c79bb5c76bd03e93004c837a",
+       "f050eb9bee884f1c7111dbdaa5266f604effae06f21cab3bd27b84db733896e3"
+      ],
+      "tree_size": 4
+     }
+    ],
+    "k": 1,
+    "query": "wire transfer limit unverified agents",
+    "retrieved": [
+     {
+      "content": "Wire transfer limit for unverified agents is 10000 USD per day.",
+      "id": "policy-001"
+     }
+    ]
+   },
+   "expect": {
+    "evidence_grade": null,
+    "note": "Non-clean scan control (Zexo + Pavlo, PR #59): c2 with the signed scan result 'flagged'. The only case where result_only() must return NOT_VALID, so a result_only() hard-wired to VALID dies here; subject_bound() refuses with NOT_VALID and no grade.",
+    "result_only_check": "NOT_VALID",
+    "subject_bound_check": "NOT_VALID"
+   },
+   "manifest": {
+    "body": {
+     "rag_corpus": {
+      "corpus_id": "demo",
+      "document_count": 4,
+      "merkle_root": "sha256:173bfd8fbf659a829609248c4ba5875a8d1f303792de30d57791d18473ba54d8",
+      "poisoning_scan": {
+       "result": "flagged",
+       "scanned_at": "2026-09-26T07:00:00Z",
+       "scanner_version": "opaque-scan/1.0",
+       "semantics": "recordwise",
+       "subject_digest": "sha256:2e0fd3f83765caa834606b1bd16f123d4f8a2b18a6f092bcf0a657f802d032b5"
+      }
+     }
+    },
+    "sig": "dc386704ac6f726b015359f431684a97661bcc57f83cee305f5be478a25505a20055be88809011aa3f85a5b20fc8fea9a52f3584e03c4e383ffb6edb43f4f206"
    }
   }
  },
