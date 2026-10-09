@@ -44,8 +44,10 @@ exit 1 even when other suites could not run, so a real break is never softened t
 from __future__ import annotations
 
 from dataclasses import dataclass
+import decimal
 import hashlib
 import json
+import math
 import re
 import pathlib
 import subprocess
@@ -282,7 +284,8 @@ class _Invalid(Exception):
 
 
 def _strict_json(data: bytes, what: str):
-    """UTF-8 JSON, one document, no duplicate object members at any depth, no NaN/Infinity."""
+    """UTF-8 JSON, one document, no duplicate object members at any depth, no NaN/Infinity,
+    no number token that the parser would round (overflow to inf, underflow to 0, precision beyond a double)."""
     def no_dupes(pairs):
         obj = {}
         for k, v in pairs:
@@ -293,12 +296,24 @@ def _strict_json(data: bytes, what: str):
 
     def no_const(c):
         raise _Invalid(f"{what}: non-JSON number {c}")
+
+    def exact_float(tok):
+        # Grading compares parsed values, so a token the parser rounds is evidence lost before comparison:
+        # 1e999 and 2e999 both become inf, 1e-999 and 2e-999 both become 0.0. Accept a number token only when
+        # its decimal value is exactly the double it parses to, or that double's shortest repr.
+        f = float(tok)
+        if not math.isfinite(f):
+            raise _Invalid(f"{what}: number {tok[:40]} overflows to a non-finite value")
+        d = decimal.Decimal(tok)
+        if d != decimal.Decimal(repr(f)) and d != decimal.Decimal(f):
+            raise _Invalid(f"{what}: number {tok[:40]} is not exactly representable (parses to {f!r})")
+        return f
     try:
         text = data.decode("utf-8")
     except UnicodeDecodeError as e:
         raise _Invalid(f"{what}: not UTF-8 ({e.reason})")
     try:
-        return json.loads(text, object_pairs_hook=no_dupes, parse_constant=no_const)
+        return json.loads(text, object_pairs_hook=no_dupes, parse_constant=no_const, parse_float=exact_float)
     except _Invalid:
         raise
     except ValueError as e:

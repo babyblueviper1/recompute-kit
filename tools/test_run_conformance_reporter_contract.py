@@ -6,7 +6,8 @@ R2  the real erc8275 mutation-coverage check, with its guard forced off (every v
     and its checker correctly REPINNED, must go red: a valid pin does not waive grading.
 R3  a reporter that omits a result on a suite listed in conformance/uncovered.json must still fail. It must never be
     rewritten to NOT RUN, which is what happens to NOT COVERED on a declared suite.
-Plus the edge cases of the contract: missing / extra / empty / invalid / duplicate-key / NaN reports, the {"results": map}
+Plus the edge cases of the contract: missing / extra / empty / invalid / duplicate-key / NaN reports,
+number tokens that collapse when parsed (1e999 vs 2e999, 1e-999 vs 2e-999, digits past a double), the {"results": map}
 envelope, invalid and empty corpora, the reserved "results" name, nonzero reporter exits, must_not_equal presence,
 int-vs-float exactness, stderr kept out of parsing, and a missing or unknown adapter.contract.
 """
@@ -127,6 +128,29 @@ class Reporter(unittest.TestCase):
                 r = self.one(V2, bad)
                 self.assertEqual(r.kind, "REPORT_CONTRACT", r.detail)
                 self.assertIn("INVALID_REPORT", r.detail)
+
+    def test_distinct_number_tokens_never_collapse_to_one_value(self):
+        # 1e999 / 2e999 both parse to inf, 1e-999 / 2e-999 both to 0.0, and the 21-digit pair both to 0.1: a
+        # value comparison after parsing would PASS 1/1 on different evidence. Each must be rejected, wherever it is.
+        pairs = (("1e999", "2e999"), ("-1e999", "-2e999"), ("1e-999", "2e-999"),
+                 ("0.10000000000000000001", "0.10000000000000000002"))
+        for exp, got in pairs:
+            with self.subTest(report=got):
+                r = self.one([{"name": "a", "expected": 0.5}], '{"a": %s}' % got)
+                self.assertEqual(r.kind, "REPORT_CONTRACT", r.detail)
+                self.assertIn("INVALID_REPORT", r.detail)
+            with self.subTest(corpus=exp):
+                r = self.one(None, '{"a": %s}' % got, raw_vectors='{"vectors": [{"name": "a", "expected": %s}]}' % exp)
+                self.assertEqual(r.kind, "REPORT_CONTRACT", r.detail)
+                self.assertIn("INVALID_CORPUS", r.detail)
+        # positive controls: ordinary spellings of exact doubles still pass and still compare by value
+        for exp, got in (("0.1", "0.1"), ("1.5", "1.50"), ("100.0", "1e2"), ("1e308", "1e308"), ("5e-324", "5e-324"),
+                         ("0.1", "0.1000000000000000055511151231257827021181583404541015625")):
+            with self.subTest(ok=got):
+                r = self.one(None, '{"a": %s}' % got, raw_vectors='{"vectors": [{"name": "a", "expected": %s}]}' % exp)
+                self.assertTrue(r.ok, r.detail)
+        # and a finite near-miss is still a determinate refutation, not a parse error
+        self.assertEqual(self.one([{"name": "a", "expected": 0.1}], '{"a": 0.2}').kind, "SUITE")
 
     def test_nonzero_reporter_exit_is_not_a_self_graded_refutation(self):
         r = self.one(V2, GOOD, code=1)
