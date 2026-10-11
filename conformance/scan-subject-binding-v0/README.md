@@ -45,7 +45,7 @@ Agent Manifest itself requires of a clean scan; that word is outside the checker
 | c4 / c4b | published deterministic scanner rerun -> NO_FINDING / CONTRADICTED, both REPRODUCED |
 | c5 | k=2: `effective_dataset_digest = root(retrieved)` is unordered, profile frozen to k=1 -> CANNOT_ESTABLISH |
 | c6 | c2 with one manifest-signature byte flipped: `check_decision()` must refuse it on `signature` and nothing else (end-to-end control; the primitive controls alone cannot see a deleted guard) |
-| c7 | c2 with the signed scan result `flagged`: the only case where `result_only()` must return `NOT_VALID`, so a `result_only()` hard-wired to `VALID` dies here; `subject_bound()` refuses with `NOT_VALID` and no grade |
+| c7 | c2 with the signed scan result `flagged`: the only case where `result_only()` must return `NOT_VALID`, so a `result_only()` hard-wired to `VALID` dies here; `subject_bound()` refuses with `NOT_VALID` and no grade (non-clean control, mutants M10b, M11) |
 
 ## Run
 
