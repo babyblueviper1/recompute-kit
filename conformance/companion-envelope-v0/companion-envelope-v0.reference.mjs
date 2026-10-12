@@ -57,6 +57,10 @@ export function companionEnvelope(core, companion) {
 const path = process.argv.find((a, i) => i >= 2 && !a.startsWith("-")) ||
   new URL("./companion-envelope-v0.vectors.json", import.meta.url).pathname;
 const doc = JSON.parse(readFileSync(path, "utf8"));
+if (Array.isArray(doc.vectors) && doc.vectors.length === 0) {
+  console.error("UNVERIFIABLE: ZERO_CASES");
+  process.exit(2);
+}
 let fails = 0;
 for (const v of doc.vectors) {
   const got = companionEnvelope(v.core, v.companion ?? null), exp = v.expect;

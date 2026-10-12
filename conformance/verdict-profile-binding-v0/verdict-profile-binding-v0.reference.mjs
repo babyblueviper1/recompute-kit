@@ -43,6 +43,10 @@ const KEYS = ["verdict_core_cc", "resolution_status", "bound_profile_commitment"
 const path = process.argv.find((a, i) => i >= 2 && !a.startsWith("-")) ||
   new URL("./verdict-profile-binding-v0.vectors.json", import.meta.url).pathname;
 const doc = JSON.parse(readFileSync(path, "utf8"));
+if (Array.isArray(doc.vectors) && doc.vectors.length === 0) {
+  console.error("UNVERIFIABLE: ZERO_CASES");
+  process.exit(2);
+}
 let fails = 0;
 for (const v of doc.vectors) {
   const got = verdictBinding(v), exp = v.expect;

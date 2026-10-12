@@ -183,6 +183,9 @@ jobs:
       - name: Mutation inventories — zero evidence must not certify coverage
         run: python3 -B tools/test_mutation_inventory_nonempty.py
 
+      - name: Self-grading corpora — zero cases must not certify conformance
+        run: python3 -B tools/test_self_grading_nonempty.py
+
       # The controls above restore what they touched. If anything is still modified the
       # green from the real run cannot be trusted, because it may have been produced
       # against a mutated tree.

@@ -219,6 +219,9 @@ def grade(got, exp):
 def run(path):
     fx = json.load(open(path))
     baseB, baseR, baseC = fx.get("bindings", []), fx.get("revocations", []), fx["consumer_cutoff"]
+    if isinstance(fx["cases"], list) and not fx["cases"]:
+        print("UNVERIFIABLE: ZERO_CASES", file=sys.stderr)
+        raise SystemExit(2)
     fails = 0
     for c in fx["cases"]:
         bindings = apply_revocations(c.get("bindings", baseB), c.get("revocations", baseR))

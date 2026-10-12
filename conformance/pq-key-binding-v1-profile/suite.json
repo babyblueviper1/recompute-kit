@@ -12,7 +12,7 @@
   },
   "checker": {
     "path": "../captured-admission-v0/admission_check.py",
-    "sha256": "7a2369ae889419318629a33e16a9f683939cfcf787478d4e38284ef9ec23f471",
+    "sha256": "fc76aae43a35fa3f8548802c832c4d923f02a0a28c1cf5888016855fe43882b0",
     "note": "frozen core, reused UNMODIFIED \u2014 no checker code in this directory"
   },
   "laneHint": "recomputable",

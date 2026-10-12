@@ -16,6 +16,6 @@
   },
   "checker": {
     "path": "recovery_check.py",
-    "sha256": "74d5f173b02c007513594503eb33d6ed23e17bc7e08dbd7f52ee836ffd43373e"
+    "sha256": "d9d12dfb31cf342f7eba57740a484eec43b38c9726ceb802241344c9cdafad5f"
   }
 }

@@ -78,6 +78,10 @@ const KEYS = ["prior_profile_commitment", "new_profile_commitment", "amendment_c
 const path = process.argv.find((a, i) => i >= 2 && !a.startsWith("-")) ||
   new URL("./profile-amendment-v0.vectors.json", import.meta.url).pathname;
 const doc = JSON.parse(readFileSync(path, "utf8"));
+if (Array.isArray(doc.vectors) && doc.vectors.length === 0) {
+  console.error("UNVERIFIABLE: ZERO_CASES");
+  process.exit(2);
+}
 let fails = 0;
 for (const v of doc.vectors) {
   const got = profileTransition(v), exp = v.expect;

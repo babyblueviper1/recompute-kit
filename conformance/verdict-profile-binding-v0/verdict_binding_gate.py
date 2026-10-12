@@ -58,6 +58,9 @@ KEYS = ("verdict_core_cc", "resolution_status", "bound_profile_commitment")
 
 def run(path):
     doc = json.load(open(path))
+    if isinstance(doc["vectors"], list) and not doc["vectors"]:
+        print("UNVERIFIABLE: ZERO_CASES", file=sys.stderr)
+        raise SystemExit(2)
     fails = 0
     for v in doc["vectors"]:
         got, exp = verdict_binding(v), v["expect"]
