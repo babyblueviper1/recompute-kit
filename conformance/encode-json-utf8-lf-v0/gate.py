@@ -180,6 +180,9 @@ def main() -> int:
     try:
         _, vector_bytes = load_and_verify(stdin_bytes)
         document = json.loads(vector_bytes.decode("utf-8"))
+        if isinstance(document.get("vectors"), list) and not document["vectors"]:
+            print("UNVERIFIABLE encode-json-utf8-lf.v0: ZERO_CASES", file=sys.stderr)
+            return 2
         if only_controls:
             control_failures = negative_controls(vector_bytes, document)
             if control_failures:

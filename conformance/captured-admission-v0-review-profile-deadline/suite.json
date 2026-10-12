@@ -13,7 +13,7 @@
   "laneHint": "recomputable",
   "checker": {
     "path": "deadline_derivation.py",
-    "sha256": "36c0ff1431010ebabebbf8589f808aa29b177784df5c3bf21cd027177548072c"
+    "sha256": "bea9711daa5a17e28faae33ae28583f040f8f3ba6df9a6a8b1cdae4ffb88d493"
   },
   "spec": {
     "path": "README.md",

@@ -151,6 +151,9 @@ def check(case: dict):
 
 if __name__ == "__main__":
     fx = json.load(open(sys.argv[1] if len(sys.argv) > 1 else "deadline_vectors.json"))
+    if isinstance(fx["cases"], list) and not fx["cases"]:
+        print("UNVERIFIABLE: ZERO_CASES", file=sys.stderr)
+        raise SystemExit(2)
     fails = 0
     for c in fx["cases"]:
         ok, v, notes = check(c)

@@ -200,6 +200,9 @@ def main(argv):
     path = argv[1] if len(argv) > 1 else "binding-record.vectors.json"
     fx = json.load(open(path))
     cases = fx["cases"]
+    if isinstance(cases, list) and not cases:
+        print("UNVERIFIABLE: ZERO_CASES", file=sys.stderr)
+        raise SystemExit(2)
     fails = faults = 0
     for c in cases:
         want = c["expected_verdict"]

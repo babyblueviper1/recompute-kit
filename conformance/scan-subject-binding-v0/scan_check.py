@@ -167,6 +167,9 @@ def evaluate(name, c, pub, toy):
 
 def main():
     V, pub, toy = load(sys.argv[1] if len(sys.argv) > 1 else HERE / "vectors.json")
+    if isinstance(V["cases"], dict) and not V["cases"]:
+        print("UNVERIFIABLE: ZERO_CASES", file=sys.stderr)
+        raise SystemExit(2)
     results = []
     for name, c in sorted(V["cases"].items()):
         got, ok = evaluate(name, c, pub, toy)

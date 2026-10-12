@@ -38,6 +38,9 @@ def companion_envelope(core, companion):
 
 def run(path):
     doc = json.load(open(path))
+    if isinstance(doc["vectors"], list) and not doc["vectors"]:
+        print("UNVERIFIABLE: ZERO_CASES", file=sys.stderr)
+        raise SystemExit(2)
     fails = 0
     for v in doc["vectors"]:
         got, exp = companion_envelope(v["core"], v.get("companion")), v["expect"]

@@ -88,6 +88,9 @@ def run(path):
     fx = json.load(open(path))
     base_bindings, base_cutoff = fx.get("bindings", []), fx["consumer_cutoff"]
     base_revocations = fx.get("revocations", [])
+    if isinstance(fx["cases"], list) and not fx["cases"]:
+        print("UNVERIFIABLE: ZERO_CASES", file=sys.stderr)
+        raise SystemExit(2)
     fails = 0
     for c in fx["cases"]:
         bindings = c.get("bindings", base_bindings)

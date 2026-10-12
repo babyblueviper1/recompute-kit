@@ -89,6 +89,9 @@ KEYS = ("prior_profile_commitment", "new_profile_commitment", "amendment_cc",
 
 def run(path):
     doc = json.load(open(path))
+    if isinstance(doc["vectors"], list) and not doc["vectors"]:
+        print("UNVERIFIABLE: ZERO_CASES", file=sys.stderr)
+        raise SystemExit(2)
     fails = 0
     for v in doc["vectors"]:
         got, exp = profile_transition(v), v["expect"]

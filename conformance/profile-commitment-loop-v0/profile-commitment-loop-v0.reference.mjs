@@ -39,6 +39,10 @@ const KEYS = ["transition_status", "resolution_status", "effective_profile_commi
 const path = process.argv.find((a, i) => i >= 2 && !a.startsWith("-")) ||
   new URL("./profile-commitment-loop-v0.vectors.json", import.meta.url).pathname;
 const doc = JSON.parse(readFileSync(path, "utf8"));
+if (Array.isArray(doc.vectors) && doc.vectors.length === 0) {
+  console.error("UNVERIFIABLE: ZERO_CASES");
+  process.exit(2);
+}
 let fails = 0;
 for (const v of doc.vectors) {
   const got = loop(v), exp = v.expect;

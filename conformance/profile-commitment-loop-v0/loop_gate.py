@@ -67,6 +67,9 @@ KEYS = ("transition_status", "resolution_status", "effective_profile_commitment"
 
 def run(path):
     doc = json.load(open(path))
+    if isinstance(doc["vectors"], list) and not doc["vectors"]:
+        print("UNVERIFIABLE: ZERO_CASES", file=sys.stderr)
+        raise SystemExit(2)
     fails = 0
     for v in doc["vectors"]:
         got, exp = loop(v), v["expect"]

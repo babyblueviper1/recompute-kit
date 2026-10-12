@@ -95,6 +95,9 @@ def resolve(manifests, target):
 
 def run(path):
     fx = json.load(open(path))
+    if isinstance(fx["cases"], list) and not fx["cases"]:
+        print("UNVERIFIABLE: ZERO_CASES", file=sys.stderr)
+        raise SystemExit(2)
     fails = 0
     for c in fx["cases"]:
         got, exp = resolve(c["manifests"], c["target"]), c["expected"]
