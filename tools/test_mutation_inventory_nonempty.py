@@ -23,13 +23,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import run_conformance as runner
 
 ROOT = Path(__file__).resolve().parent.parent
-SUITES = (
-    "authorized-preimage-schema-v0",
-    "consumption-time-state-binding-v0",
-    "event-time-concurrency-boundary-v0",
-    "permission-consumption-boundary-v0",
-    "scan-subject-binding-v0",
-)
+# Discovered, not listed: a harness lands covered by construction, not by
+# being remembered. A hardcoded tuple silently exempts whatever suite is
+# still in flight when this file is written (trustless-ai/recompute-kit#65
+# review comment: #17 adds conformance/mutation-survival-v0 and would have
+# been invisible to a fixed list).
+SUITES = tuple(sorted(p.parent.name for p in (ROOT / "conformance").glob("*/mutation_check.py")))
 ENCODE = "encode-json-utf8-lf-v0"
 
 
