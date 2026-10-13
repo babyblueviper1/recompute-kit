@@ -194,6 +194,165 @@ def _check_declared_pins(d: pathlib.Path, m: dict):
     return None
 
 
+# Runtime dependencies are declared, not inferred from stderr. ENVIRONMENT_FAILURE_SIGNATURES classifies AFTER the fact
+# by matching wording, and wording floats with the toolchain (bun-version: latest changed one message and an induced
+# infra break read as a refuted vector, #68). A suite declares what it needs in suite.json:
+#
+#     "runtime": {"commands": ["bun"], "node_packages": ["ethers"], "python_modules": ["rfc8785"],
+#                 "optional_python_modules": ["nacl"]}
+#
+# and the runner verifies all of it BEFORE executing, so a missing dependency is a precondition failure (RUNNER, exit 2)
+# and never reaches a classifier. The list cannot silently exempt what is new: a third-party import in the suite's own
+# sources that the manifest does not declare is NOT COVERED, and the adapter command's interpreter is always checked.
+# Optionality is declared too, never inferred from code shape: `try: import x / except ImportError: raise` looks like a
+# fallback and is not one. Every import must be in python_modules (preflighted) or optional_python_modules (not).
+RUNTIME_KEYS = ("commands", "node_packages", "python_modules", "optional_python_modules")
+_JS_SUFFIXES = (".ts", ".mts", ".cts", ".js", ".mjs", ".cjs")
+_JS_COMMENT = re.compile(r"/\*.*?\*/|(?<![:\"'\\])//[^\n]*", re.S)
+_JS_SPECIFIER = re.compile(
+    r"""(?:\bfrom\s*|\bimport\s*\(?\s*|\brequire\s*\(\s*|\bexport\s*\*\s*from\s*)["']([^"'\n]+)["']""")
+
+
+# Node core modules also resolve WITHOUT the node: prefix (import fs from "fs"); they are not packages to declare.
+# From node 22's require("module").builtinModules (top-level names); bun resolves the same names.
+NODE_BUILTINS = frozenset((
+    "assert", "async_hooks", "buffer", "child_process", "cluster", "console", "constants", "crypto", "dgram", "diagnostics_channel", "dns", "domain", "events", "fs", "http", "http2", "https", "inspector", "module", "net", "os", "path", "perf_hooks", "process", "punycode", "querystring", "readline", "repl", "stream", "string_decoder", "sys", "timers", "tls", "trace_events", "tty", "url", "util", "v8", "vm", "wasi", "worker_threads", "zlib"))
+
+
+def _node_package_name(spec: str):
+    """Bare specifier -> package name; None for relative, absolute, URL or runtime-builtin specifiers."""
+    if spec.startswith((".", "/")) or ":" in spec:
+        return None
+    if spec.split("/")[0] in NODE_BUILTINS:
+        return None
+    parts = spec.split("/")
+    return "/".join(parts[:2]) if spec.startswith("@") and len(parts) > 1 else parts[0]
+
+
+def _suite_sources(d: pathlib.Path, suffixes):
+    for f in sorted(d.rglob("*")):
+        if f.is_file() and f.suffix in suffixes and "node_modules" not in f.relative_to(d).parts:
+            yield f
+
+
+def _imported_node_packages(d: pathlib.Path) -> set:
+    found = set()
+    for f in _suite_sources(d, _JS_SUFFIXES):
+        text = _JS_COMMENT.sub("", f.read_text(encoding="utf-8", errors="replace"))
+        for spec in _JS_SPECIFIER.findall(text):
+            name = _node_package_name(spec)
+            if name:
+                found.add(name)
+    return found
+
+
+def _unparseable_python_sources(d: pathlib.Path) -> list:
+    """Suite .py files ast cannot parse. Their imports are invisible to the scan, so they are reported, never skipped."""
+    import ast
+    bad = []
+    for f in _suite_sources(d, (".py",)):
+        try:
+            ast.parse(f.read_bytes())
+        except (SyntaxError, ValueError) as e:
+            bad.append(f"{f.relative_to(d)} ({type(e).__name__}: {e})")
+    return bad
+
+
+def _imported_python_modules(d: pathlib.Path) -> set:
+    import ast
+    local = {f.stem for f in _suite_sources(d, (".py",))} | {x.name for x in d.iterdir() if x.is_dir()}
+    found = set()
+    for f in _suite_sources(d, (".py",)):
+        try:
+            tree = ast.parse(f.read_bytes())
+        except (SyntaxError, ValueError):
+            continue  # reported by _unparseable_python_sources before this scan's result is trusted
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                names = [a.name for a in node.names]
+            elif isinstance(node, ast.ImportFrom) and not node.level and node.module:
+                names = [node.module]
+            else:
+                continue
+            for n in names:
+                top = n.split(".")[0]
+                if top not in sys.stdlib_module_names and top not in local and top != "__future__":
+                    found.add(top)
+    return found
+
+
+def _resolves_node_package(d: pathlib.Path, name: str) -> bool:
+    # Node resolution order: node_modules in the suite dir, then every parent up to the repository root.
+    for base in [d, *d.parents]:
+        if (base / "node_modules" / name / "package.json").is_file():
+            return True
+        if base == ROOT:
+            break
+    return False
+
+
+def _missing_python_modules(d: pathlib.Path, interpreter, names: list) -> list:
+    """Resolve modules in the interpreter adapter.cmd runs, not the runner's own: a suite with its own venv is checked there."""
+    import importlib.util, os, shutil
+    if not names:
+        return []
+    # The adapter runs as `cmd` with cwd=d, so a path-like interpreter (venv/bin/python) resolves from d.
+    exe = None
+    if interpreter:
+        exe = shutil.which(interpreter) if "/" not in interpreter and "\\" not in interpreter else str(d / interpreter)
+    if exe and "/" in interpreter and not os.path.isfile(exe):
+        return [f"{n} (interpreter {interpreter} not found)" for n in names]
+    if not exe or not os.path.basename(exe).startswith("python") or os.path.realpath(exe) == os.path.realpath(sys.executable):
+        return [n for n in names if importlib.util.find_spec(n) is None]
+    probe = "import importlib.util,sys\nfor n in sys.argv[1:]:\n    importlib.util.find_spec(n) is None and print(n)"
+    r = subprocess.run([exe, "-c", probe, *names], cwd=d, capture_output=True, text=True, timeout=60)
+    if r.returncode != 0:
+        return [f"{n} (interpreter {interpreter} failed: rc={r.returncode})" for n in names]
+    return r.stdout.split()
+
+
+def _check_runtime(d: pathlib.Path, m: dict, cmd: str):
+    """-> (kind, detail) when a precondition fails, else None. Runs before the adapter, never after it."""
+    import importlib.util, shlex, shutil
+    rt = m.get("runtime", {})
+    if not isinstance(rt, dict) or set(rt) - set(RUNTIME_KEYS) or not all(
+            isinstance(rt.get(k, []), list) and all(isinstance(x, str) and x for x in rt.get(k, [])) for k in RUNTIME_KEYS):
+        return "NOT COVERED", f"runtime must be an object of {'/'.join(RUNTIME_KEYS)} string lists: {rt!r:.120}"
+    declared_node, declared_py = set(rt.get("node_packages", [])), set(rt.get("python_modules", []))
+    optional_py = set(rt.get("optional_python_modules", []))
+    if declared_py & optional_py:
+        return "NOT COVERED", f"declared both required and optional: {', '.join(sorted(declared_py & optional_py))}"
+    undeclared = sorted(_imported_node_packages(d) - declared_node)
+    if undeclared:
+        return "NOT COVERED", f"imports node package(s) not declared in runtime.node_packages: {', '.join(undeclared)}"
+    unparseable = _unparseable_python_sources(d)
+    if unparseable:
+        return "NOT COVERED", f"python source(s) do not parse, so their imports cannot be checked: {'; '.join(unparseable)}"
+    undeclared = sorted(_imported_python_modules(d) - declared_py - optional_py)
+    if undeclared:
+        return "NOT COVERED", f"imports python module(s) not declared in runtime.python_modules: {', '.join(undeclared)}"
+
+    try:
+        interpreter = shlex.split(cmd)[0]
+    except (ValueError, IndexError):
+        interpreter = None
+    # An adapter that is itself a script the scan cannot read (./check, ./gate.sh) hides every command it runs. It must
+    # declare them in runtime.commands; an empty list would be exempt by construction, not verified.
+    script = (d / interpreter).resolve() if interpreter and "/" in interpreter else None
+    if (script is not None and script.is_file() and script.is_relative_to(d.resolve())
+            and script.suffix not in (".py", *_JS_SUFFIXES) and not rt.get("commands")):
+        return "NOT COVERED", f"adapter {interpreter} is not Python or JS, so its dependencies cannot be scanned: declare runtime.commands"
+    commands = list(rt.get("commands", []))
+    if interpreter and "/" not in interpreter and "\\" not in interpreter:
+        commands.insert(0, interpreter)
+    missing = [c for c in dict.fromkeys(commands) if shutil.which(c) is None]
+    missing += [f"node package {n}" for n in sorted(declared_node) if not _resolves_node_package(d, n)]
+    missing += [f"python module {n}" for n in _missing_python_modules(d, interpreter, sorted(declared_py))]
+    if missing:
+        return "RUNNER", f"precondition: runtime dependency missing ({', '.join(missing)}), adapter not run"
+    return None
+
+
 def _run_one(d: pathlib.Path, m: dict, label: str) -> Result:
 
     adapter = m.get("adapter") or {}
@@ -245,6 +404,10 @@ def _run_one(d: pathlib.Path, m: dict, label: str) -> Result:
         # say who grades cannot be graded, so it is not run as if it had said.
         return Result(label, False, "NOT COVERED",
                       f"adapter.contract must be one of {'/'.join(ADAPTER_CONTRACTS)}, got {contract!r}")
+
+    runtime_failure = _check_runtime(d, m, cmd)
+    if runtime_failure is not None:
+        return Result(label, False, runtime_failure[0], runtime_failure[1])
 
     stdin_data = b""
     if vec_path:

@@ -11,8 +11,13 @@
   },
   "adapter": {
     "kind": "stdio",
-    "cmd": "python gate.py --grade",
+    "cmd": "python3 gate.py --grade",
     "contract": "self_grading"
+  },
+  "runtime": {
+    "commands": [
+      "bun"
+    ]
   },
   "implementations": [
     {
