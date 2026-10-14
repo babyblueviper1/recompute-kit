@@ -135,22 +135,36 @@ bin/conformance      # reference recompute (via cast) vs every golden vector
 
 ### Per-suite conformance (`conformance/<suite>/`)
 
-Beyond the single agent-flow vector file, each ERC/profile also ships as its own
+Beyond the single agent-flow vector file, most ERCs/profiles also ship as their own
 **hash-pinned suite** under `conformance/<suite>/` — e.g. `captured-admission-v0`,
-`pq-key-binding-v0` and `pq-key-binding-v1`, `dex-calldata-v0`, `tee-inference-v0`,
-`crc-claim-v0`, `storage-root-v0`. Each carries a `suite.json` that pins its vectors file
-**by sha256** and names the adapter command that grades a candidate against them, plus a
-`spec.md`/`README.md`:
+`pq-key-binding-v0` and `pq-key-binding-v1`, `dex-calldata-v0`, `tee-inference-v0`. Each
+carries a `suite.json` that pins its vectors file **by sha256** and names the adapter command
+that grades a candidate against them, plus a `spec.md`/`README.md`:
 
 ```bash
-bin/conformance-suite --suite conformance/pq-key-binding-v1   # grade vs the hash-pinned suite
+bin/conformance-suite --suite conformance/dex-calldata-v0
+#   ✓ vectors  sha256 0f88616f3c21ad6f… — matches declared
+#   ✓ spec     sha256 6d0f67769b7b83ba… — matches declared
+#   3/3 reproduced
+#   ✓ CONFORMANT — every vector reproduced
+```
+
+`bin/conformance-suite` grades **one** `reporter`-contract manifest: it feeds the pinned vectors
+in and compares the adapter's JSON against them. A `checks[]` (multi-check) manifest or a
+`self_grading` adapter goes through the whole-repo runner instead, which reads each manifest and
+dispatches on `adapter.contract`:
+
+```bash
+python3 tools/run_conformance.py            # every suite, as its own suite.json declares
 ```
 
 The pin is the point: the grader recomputes the sha256 of the exact vector bytes and refuses
 to run if it drifts from `suite.json`, so a suite can never silently grade against changed
-vectors. `conformance/uncovered.json` declares — explicitly, never by omission — which suite
-directories no runner executes yet: a directory listed there is **not passing, it is not
-running at all**, because "no gate" and "green gate" must never read the same.
+vectors. And a directory under `conformance/` is not evidence that anything runs —
+`conformance/uncovered.json` declares, explicitly and never by omission, which suite directories
+no runner executes yet (`crc-claim-v0` and `storage-root-v0` among them, which have no
+`suite.json` at all). A directory listed there is **not passing, it is not running at all**,
+because "no gate" and "green gate" must never read the same.
 
 ## MCP server
 
