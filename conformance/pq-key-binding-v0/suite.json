@@ -29,7 +29,7 @@
       "name": "rotation",
       "vectors": {
         "path": "pq-key-binding-v0.rotation-vectors.json",
-        "sha256": "2c046fdaaebe1a8e71b99b191cbd8efa48abe7b6449e5f4b32cc30f1750d6b1a"
+        "sha256": "b71f375928fb2b03454b91b28b4b10f3cab0fe0f14b75b1c0a7cc54221113abd"
       },
       "adapter": {
         "kind": "stdio",
