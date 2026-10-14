@@ -90,8 +90,11 @@ ENVIRONMENT_FAILURE_SIGNATURES = (
 
 
 class Result:
-    def __init__(self, name: str, ok: bool, kind: str, detail: str):
+    # adapter_ran=False marks a result produced before the adapter executed (a runtime precondition stop).
+    # It is structural on purpose: consumers must not infer "never ran" from the wording of `detail`.
+    def __init__(self, name: str, ok: bool, kind: str, detail: str, adapter_ran: bool = True):
         self.name, self.ok, self.kind, self.detail = name, ok, kind, detail
+        self.adapter_ran = adapter_ran
 
 
 @dataclass(frozen=True)
@@ -407,7 +410,7 @@ def _run_one(d: pathlib.Path, m: dict, label: str) -> Result:
 
     runtime_failure = _check_runtime(d, m, cmd)
     if runtime_failure is not None:
-        return Result(label, False, runtime_failure[0], runtime_failure[1])
+        return Result(label, False, runtime_failure[0], runtime_failure[1], adapter_ran=False)
 
     stdin_data = b""
     if vec_path:
@@ -581,7 +584,7 @@ def suite_dir(label: str) -> str:
 
 def _precondition_unrun(r) -> bool:
     """True for the RUNNER result _check_runtime() returns when it stops a suite before its adapter runs."""
-    return r.kind == "RUNNER" and r.detail.startswith("precondition:")
+    return r.kind == "RUNNER" and r.adapter_ran is False
 
 
 def classify_declared_uncovered(results, declared, declared_undeclared_vectors) -> list[str]:
