@@ -32,7 +32,7 @@ CHECKS = {
     "companion-envelope-v0/envelope": 5,
     "companion-envelope-v0/envelope-reference-ts": 5,
     "pq-key-binding-v0/cutoff": 8,
-    "pq-key-binding-v0/rotation": 7,
+    "pq-key-binding-v0/rotation": 8,
     "pq-key-binding-v0/revocation": 6,
     "pq-key-binding-v1/cutoff": 32,
     "pq-key-binding-v1/manifest": 7,
